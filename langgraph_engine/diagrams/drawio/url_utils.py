@@ -29,14 +29,14 @@ def get_shareable_url(xml_content, github_raw_url=None):
 
 
 def _encode_drawio_url(xml):
-    """Encode XML as draw.io URL fragment (#H format).
+    """Encode XML as draw.io URL fragment (#R format for raw payload).
 
     Encoding steps (matching draw.io JavaScript):
         1. URL-encode the XML string
         2. Raw deflate compress (zlib with wbits=-15 equivalent)
         3. Base64 encode
         4. URL-encode the base64 string
-        5. Prefix with https://app.diagrams.net/#H
+        5. Prefix with https://app.diagrams.net/#R
 
     Returns:
         Full shareable URL string.
@@ -49,7 +49,7 @@ def _encode_drawio_url(xml):
         compressed = zlib.compress(url_encoded.encode("utf-8"))
         raw_deflate = compressed[2:-4]
         b64 = base64.b64encode(raw_deflate).decode("ascii")
-        return "https://app.diagrams.net/#H" + urllib.parse.quote(b64, safe="")
+        return "https://app.diagrams.net/#R" + urllib.parse.quote(b64, safe="")
     except Exception as exc:
         logger.warning("Could not encode draw.io URL: %s", exc)
         return "https://app.diagrams.net/"
