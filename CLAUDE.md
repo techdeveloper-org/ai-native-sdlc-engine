@@ -1,9 +1,9 @@
 # Claude Workflow Engine - Project Context
 
 **Project:** Claude Workflow Engine
-**Version:** 2.1.0
+**Version:** 2.1.1
 **Type:** LangGraph Orchestration Pipeline with Call Graph Intelligence + Template Fast-Path
-**Last Updated:** 2026-09-13
+**Last Updated:** 2026-11-10
 
 ---
 
@@ -485,7 +485,7 @@ See environment variables in `.env.example`:
 
 ---
 
-**Last Updated:** 2026-09-13
+**Last Updated:** 2026-11-10
 
 
 <!-- execution-insight- -->

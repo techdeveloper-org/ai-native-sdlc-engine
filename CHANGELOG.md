@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.1.1] - 2026-11-10
+
+### Changed
+
+- Bumped from 2.1.0 to 2.1.1
+
 ## [Unreleased]
+
+### Changed
+- **Plugin id renamed `claude-workflow-engine` to `ai-native-sdlc-engine`** to match the repository rename. Slash commands are now `/ai-native-sdlc-engine:*`; reinstall via `/plugin` (marketplace update, install the new id, uninstall the old one). Broader text references in docs, scripts and `setup.py` are a separate sweep. (#325)
 
 ### Removed
 - **`docs/standards/` (52 files).** It duplicated the Claude rules in `~/.claude/rules/` and had drifted: 8 files were older than the live rules, and 6 existed only in the repo. The 6 repo-only files (java, csharp, django, flask, spring-boot, TOOL-OPTIMIZATION) moved to `~/.claude/rules/` with `paths:` frontmatter. `load_framework_standards()` and `load_language_standards()` in `standards/selector.py` now read `~/.claude/rules/`, and `TestRuleFilePaths` reads it too, skipping where it is not installed. (#320)
