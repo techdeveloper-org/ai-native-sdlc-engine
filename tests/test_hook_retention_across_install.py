@@ -565,7 +565,7 @@ class TestSpecificityBothDirections:
         bookkeeping keys appear, everything else stands still.
         """
         before = _document()
-        after = _document(enabledPlugins={"claude-workflow-engine@techdeveloper-org": True}, extraKnownMarketplaces={})
+        after = _document(enabledPlugins={"ai-native-sdlc-engine@techdeveloper-org": True}, extraKnownMarketplaces={})
 
         verdict = retention_verdict(before, after)
 

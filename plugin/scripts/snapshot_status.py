@@ -4,7 +4,7 @@ WHY THIS LIVES IN THE PLUGIN AND IMPORTS NOTHING FROM THE ENGINE
 ----------------------------------------------------------------
 This check has to run where the snapshot actually is: inside an installed
 plugin, under the plugin manager's cache directory, on a machine that may have
-no ``claude-workflow-engine`` checkout and no ``claude-global-library`` checkout
+no ``ai-native-sdlc-engine`` checkout and no ``claude-global-library`` checkout
 at all. V2-016 established that an installed plugin gets ``ModuleNotFoundError``
 for every import back into the engine repository, so this module imports only
 the standard library. ``scripts/build_library_snapshot.py`` is the engine-side

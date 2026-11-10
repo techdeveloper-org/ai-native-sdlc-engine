@@ -1,4 +1,4 @@
-# claude-workflow-engine (Claude Code plugin)
+# ai-native-sdlc-engine (Claude Code plugin)
 
 The installable packaging of the Claude Workflow Engine's SDLC orchestration
 entry points.
@@ -6,8 +6,8 @@ entry points.
 ## Install
 
 ```
-/plugin marketplace add techdeveloper-org/claude-workflow-engine
-/plugin install claude-workflow-engine@techdeveloper-org
+/plugin marketplace add techdeveloper-org/ai-native-sdlc-engine
+/plugin install ai-native-sdlc-engine@techdeveloper-org
 ```
 
 That single step delivers the plugin's **commands, agents and skills**. No
@@ -59,7 +59,7 @@ prohibitions are CRITICAL: a violation fails the build.
 
 ## Uninstall
 
-`/plugin uninstall claude-workflow-engine` removes the plugin. It does not
+`/plugin uninstall ai-native-sdlc-engine` removes the plugin. It does not
 return the machine to its exact pre-install state, and that is host behaviour
 this plugin does not control: `enabledPlugins` and `extraKnownMarketplaces` are
 emptied to `{}` but left in `settings.json`, and the version cache directory

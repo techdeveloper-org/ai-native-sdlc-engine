@@ -197,7 +197,7 @@ class TestSpecificityControl:
         manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
         manifest["license"] = "MIT"
         manifest["keywords"] = ["sdlc", "orchestration"]
-        manifest["repository"] = "https://github.com/techdeveloper-org/claude-workflow-engine"
+        manifest["repository"] = "https://github.com/techdeveloper-org/ai-native-sdlc-engine"
         _write_manifest(scratch_plugin, manifest)
         findings = _findings_for(scratch_plugin)
         assert findings == [], "\n".join(str(f) for f in findings)

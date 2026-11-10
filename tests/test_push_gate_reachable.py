@@ -90,7 +90,7 @@ def guarded_settings_are_untouched():
     assert _digests() == before, "a guarded settings file changed while this module ran"
 
 
-def _scratch_catalogue(path, entry, repo="claude-workflow-engine", capability=gate.PUSH_GATE_CAPABILITY):
+def _scratch_catalogue(path, entry, repo="ai-native-sdlc-engine", capability=gate.PUSH_GATE_CAPABILITY):
     """Write a one-server catalogue for a probe test.
 
     Args:
