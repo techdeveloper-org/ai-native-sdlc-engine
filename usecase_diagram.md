@@ -20,7 +20,7 @@ flowchart LR
     OPS(("Operator / SRE"))
     EXT(("External services<br/>GitHub, Anthropic"))
 
-    subgraph SYS["Claude Workflow Engine"]
+    subgraph SYS["AI-Native SDLC Engine"]
         UC1(["Run 3-level SDLC pipeline<br/>scripts/3-level-flow.py"])
         UC2(["Invoke pipeline CLI subcommands<br/>scripts/cli.py"])
         UC3(["Create and manage GitHub issues<br/>scripts/github_issue_manager.py"])

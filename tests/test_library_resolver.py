@@ -183,14 +183,14 @@ class TestLocateLibraryRoot:
 
     def test_default_sibling_layout(self, tmp_path, monkeypatch):
         monkeypatch.delenv("CLAUDE_GLOBAL_LIB_PATH", raising=False)
-        engine_root = tmp_path / "claude-workflow-engine"
+        engine_root = tmp_path / "ai-native-sdlc-engine"
         engine_root.mkdir()
         (tmp_path / "claude-global-library").mkdir()
         assert locate_library_root(engine_root) == tmp_path / "claude-global-library"
 
     def test_none_when_neither_exists(self, tmp_path, monkeypatch):
         monkeypatch.delenv("CLAUDE_GLOBAL_LIB_PATH", raising=False)
-        engine_root = tmp_path / "claude-workflow-engine"
+        engine_root = tmp_path / "ai-native-sdlc-engine"
         engine_root.mkdir()
         assert locate_library_root(engine_root) is None
 
@@ -325,7 +325,7 @@ class TestBuildDefaultResolver:
     def test_fallback_disabled_by_default_raises_setup_error_when_local_absent(self, tmp_path, monkeypatch):
         monkeypatch.delenv("CLAUDE_GLOBAL_LIB_PATH", raising=False)
         monkeypatch.delenv("CLAUDE_ALLOW_GITHUB_FALLBACK", raising=False)
-        engine_root = tmp_path / "claude-workflow-engine"
+        engine_root = tmp_path / "ai-native-sdlc-engine"
         engine_root.mkdir()
         # No sibling directory created -> local tier absent, GitHub tier absent (default off)
         resolver = build_default_resolver(engine_root=engine_root)
@@ -335,7 +335,7 @@ class TestBuildDefaultResolver:
     def test_fallback_enabled_adds_github_tier(self, tmp_path, monkeypatch):
         monkeypatch.delenv("CLAUDE_GLOBAL_LIB_PATH", raising=False)
         monkeypatch.setenv("CLAUDE_ALLOW_GITHUB_FALLBACK", "1")
-        engine_root = tmp_path / "claude-workflow-engine"
+        engine_root = tmp_path / "ai-native-sdlc-engine"
         engine_root.mkdir()
         resolver = build_default_resolver(engine_root=engine_root)
 

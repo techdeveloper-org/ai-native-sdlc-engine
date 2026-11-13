@@ -1,6 +1,6 @@
 # ai-native-sdlc-engine (Claude Code plugin)
 
-The installable packaging of the Claude Workflow Engine's SDLC orchestration
+The installable packaging of the AI-Native SDLC Engine's SDLC orchestration
 entry points.
 
 ## Install

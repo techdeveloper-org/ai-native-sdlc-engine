@@ -1,6 +1,6 @@
 # Naming Convention Audit Report
 
-**Project:** Claude Workflow Engine
+**Project:** AI-Native SDLC Engine
 **Audit Date:** 2026-04-04
 **Scope:** 310+ Python files across langgraph_engine/, scripts/pre_tool_enforcer/,
   scripts/post_tool_tracker/, scripts/stop_notifier/, scripts/github_pr_workflow/,

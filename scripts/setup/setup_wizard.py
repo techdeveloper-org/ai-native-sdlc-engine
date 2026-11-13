@@ -1,5 +1,5 @@
 """
-Claude Workflow Engine - Interactive Setup Wizard.
+AI-Native SDLC Engine - Interactive Setup Wizard.
 
 Walks first-time users through configuration:
 1. System checks (Python, OS, dependencies)
@@ -48,7 +48,7 @@ except ImportError:
 # ASCII-only banner
 BANNER = """
 ============================================================
-  Claude Workflow Engine - Setup Wizard
+  AI-Native SDLC Engine - Setup Wizard
   Version: {version}
 ============================================================
 """

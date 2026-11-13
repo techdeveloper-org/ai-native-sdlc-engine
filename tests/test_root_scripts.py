@@ -1,5 +1,5 @@
 """
-Tests for key root scripts in the Claude Workflow Engine.
+Tests for key root scripts in the AI-Native SDLC Engine.
 
 Covers:
 - SessionIDGenerator (session-id-generator.py)

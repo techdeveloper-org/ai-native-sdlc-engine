@@ -1,5 +1,5 @@
 # =============================================================================
-# Claude Workflow Engine - Kubernetes Deployment
+# AI-Native SDLC Engine - Kubernetes Deployment
 # Runs 2 replicas of the engine with health/readiness probes, resource limits,
 # and non-root security context.
 # =============================================================================

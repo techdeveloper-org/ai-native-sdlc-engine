@@ -1,4 +1,4 @@
-# AS-BUILT PRD -- claude-workflow-engine v1.21.4
+# AS-BUILT PRD -- ai-native-sdlc-engine v1.21.4
 
 **Phase:** C.3 (Chikofsky Level 3 -- Design Recovery / Documentation Synthesis)
 **Generated:** 2026-08-01
@@ -49,7 +49,7 @@ server table row, or subprocess-spawn site as evidence.
 ```mermaid
 graph TB
     Dev["Developer\n(Claude Code CLI user)"]
-    CWE["claude-workflow-engine\nLangGraph SDLC orchestration pipeline"]
+    CWE["ai-native-sdlc-engine\nLangGraph SDLC orchestration pipeline"]
     Claude["Claude Code CLI\n(hook host, session UI)"]
     Anthropic["Anthropic API\n(ANTHROPIC_API_KEY, 26 access sites)"]
     GitHub["GitHub\n(GITHUB_TOKEN, 24 access sites)"]
@@ -95,7 +95,7 @@ here means the C4 sense of coarse runtime/logical units, not Docker containers).
 
 ```mermaid
 graph TB
-    subgraph "claude-workflow-engine (single Python process tree)"
+    subgraph "ai-native-sdlc-engine (single Python process tree)"
         Entry["scripts/3-level-flow.py\nUserPromptSubmit entry point"]
         Orch["langgraph_engine/orchestrator.py\ncreate_flow_graph() -- single canonical\nLangGraph StateGraph factory"]
         L0["preflight_guard/\nLevel 0: Unicode/encoding/path checks"]

@@ -1,5 +1,5 @@
 # =============================================================================
-# Claude Workflow Engine - Kubernetes ConfigMap
+# AI-Native SDLC Engine - Kubernetes ConfigMap
 # Non-sensitive runtime configuration for the workflow engine deployment.
 # =============================================================================
 apiVersion: v1

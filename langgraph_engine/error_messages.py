@@ -7,7 +7,7 @@ Converts raw technical exceptions and pipeline error codes into:
 - Troubleshooting links for common error categories
 - Help command suggestions
 
-Covers all common error categories in the Claude Workflow Engine pipeline:
+Covers all common error categories in the AI-Native SDLC Engine pipeline:
 - LLM inference errors (claude_cli, anthropic)
 - GitHub API errors
 - File system errors
@@ -543,7 +543,7 @@ class _ErrorCatalog:
                     "Report persistent errors with your session ID to the project maintainer",
                 ],
                 troubleshooting_links=[
-                    f"https://github.com/{_GITHUB_OWNER}/claude-workflow-engine/issues - Report issues",
+                    f"https://github.com/{_GITHUB_OWNER}/ai-native-sdlc-engine/issues - Report issues",
                 ],
                 help_commands=[
                     "set CLAUDE_DEBUG=1",
@@ -682,7 +682,7 @@ def format_exception(
 # ---------------------------------------------------------------------------
 
 _GENERAL_HELP = f"""
-Claude Workflow Engine Pipeline - Help
+AI-Native SDLC Engine Pipeline - Help
 
 The pipeline runs in 8 active steps to process your request:
   Pre-0, Step 0: Pre-analysis and orchestration

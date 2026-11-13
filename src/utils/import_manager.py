@@ -1,5 +1,5 @@
 """
-Import Manager for Claude Workflow Engine.
+Import Manager for AI-Native SDLC Engine.
 
 Provides a unified interface for loading resources from both the local project
 and the remote GitHub repositories. Handles UTF-8 encoding setup for Windows
@@ -8,12 +8,12 @@ consoles before performing any network requests.
 Resources are sourced from:
 1. Local project modules - via Python's import system
 2. claude-global-library - GitHub raw URLs (skills and agents)
-3. claude-workflow-engine - GitHub raw URLs (architecture policies)
+3. ai-native-sdlc-engine - GitHub raw URLs (architecture policies)
 
 Module-level constants:
     GITHUB_BASE (str): Base GitHub raw-content URL prefix.
     GLOBAL_LIB_URL (str): Raw URL prefix for claude-global-library main branch.
-    PROJECT_URL (str): Raw URL prefix for claude-workflow-engine main branch.
+    PROJECT_URL (str): Raw URL prefix for ai-native-sdlc-engine main branch.
     PROJECT_ROOT (Path): Absolute path to the project root directory.
     SKILL_URLS (dict): Quick-reference URL map for common skills.
     AGENT_URLS (dict): Quick-reference URL map for common agents.
@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 _GITHUB_OWNER = os.environ.get("CLAUDE_GITHUB_OWNER", "techdeveloper-org")
 GITHUB_BASE = f"https://raw.githubusercontent.com/{_GITHUB_OWNER}"
 GLOBAL_LIB_URL = os.environ.get("CLAUDE_GLOBAL_LIB_URL", f"{GITHUB_BASE}/claude-global-library/main")
-PROJECT_URL = os.environ.get("CLAUDE_PROJECT_URL", f"{GITHUB_BASE}/claude-workflow-engine/main")
+PROJECT_URL = os.environ.get("CLAUDE_PROJECT_URL", f"{GITHUB_BASE}/ai-native-sdlc-engine/main")
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -85,7 +85,7 @@ class ImportManager:
     GitHub base URLs used:
         Skills:  https://raw.../claude-global-library/main/skills/{name}/skill.md
         Agents:  https://raw.../claude-global-library/main/agents/{name}/agent.md
-        Policies: https://raw.../claude-workflow-engine/main/scripts/architecture/{path}
+        Policies: https://raw.../ai-native-sdlc-engine/main/scripts/architecture/{path}
     """
 
     @staticmethod
@@ -156,10 +156,10 @@ class ImportManager:
 
     @staticmethod
     def get_policy(policy_path: str) -> Optional[str]:
-        """Load an architecture policy document from claude-workflow-engine on GitHub.
+        """Load an architecture policy document from ai-native-sdlc-engine on GitHub.
 
         Fetches a policy markdown file from the ``scripts/architecture/``
-        directory of the claude-workflow-engine repository's main branch.
+        directory of the ai-native-sdlc-engine repository's main branch.
 
         Args:
             policy_path (str): Relative path within scripts/architecture/

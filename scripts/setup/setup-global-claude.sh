@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# Claude Workflow Engine - Global Claude Memory System Setup (Unix/macOS/Linux/WSL)
+# AI-Native SDLC Engine - Global Claude Memory System Setup (Unix/macOS/Linux/WSL)
 # =============================================================================
 # This script sets up the Claude Memory System (3-Level Architecture) in your
 # ~/.claude directory so Claude Code follows the enforcement policies
@@ -36,7 +36,7 @@ NC='\033[0m'
 
 echo ""
 echo "============================================================"
-echo " Claude Workflow Engine - Global Memory System Setup"
+echo " AI-Native SDLC Engine - Global Memory System Setup"
 echo "============================================================"
 echo ""
 
@@ -132,8 +132,8 @@ else
         echo "  [INFO] Creating minimal CLAUDE.md..."
         cat > "$GLOBAL_CLAUDE_MD" << 'EOF'
 # Claude Memory System
-# Install claude-workflow-engine for the full 3-level architecture setup.
-# See: https://github.com/techdeveloper-org/claude-workflow-engine
+# Install ai-native-sdlc-engine for the full 3-level architecture setup.
+# See: https://github.com/techdeveloper-org/ai-native-sdlc-engine
 EOF
     fi
 fi
@@ -145,7 +145,7 @@ CONFIG_FILE="$SCRIPT_DIR/settings-config.json"
 
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "  [ERROR] settings-config.json not found at $CONFIG_FILE"
-    echo "  [INFO] This file should be in the scripts/ directory of claude-workflow-engine"
+    echo "  [INFO] This file should be in the scripts/ directory of ai-native-sdlc-engine"
     exit 1
 fi
 
@@ -176,7 +176,7 @@ fi
 # Step 5: Finalize
 echo "[5/5] Finalizing..."
 echo "1.0.0" > "$MEMORY_CURRENT/VERSION"
-echo "Claude Workflow Engine Memory System" > "$MEMORY_CURRENT/MANIFEST.md"
+echo "AI-Native SDLC Engine Memory System" > "$MEMORY_CURRENT/MANIFEST.md"
 echo "Installed: $(date)" >> "$MEMORY_CURRENT/MANIFEST.md"
 
 echo ""

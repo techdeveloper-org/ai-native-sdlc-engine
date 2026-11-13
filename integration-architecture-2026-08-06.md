@@ -224,7 +224,7 @@ imports of non-existent modules are swallowed every turn.
    Historically it committed 25 times, pushed 16, opened 35 PRs and attempted 244 merges. It is
    currently disarmed **only by two broken imports** and it re-triggers every few minutes — it
    fired on this very branch at 16 commits ahead. Repairing the import first would arm it.
-   The capability is not lost: the plugin already ships `/claude-workflow-engine:review`, which
+   The capability is not lost: the plugin already ships `/ai-native-sdlc-engine:review`, which
    does the same work when asked. **Removal, not repair** — and a test that fails if the path
    returns.
 2. Decide each remaining dead import: wire it to the real module, or delete the path.
@@ -274,7 +274,7 @@ imports of non-existent modules are swallowed every turn.
 ## 6. What this document does not settle
 
 - Whether the Stop hook's auto-PR capability should be repaired, gated, or removed. That is a
-  policy decision, and the plugin already ships `/claude-workflow-engine:review` which does the
+  policy decision, and the plugin already ships `/ai-native-sdlc-engine:review` which does the
   same work on request.
 - Whether each duplicated capability should live in-process or behind MCP.
 - What the selection budget should be — how many agents and skills may be loaded at once. That

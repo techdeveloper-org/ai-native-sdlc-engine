@@ -1,5 +1,5 @@
 """
-Claude Workflow Engine - Complete System Architecture Diagram Generator
+AI-Native SDLC Engine - Complete System Architecture Diagram Generator
 
 Generates a professional draw.io diagram showing the entire system:
   - 4 pipeline levels (Level -1 through Level 3)
@@ -201,7 +201,7 @@ def build():
             8,
             1660,
             44,
-            "Claude Workflow Engine  \u2014  Complete System Architecture  (v1.5.0)",
+            "AI-Native SDLC Engine  \u2014  Complete System Architecture  (v1.5.0)",
             "text;html=1;align=center;fontStyle=1;fontSize=16;" "fillColor=#1e3a5f;fontColor=#FFFFFF;strokeColor=none;",
         )
     )

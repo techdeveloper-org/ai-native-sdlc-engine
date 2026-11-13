@@ -42,7 +42,7 @@ Scans project to extract:
 **Example Output:**
 ```python
 ProjectContext(
-    name="claude-workflow-engine",
+    name="ai-native-sdlc-engine",
     languages=["Python", "JavaScript"],
     frameworks=["Flask", "Angular"],
     version="5.3.0",
@@ -408,5 +408,5 @@ def step7_update_documentation(self, files_modified: List[str]) -> Dict[str, Any
 ---
 
 **Status:** Ready for Phase 2 implementation
-**Owner:** Claude Workflow Engine
+**Owner:** AI-Native SDLC Engine
 **Last Updated:** 2026-03-11

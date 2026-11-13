@@ -1,3 +1,3 @@
 """
-Integration test package for Claude Workflow Engine 3-Level Flow Engine.
+Integration test package for AI-Native SDLC Engine 3-Level Flow Engine.
 """

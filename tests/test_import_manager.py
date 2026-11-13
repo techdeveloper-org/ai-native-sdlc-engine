@@ -65,7 +65,7 @@ class TestGetSkillFailureModes:
         monkeypatch.delenv("CLAUDE_ALLOW_GITHUB_FALLBACK", raising=False)
         # Force resolver rebuild against a fake, non-sibling engine_root so the
         # real checkout isn't found as the default-layout fallback either.
-        fake_engine_root = tmp_path / "claude-workflow-engine"
+        fake_engine_root = tmp_path / "ai-native-sdlc-engine"
         fake_engine_root.mkdir()
         import_manager_module.PROJECT_ROOT = fake_engine_root
         try:
@@ -79,7 +79,7 @@ class TestGetSkillGitHubFallback:
     def test_github_fallback_used_when_enabled_and_local_absent(self, tmp_path, monkeypatch):
         monkeypatch.setenv("CLAUDE_ALLOW_GITHUB_FALLBACK", "1")
         monkeypatch.setenv("CLAUDE_GLOBAL_LIB_PATH", str(tmp_path / "does-not-exist"))
-        fake_engine_root = tmp_path / "claude-workflow-engine"
+        fake_engine_root = tmp_path / "ai-native-sdlc-engine"
         fake_engine_root.mkdir()
         import_manager_module.PROJECT_ROOT = fake_engine_root
         try:

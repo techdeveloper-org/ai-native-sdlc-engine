@@ -1,4 +1,4 @@
-"""OpenTelemetry distributed tracing for the Claude Workflow Engine pipeline.
+"""OpenTelemetry distributed tracing for the AI-Native SDLC Engine pipeline.
 
 Provides:
 - init_tracing(): configure TracerProvider with OTLP gRPC or console exporter
@@ -107,7 +107,7 @@ def init_tracing(service_name: Optional[str] = None) -> bool:
         return False
 
     try:
-        name = service_name or os.environ.get("OTEL_SERVICE_NAME", "claude-workflow-engine")
+        name = service_name or os.environ.get("OTEL_SERVICE_NAME", "ai-native-sdlc-engine")
         resource = Resource.create({"service.name": name})
         provider = TracerProvider(resource=resource)
 

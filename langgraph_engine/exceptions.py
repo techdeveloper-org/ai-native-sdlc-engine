@@ -1,5 +1,5 @@
 """
-Custom exception hierarchy for the Claude Workflow Engine.
+Custom exception hierarchy for the AI-Native SDLC Engine.
 
 Provides a consistent set of typed exceptions used across all pipeline
 layers (orchestrator, subgraphs, MCP servers, hook scripts).  Every
@@ -42,7 +42,7 @@ from typing import Any, Dict, Optional
 
 
 class WorkflowEngineError(Exception):
-    """Base exception for all Claude Workflow Engine errors.
+    """Base exception for all AI-Native SDLC Engine errors.
 
     All pipeline-specific exceptions inherit from this class so callers
     can catch the entire family with a single ``except WorkflowEngineError``

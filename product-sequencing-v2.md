@@ -6,7 +6,7 @@ the NFR-1/bundled-MCP-server question) -- both amendment passes by product-manag
 normalisation, post Deliverable-1 approval
 **Author:** product-manager-agent
 **Date:** 2026-08-01 (Phase 0 baseline; Phase 2.2 and Phase 2.3 amendments, same day)
-**Target repo:** `claude-workflow-engine` v1.21.4 -> v2.0.0
+**Target repo:** `ai-native-sdlc-engine` v1.21.4 -> v2.0.0
 **Primary input (Phase 0):** `docs/phase-0-requirements/prd-v2.md` (475 lines, 14 sections, BA-validated FR/NFR set + RTM)
 **Primary inputs (Phase 2.2 amendment):** `docs/phase-1-architecture/hld.md` (APPROVED, consensus
 iteration 4), `docs/phase-1-architecture/plugin_schema_spike.md` (5/5 items measured),

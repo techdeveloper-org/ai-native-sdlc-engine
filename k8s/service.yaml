@@ -1,5 +1,5 @@
 # =============================================================================
-# Claude Workflow Engine - Kubernetes Service
+# AI-Native SDLC Engine - Kubernetes Service
 # ClusterIP service exposing health (8080) and metrics (9090) ports for
 # internal cluster access by Prometheus scraping and readiness checks.
 # =============================================================================

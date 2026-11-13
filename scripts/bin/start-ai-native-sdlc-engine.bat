@@ -1,5 +1,5 @@
 @echo off
-REM Claude Workflow Engine Startup Script for Windows
+REM AI-Native SDLC Engine Startup Script for Windows
 REM Starts the Flask server in background
 
 setlocal
@@ -14,7 +14,7 @@ if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
 REM Check if already running
 if exist "%PID_FILE%" (
-    echo [INFO] Claude Workflow Engine may already be running
+    echo [INFO] AI-Native SDLC Engine may already be running
     echo [INFO] PID file exists: %PID_FILE%
     echo [INFO] If server is not running, delete this file and try again
     exit /b 0
@@ -22,7 +22,7 @@ if exist "%PID_FILE%" (
 
 echo.
 echo ========================================
-echo   Starting Claude Workflow Engine Server
+echo   Starting AI-Native SDLC Engine Server
 echo ========================================
 echo.
 echo Project: %PROJECT_DIR%

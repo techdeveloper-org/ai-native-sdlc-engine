@@ -9,7 +9,7 @@
 ## YOUR TASK
 
 Create a comprehensive set of coding standards rule files in the `rules/` folder
-of the claude-workflow-engine project. These rules codify the PATTERNS and
+of the ai-native-sdlc-engine project. These rules codify the PATTERNS and
 CONVENTIONS that we consistently follow across ALL our Spring Boot microservice
 ecosystems. The rules must be:
 

@@ -402,7 +402,7 @@ class TestAC2Staleness:
         """REGRESSION (#315): the no-flag auto-discovery path must find the
         library beside the ENGINE repo, not beside the plugin subdirectory.
 
-        The real workspace layout is ``<workspace>/claude-workflow-engine/plugin``
+        The real workspace layout is ``<workspace>/ai-native-sdlc-engine/plugin``
         and ``<workspace>/claude-global-library`` as siblings of the engine repo.
         Every other test in this class passes ``library_root=`` explicitly and so
         never exercises ``locate_library_root``'s ``search_from`` branch at all;
@@ -410,7 +410,7 @@ class TestAC2Staleness:
         instead of a flat tmp_path.
         """
         workspace = tmp_path / "workspace"
-        engine_root = workspace / "claude-workflow-engine"
+        engine_root = workspace / "ai-native-sdlc-engine"
         plugin_root = engine_root / "plugin"
         library = _make_library(workspace / "claude-global-library", version="1.2.3")
         _make_plugin(plugin_root, snapshot_from=library, snapshot_version="1.0.0")

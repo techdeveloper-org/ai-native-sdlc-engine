@@ -1,4 +1,4 @@
-"""Prometheus metrics exporter for the Claude Workflow Engine pipeline.
+"""Prometheus metrics exporter for the AI-Native SDLC Engine pipeline.
 
 Exposes 9 metrics covering pipeline execution, step durations,
 LLM inference, MCP tool calls, call graph rebuilds, active pipeline count,

@@ -8,7 +8,7 @@
     {
       "name": "ai-native-sdlc-engine",
       "source": "./plugin",
-      "description": "SDLC orchestration entry points for the Claude Workflow Engine. Ships commands, agents and skills only: zero hooks and zero bundled MCP servers, so an enabled-but-uninvoked plugin contributes no processes to a session."
+      "description": "SDLC orchestration entry points for the AI-Native SDLC Engine. Ships commands, agents and skills only: zero hooks and zero bundled MCP servers, so an enabled-but-uninvoked plugin contributes no processes to a session."
     }
   ]
 }

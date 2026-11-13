@@ -1,5 +1,5 @@
 """
-Setup configuration for Claude Workflow Engine
+Setup configuration for AI-Native SDLC Engine
 """
 
 from pathlib import Path
@@ -25,14 +25,14 @@ if requirements_file.exists():
     ]
 
 setup(
-    name="claude-workflow-engine",
+    name="ai-native-sdlc-engine",
     version=VERSION,
     description="3-Level LangGraph orchestration pipeline for Claude Code workflows",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="TechDeveloper",
     author_email="",
-    url="https://github.com/techdeveloper-org/claude-workflow-engine",
+    url="https://github.com/techdeveloper-org/ai-native-sdlc-engine",
     license="MIT",
     # Package configuration
     packages=find_packages(where="src") + find_packages(where=".", include=["langgraph_engine", "langgraph_engine.*"]),
@@ -46,7 +46,9 @@ setup(
     # Entry points
     entry_points={
         "console_scripts": [
+            "ai-sdlc-engine=langgraph_engine.run_pipeline:main",
             "claude-workflow=langgraph_engine.run_pipeline:main",
+            "sdlc=scripts.cli:main",
             "cwe=scripts.cli:main",
         ],
     },
@@ -63,10 +65,10 @@ setup(
         "Topic :: Software Development :: Quality Assurance",
         "Topic :: Software Development :: Build Tools",
     ],
-    keywords="claude ai workflow langgraph orchestration pipeline automation",
+    keywords="claude ai workflow langgraph orchestration pipeline automation sdlc",
     project_urls={
-        "Documentation": "https://github.com/techdeveloper-org/claude-workflow-engine/docs",
-        "Source": "https://github.com/techdeveloper-org/claude-workflow-engine",
-        "Tracker": "https://github.com/techdeveloper-org/claude-workflow-engine/issues",
+        "Documentation": "https://github.com/techdeveloper-org/ai-native-sdlc-engine",
+        "Source": "https://github.com/techdeveloper-org/ai-native-sdlc-engine",
+        "Tracker": "https://github.com/techdeveloper-org/ai-native-sdlc-engine/issues",
     },
 )

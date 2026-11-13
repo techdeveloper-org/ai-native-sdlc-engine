@@ -1,6 +1,6 @@
 # Deployment Guide
 
-**Project:** Claude Workflow Engine
+**Project:** AI-Native SDLC Engine
 **Version:** 1.15.1
 **Last Updated:** 2026-04-04
 
@@ -23,8 +23,8 @@
 ### 1. Clone and enter the repository
 
 ```bash
-git clone https://github.com/techdeveloper-org/claude-workflow-engine.git
-cd claude-workflow-engine
+git clone https://github.com/techdeveloper-org/ai-native-sdlc-engine.git
+cd ai-native-sdlc-engine
 ```
 
 ### 2. Create a virtual environment
@@ -105,7 +105,7 @@ effect immediately without rebuilding the image.
 
 ```
 k8s/
-+-- namespace.yaml          # claude-workflow-engine namespace
++-- namespace.yaml          # ai-native-sdlc-engine namespace
 +-- configmap.yaml          # Non-secret env vars
 +-- secret.yaml             # API keys (use Sealed Secrets or Vault in production)
 +-- deployment.yaml         # Main application pod
@@ -121,10 +121,10 @@ kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/
 
 # Verify pods are running
-kubectl -n claude-workflow-engine get pods
+kubectl -n ai-native-sdlc-engine get pods
 
 # Check liveness probe
-kubectl -n claude-workflow-engine exec -it deploy/workflow-engine -- curl localhost:8000/health
+kubectl -n ai-native-sdlc-engine exec -it deploy/workflow-engine -- curl localhost:8000/health
 ```
 
 ### Liveness and readiness probes

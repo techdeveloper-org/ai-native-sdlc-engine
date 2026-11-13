@@ -2,7 +2,7 @@
 
 **Version:** 5.0.0
 **Last Updated:** 2026-03-05
-**Purpose:** Comprehensive visualization of the entire Claude Workflow Engine 3-level policy enforcement pipeline
+**Purpose:** Comprehensive visualization of the entire AI-Native SDLC Engine 3-level policy enforcement pipeline
 
 ---
 
@@ -23,7 +23,7 @@
 > in `settings.json`, which is a settings rule rather than a hook. See
 > `CLAUDE.md` → "Hook status" and `ADR-006-hook-free-execution.md`.
 
-This document shows the complete flow of policy execution across all 4 hooks and 3 levels of the Claude Workflow Engine system. Every subprocess call, flag read/write, and data flow is visualized using Mermaid flowcharts.
+This document shows the complete flow of policy execution across all 4 hooks and 3 levels of the AI-Native SDLC Engine system. Every subprocess call, flag read/write, and data flow is visualized using Mermaid flowcharts.
 
 **The 4 Hooks (Execution Order) — as designed in v1.x; see the status notice above:**
 1. `UserPromptSubmit` → clear-session-handler.py + 3-level-flow.py (Level -1/1/2/3) **[UNREGISTERED since v2.0.0]**
@@ -635,7 +635,7 @@ Hook 2 (3-Level Flow)
 
 ## Summary: Complete Policy Chain
 
-The Claude Workflow Engine policy chain is a **synchronized 5-hook pipeline** that enforces a **3-level architecture** across every user interaction:
+The AI-Native SDLC Engine policy chain is a **synchronized 5-hook pipeline** that enforces a **3-level architecture** across every user interaction:
 
 1. **Clear Session Hook** - Initialize session, create flags, reset enforcement
 2. **3-Level Flow Hook** - Run Levels -1/1/2/3, write checkpoint, verify all policies
@@ -655,5 +655,5 @@ The Claude Workflow Engine policy chain is a **synchronized 5-hook pipeline** th
 
 **Document Version:** 5.0.0
 **Last Updated:** 2026-03-05
-**Created by:** Claude Workflow Engine System Architecture
+**Created by:** AI-Native SDLC Engine System Architecture
 **All Mermaid diagrams are interactive** - click to expand

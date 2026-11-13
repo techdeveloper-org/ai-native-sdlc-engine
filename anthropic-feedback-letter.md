@@ -38,7 +38,7 @@ When I started using Claude Code, I noticed a consistent pattern:
 
 ## 2. What I Built to Fix This
 
-### The Claude Workflow Engine
+### The AI-Native SDLC Engine
 
 I built a 3-level LangGraph-based orchestration pipeline (7.6.0) that wraps around Claude Code and enforces "think before act" at every critical step:
 
@@ -49,7 +49,7 @@ I built a 3-level LangGraph-based orchestration pipeline (7.6.0) that wraps arou
 - 15-step execution pipeline (Step 0-14) with graph-driven decision making
 - 148+ tests with zero failures
 
-**GitHub:** https://github.com/techdeveloper-org/claude-workflow-engine
+**GitHub:** https://github.com/techdeveloper-org/ai-native-sdlc-engine
 
 ### The CallGraph Integration (Key Innovation)
 
@@ -479,7 +479,7 @@ I'm open to working with Anthropic on:
 - `github_code_review.py` - 5-layer automated code review
 
 ### GitHub Repository
-https://github.com/techdeveloper-org/claude-workflow-engine
+https://github.com/techdeveloper-org/ai-native-sdlc-engine
 
 **Important Note on Repository Access:**
 This repository is currently **private** and I have not open-sourced it yet. The AI coding tool space is highly competitive, and this system represents months of intensive work and unique innovations that no competitor has achieved.

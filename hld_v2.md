@@ -1,4 +1,4 @@
-# High-Level Design (Delta HLD) -- claude-workflow-engine v2.0.0, Hook-Free Plugin Architecture
+# High-Level Design (Delta HLD) -- ai-native-sdlc-engine v2.0.0, Hook-Free Plugin Architecture
 
 **Mode:** Phase 1 Brownfield (Mode B -- Delta HLD)
 **Author:** solution-architect (Domain 5, architecture-quality)
@@ -88,7 +88,7 @@ cost of ADR-006 and it is stated without softening in SS 4.1.
 graph TB
     DEV["Developer<br/>single user, Windows 11 / PowerShell"]
     CC["Claude Code CLI<br/>plugin host + hook host"]
-    PLUGIN["claude-workflow-engine plugin v2.0.0<br/>commands, skills, agents,<br/>MCP refs, pinned snapshot"]
+    PLUGIN["ai-native-sdlc-engine plugin v2.0.0<br/>commands, skills, agents,<br/>MCP refs, pinned snapshot"]
     ENGINE["LangGraph SDLC Engine<br/>Levels 0-2, Steps 0-8"]
     LIB["claude-global-library<br/>505 agents / 992 skills / 99 domain KGs<br/>read at BUILD time only (ADR-007)"]
     MKT["Private marketplace<br/>techdeveloper-org (ADR-008)"]
@@ -952,8 +952,8 @@ Three consequences, none of which reverse the ADR:
    It confirms FR-8a is the largest remaining overhead item once the hooks are gone.
 3. **NFR-1's measurement protocol must isolate the retained Stop hook.** This is the sharp one, and
    the corrected figures strengthen rather than weaken it.
-   NFR-1's AC is "delta = 0 processes **attributable to claude-workflow-engine**." The retained Stop
-   hook *is* claude-workflow-engine code, it lives in this repo, and it spawns on every response
+   NFR-1's AC is "delta = 0 processes **attributable to ai-native-sdlc-engine**." The retained Stop
+   hook *is* ai-native-sdlc-engine code, it lives in this repo, and it spawns on every response
    turn. A naive process-count measurement whose window spans a turn boundary will therefore record
    a non-zero delta caused by a component ADR-010 deliberately kept -- failing NFR-1 for a reason
    the design already accepted. The measurement must attribute per-component, counting only
@@ -1345,7 +1345,7 @@ The user base is one developer, so this is a runbook, not a rollout plan.
 
 | # | Step | Detail | Reversible? |
 |---|---|---|---|
-| 1 | Install the plugin first, while hooks still run | `/plugin marketplace add techdeveloper-org/<repo>` then `/plugin install claude-workflow-engine@techdeveloper-org`. Installs commands, agents and skills only -- **no MCP servers** (ADR-019) | Yes -- `/plugin uninstall` |
+| 1 | Install the plugin first, while hooks still run | `/plugin marketplace add techdeveloper-org/<repo>` then `/plugin install ai-native-sdlc-engine@techdeveloper-org`. Installs commands, agents and skills only -- **no MCP servers** (ADR-019) | Yes -- `/plugin uninstall` |
 | 2 | **Register the MCP servers** | `/{plugin-name}:register-mcp`. **Opt-in by design (ADR-019)** -- the plugin ships no `.mcp.json`, so no MCP-backed capability exists until this runs. Writes user-scope registrations via merge-against-fresh-read (SS 8.4). **Required before steps 3 and 5** | Yes -- `/{plugin-name}:unregister-mcp` |
 | 3 | Verify the FR-23 replacement is reachable | The version-push gate answers as an MCP tool. **Cannot pass before step 2** -- if it fails, the cause is almost always an unrun step 2, not a broken migration. **This must pass before step 5** | n/a |
 | 4 | Learn the explicit entry points (FR-7) | Slash commands for plan/decompose, implement, review, document, release, plus one command that runs Steps 0-8 for the old end-to-end behaviour | n/a |

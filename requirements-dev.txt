@@ -1,4 +1,4 @@
-# Claude Workflow Engine — Dev / Test Dependencies
+# AI-Native SDLC Engine — Dev / Test Dependencies
 # ============================================================================
 # Install with: uv pip install -r requirements-dev.txt --system
 # These packages are NOT included in production installs.

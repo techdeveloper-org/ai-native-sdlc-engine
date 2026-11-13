@@ -1,4 +1,4 @@
-# Claude Workflow Engine — Pipeline Architecture
+# AI-Native SDLC Engine — Pipeline Architecture
 
 > Version 1.20.x · LangGraph 0.2.0+ · Python 3.10+
 >
@@ -316,7 +316,7 @@ flowchart TD
 
 ```mermaid
 graph TD
-    CWE["Claude Workflow Engine\nPipeline Core"]
+    CWE["AI-Native SDLC Engine\nPipeline Core"]
 
     subgraph INFRA["Infrastructure Layer"]
         SM["session-mgr\n14 tools\nSession lifecycle"]

@@ -53,7 +53,7 @@ for it.
 """
 
 _RUNTIME_CONTEXT_TEMPLATE = """\
-=== RUNTIME CONTEXT (injected by claude-workflow-engine) ===
+=== RUNTIME CONTEXT (injected by ai-native-sdlc-engine) ===
 
 This block is authoritative. Every value below was computed from the actual
 codebase before this prompt was assembled. Treat each as established fact: do

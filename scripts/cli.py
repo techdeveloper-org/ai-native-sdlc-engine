@@ -1,14 +1,14 @@
 """
-Claude Workflow Engine CLI.
+AI-Native SDLC Engine CLI.
 
 Usage:
-  cwe run "fix the login bug"              # Run the pipeline on a task
-  cwe run --task "add feature" --mode full  # Full mode (all 15 steps)
-  cwe setup                                 # Interactive first-time setup
-  cwe status                                # Show current pipeline state
-  cwe health                                # Check all dependencies and MCP servers
-  cwe version                              # Show version
-  cwe doctor                               # Diagnose common issues
+  sdlc run "fix the login bug"             # Run the pipeline on a task
+  sdlc run --task "add feature" --mode full # Full mode (all steps)
+  sdlc setup                               # Interactive first-time setup
+  sdlc status                              # Show current pipeline state
+  sdlc health                              # Check all dependencies and MCP servers
+  sdlc version                             # Show version
+  sdlc doctor                              # Diagnose common issues
 
 Version: 1.4.1
 """
@@ -72,7 +72,7 @@ def cmd_run(args):
     flow_script = Path(__file__).resolve().parent / "3-level-flow.py"
     if not flow_script.exists():
         print(f"Error: Pipeline script not found at {flow_script}")
-        print("Ensure you are running from the claude-workflow-engine directory.")
+        print("Ensure you are running from the ai-native-sdlc-engine directory.")
         sys.exit(1)
 
     # Build command: 3-level-flow.py uses --message=MSG format
@@ -137,7 +137,7 @@ def cmd_health(args):
     Verifies: Python version, required packages, GitHub CLI,
     LLM provider configuration, and required environment variables.
     """
-    print("Claude Workflow Engine - Health Check")
+    print("AI-Native SDLC Engine - Health Check")
     print("=" * 50)
 
     checks = []
@@ -221,7 +221,7 @@ def cmd_health(args):
 def cmd_version(args):
     """Show version information."""
     ver = get_version()
-    print(f"Claude Workflow Engine v{ver}")
+    print(f"AI-Native SDLC Engine v{ver}")
     print(f"Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
     print(f"Platform: {sys.platform}")
 
@@ -232,7 +232,7 @@ def cmd_doctor(args):
     Checks for: MCP server registrations, stale sessions, and
     non-ASCII characters in Python source files (Windows cp1252 risk).
     """
-    print("Claude Workflow Engine - Doctor")
+    print("AI-Native SDLC Engine - Doctor")
     print("=" * 50)
 
     issues = []
@@ -313,7 +313,7 @@ def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         prog="cwe",
-        description="Claude Workflow Engine - Full SDLC Automation",
+        description="AI-Native SDLC Engine - Full SDLC Automation",
         epilog="Run 'cwe <command> --help' for command-specific help.",
     )
     parser.add_argument("--version", "-v", action="store_true", help="Show version")

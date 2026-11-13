@@ -1,4 +1,4 @@
-# Claude Workflow Engine - Policies & Scripts Complete Flow
+# AI-Native SDLC Engine - Policies & Scripts Complete Flow
 
 ## 🎯 Core Concept
 

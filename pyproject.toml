@@ -3,7 +3,7 @@ requires = ["hatchling>=1.25.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "claude-workflow-engine"
+name = "ai-native-sdlc-engine"
 dynamic = ["version"]
 description = "LangGraph-based 3-level orchestration pipeline for automating Claude Code development workflows with call graph intelligence, template fast-path, and multi-provider LLM inference."
 readme = "README.md"
@@ -43,8 +43,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/techdeveloper-org/claude-workflow-engine"
-Repository = "https://github.com/techdeveloper-org/claude-workflow-engine"
+Homepage = "https://github.com/techdeveloper-org/ai-native-sdlc-engine"
+Repository = "https://github.com/techdeveloper-org/ai-native-sdlc-engine"
 
 [tool.hatch.version]
 path = "langgraph_engine/__init__.py"

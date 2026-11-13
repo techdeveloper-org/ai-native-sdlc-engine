@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Claude Workflow Engine - Security Fixes Installation Script
+# AI-Native SDLC Engine - Security Fixes Installation Script
 # This script installs and configures all security fixes
 
 set -e  # Exit on error
 
 echo "================================================================"
-echo "Claude Workflow Engine - Security Fixes Installation"
+echo "AI-Native SDLC Engine - Security Fixes Installation"
 echo "================================================================"
 echo ""
 
@@ -19,7 +19,7 @@ NC='\033[0m' # No Color
 # Check if running in correct directory
 if [ ! -f "requirements-secure.txt" ]; then
     echo -e "${RED}ERROR: requirements-secure.txt not found${NC}"
-    echo "Please run this script from the claude-workflow-engine root directory"
+    echo "Please run this script from the ai-native-sdlc-engine root directory"
     exit 1
 fi
 

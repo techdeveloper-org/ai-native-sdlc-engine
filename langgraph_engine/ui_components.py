@@ -396,7 +396,7 @@ class PipelineUI:
         lines = [
             "",
             "=" * width,
-            f"  Claude Workflow Engine Pipeline  |  Session: {self.session_id or 'N/A'}",
+            f"  AI-Native SDLC Engine Pipeline  |  Session: {self.session_id or 'N/A'}",
             f"  Steps: {self.total_steps}  |  Started: {_now_str()}",
             "=" * width,
         ]

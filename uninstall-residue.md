@@ -1,6 +1,6 @@
 # Uninstall residue runbook
 
-**Scope: what survives `claude plugin uninstall claude-workflow-engine@techdeveloper-org`, and how to
+**Scope: what survives `claude plugin uninstall ai-native-sdlc-engine@techdeveloper-org`, and how to
 remove each item by hand.**
 
 This is the deliverable for PRD FR-24 / SRS FR-36. FR-36 is deliberately a document rather than a
@@ -89,12 +89,12 @@ an artefact or derived by substitution. Each is exactly one of `MEASURED`, `INFE
 
 | ID | Exact path or key | Behaviour | Path | Source of the path |
 |---|---|---|---|---|
-| R1 | `~/.claude/settings.json`, top-level key `enabledPlugins`, emptied to `{}` and retained. Before uninstall it holds `"claude-workflow-engine@techdeveloper-org": true`. | MEASURED | MEASURED | Fixed key name and fixed file; spike lines 143-145, 176-178 as of 2026-08-03. Re-confirmed on this machine 2026-08-03. |
+| R1 | `~/.claude/settings.json`, top-level key `enabledPlugins`, emptied to `{}` and retained. Before uninstall it holds `"ai-native-sdlc-engine@techdeveloper-org": true`. | MEASURED | MEASURED | Fixed key name and fixed file; spike lines 143-145, 176-178 as of 2026-08-03. Re-confirmed on this machine 2026-08-03. |
 | R2 | `~/.claude/settings.json`, top-level key `extraKnownMarketplaces`, emptied to `{}` and retained. Before removal it holds a `techdeveloper-org` entry. | MEASURED | MEASURED | Fixed key name and fixed file; spike lines 129-137, 188-191 as of 2026-08-03. Re-confirmed on this machine 2026-08-03. |
-| R3 | `~/.claude/plugins/cache/techdeveloper-org/claude-workflow-engine/0.1.0/`, together with the `.orphaned_at` marker file written inside it. | MEASURED | INFERRED | Layout observed once in the spike (lines 180-183, 194-196 as of 2026-08-03). The three segments are this plugin's marketplace name, plugin name and version, read from `.claude-plugin/marketplace.json` and `plugin/.claude-plugin/plugin.json` on 2026-08-03. |
+| R3 | `~/.claude/plugins/cache/techdeveloper-org/ai-native-sdlc-engine/0.1.0/`, together with the `.orphaned_at` marker file written inside it. | MEASURED | INFERRED | Layout observed once in the spike (lines 180-183, 194-196 as of 2026-08-03). The three segments are this plugin's marketplace name, plugin name and version, read from `.claude-plugin/marketplace.json` and `plugin/.claude-plugin/plugin.json` on 2026-08-03. |
 | R4 | `~/.claude/settings.json`, `mcpServers` entry `post-tool-tracker`, written only if the user ran `register-mcp`. | INFERRED | MEASURED | Entry id read from `plugin/mcp-registry.json`. Settings file reported by `mcp_registration.py status --json`. Survival across uninstall is ADR-020 Path C, which is **not measured** -- see the warning below this table. |
 | R5 | `~/.claude/cwe-mcp-registrations.json`, the provenance ledger `register-mcp` writes beside the settings file. | INFERRED | MEASURED | File name and location read from `plugin/scripts/mcp_registration.py` (`LEDGER_FILE_NAME`, line 80, and the ledger path expression, line 931, as of 2026-08-03). |
-| R6 | `~/.claude/plugins/data/claude-workflow-engine-techdeveloper-org/` | NOT MEASURED | INFERRED | Naming pattern taken from a single observed `CLAUDE_PLUGIN_DATA` value (spike line 91 as of 2026-08-03). The spike could not test this: its plugin never wrote persistent data, so there was nothing for `--keep-data` to act on (spike lines 184-186 as of 2026-08-03). Expected absent for this plugin: nothing under `plugin/` reads or writes `CLAUDE_PLUGIN_DATA` (grep, 2026-08-03). |
+| R6 | `~/.claude/plugins/data/ai-native-sdlc-engine-techdeveloper-org/` | NOT MEASURED | INFERRED | Naming pattern taken from a single observed `CLAUDE_PLUGIN_DATA` value (spike line 91 as of 2026-08-03). The spike could not test this: its plugin never wrote persistent data, so there was nothing for `--keep-data` to act on (spike lines 184-186 as of 2026-08-03). Expected absent for this plugin: nothing under `plugin/` reads or writes `CLAUDE_PLUGIN_DATA` (grep, 2026-08-03). |
 
 **R4 names one entry today and may name two later.** `plugin/mcp-registry.json` lists two servers,
 `post-tool-tracker` and `push-gate`. As of 2026-08-03 only the first can be written: the registry
@@ -131,7 +131,7 @@ moment the plugin is removed.
 
 **Preconditions.**
 
-- The plugin `claude-workflow-engine@techdeveloper-org` is currently installed.
+- The plugin `ai-native-sdlc-engine@techdeveloper-org` is currently installed.
 - You can write to the settings file for the scope it was installed at.
 - Nothing else is writing that settings file while you work.
 
@@ -182,11 +182,11 @@ Read `plugin/commands/unregister-mcp.md` before you do.
 ### A2. Uninstall the plugin
 
 ```
-claude plugin uninstall claude-workflow-engine@techdeveloper-org
+claude plugin uninstall ai-native-sdlc-engine@techdeveloper-org
 claude plugin marketplace remove techdeveloper-org
 ```
 
-*Verification:* `claude plugin list` no longer lists `claude-workflow-engine`,
+*Verification:* `claude plugin list` no longer lists `ai-native-sdlc-engine`,
 `~/.claude/plugins/installed_plugins.json` contains `"plugins": {}`, and both `enabledPlugins` and
 `extraKnownMarketplaces` in `~/.claude/settings.json` are `{}`. That last clause is the state step A3
 requires; check it here rather than discovering in A3 that it does not hold.
@@ -217,7 +217,7 @@ file's original bytes, because the file is re-serialised with two-space indentat
 Check first. It may already be absent; see section 6.
 
 ```
-python -c "import pathlib,shutil; p=pathlib.Path('~/.claude/plugins/cache/techdeveloper-org/claude-workflow-engine/0.1.0').expanduser(); print('present:', p.is_dir()); print('orphan marker:', (p/'.orphaned_at').is_file()); shutil.rmtree(p, ignore_errors=True); print('present after:', p.is_dir())"
+python -c "import pathlib,shutil; p=pathlib.Path('~/.claude/plugins/cache/techdeveloper-org/ai-native-sdlc-engine/0.1.0').expanduser(); print('present:', p.is_dir()); print('orphan marker:', (p/'.orphaned_at').is_file()); shutil.rmtree(p, ignore_errors=True); print('present after:', p.is_dir())"
 ```
 
 *Verification:* the command prints `present after: False`.
@@ -228,13 +228,13 @@ If `present` was `True` but `orphan marker` was `False`, stop. An unmarked direc
 orphan, and may belong to a live installation. Re-check that A2 completed.
 
 Afterwards you may also remove the now-empty parent directories
-`~/.claude/plugins/cache/techdeveloper-org/claude-workflow-engine/` and
+`~/.claude/plugins/cache/techdeveloper-org/ai-native-sdlc-engine/` and
 `~/.claude/plugins/cache/techdeveloper-org/`, if no other version or plugin remains under them.
 
 ### A5. Remove the plugin data directory (R6), if it exists
 
 ```
-python -c "import pathlib,shutil; p=pathlib.Path('~/.claude/plugins/data/claude-workflow-engine-techdeveloper-org').expanduser(); print('present:', p.is_dir()); shutil.rmtree(p, ignore_errors=True); print('present after:', p.is_dir())"
+python -c "import pathlib,shutil; p=pathlib.Path('~/.claude/plugins/data/ai-native-sdlc-engine-techdeveloper-org').expanduser(); print('present:', p.is_dir()); shutil.rmtree(p, ignore_errors=True); print('present after:', p.is_dir())"
 ```
 
 *Verification:* the command prints `present after: False`.
@@ -338,7 +338,7 @@ defects in this plugin, they are not something this plugin can prevent or detect
 repository should assert they are absent after an uninstall.
 
 1. **The orphaned plugin cache directory.** `claude plugin uninstall` leaves the plugin's cached files
-   at `~/.claude/plugins/cache/techdeveloper-org/claude-workflow-engine/0.1.0/`.
+   at `~/.claude/plugins/cache/techdeveloper-org/ai-native-sdlc-engine/0.1.0/`.
 2. **The `.orphaned_at` marker file** written inside that directory to mark it as superseded.
 
 Three facts fix this as accepted rather than open:

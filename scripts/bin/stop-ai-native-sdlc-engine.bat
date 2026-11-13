@@ -1,5 +1,5 @@
 @echo off
-REM Stop Claude Workflow Engine Server
+REM Stop AI-Native SDLC Engine Server
 
 setlocal
 
@@ -8,12 +8,12 @@ set PID_FILE=%PROJECT_DIR%\data\.server.pid
 
 echo.
 echo ========================================
-echo   Stopping Claude Workflow Engine Server
+echo   Stopping AI-Native SDLC Engine Server
 echo ========================================
 echo.
 
 REM Kill Python process running Flask
-taskkill /F /IM python.exe /FI "WINDOWTITLE eq Claude Workflow Engine*" 2>nul
+taskkill /F /IM python.exe /FI "WINDOWTITLE eq AI-Native SDLC Engine*" 2>nul
 
 REM Alternative: Kill all Python processes (careful!)
 REM taskkill /F /IM python.exe 2>nul

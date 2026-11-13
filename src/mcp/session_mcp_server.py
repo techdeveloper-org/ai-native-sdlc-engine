@@ -347,7 +347,7 @@ def session_query(filters: str = "{}") -> dict:
     Args:
         filters: JSON string with filter criteria.
             Supported keys: project, date_from, date_to, keyword
-            Example: '{"project": "claude-workflow-engine", "keyword": "MCP"}'
+            Example: '{"project": "ai-native-sdlc-engine", "keyword": "MCP"}'
     """
     try:
         filter_dict = json.loads(filters)

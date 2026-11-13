@@ -1,6 +1,6 @@
-"""Claude Workflow Engine - Main Package.
+"""AI-Native SDLC Engine - Main Package.
 
-Claude Workflow Engine is a real-time monitoring dashboard for the Claude Memory System.
+AI-Native SDLC Engine is a real-time monitoring dashboard for the Claude Memory System.
 It tracks 3-Level Architecture execution, policy enforcement, session analytics,
 and provides a web UI to visualize Claude Code behavior across sessions.
 

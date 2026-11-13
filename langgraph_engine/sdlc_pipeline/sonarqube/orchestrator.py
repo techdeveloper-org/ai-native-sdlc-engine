@@ -81,7 +81,7 @@ def create_issues_for_findings(
             f"**Rule:** {rule}\n"
             f"**File:** `{file_path}` (line {line_no})\n\n"
             f"### Message\n\n{message}\n\n"
-            f"*Auto-detected by the Claude Workflow Engine SonarQube scanner.*"
+            f"*Auto-detected by the AI-Native SDLC Engine SonarQube scanner.*"
         )
         return {"title": title, "body": body}
 

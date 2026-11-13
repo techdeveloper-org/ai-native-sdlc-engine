@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-test_new_components.py - Tests for new components added to the Claude Workflow Engine.
+test_new_components.py - Tests for new components added to the AI-Native SDLC Engine.
 
 Covers:
   1. Code Graph Analyzer (scripts/architecture/03-execution-system/00-code-graph-analysis/)

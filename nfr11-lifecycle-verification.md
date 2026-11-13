@@ -136,8 +136,8 @@ actually writes; if they disagree, discard this baseline and start again from 4.
 ### 4.2 Install the plugin
 
 ```
-claude plugin marketplace add techdeveloper-org/claude-workflow-engine
-claude plugin install claude-workflow-engine@techdeveloper-org
+claude plugin marketplace add techdeveloper-org/ai-native-sdlc-engine
+claude plugin install ai-native-sdlc-engine@techdeveloper-org
 ```
 
 ### 4.3 Resolve the settings and ledger paths -- do not assume them
@@ -213,7 +213,7 @@ them once.
 ### 4.6 Uninstall, snapshot the AFTER state, and run the uninstall test
 
 ```
-claude plugin uninstall claude-workflow-engine@techdeveloper-org
+claude plugin uninstall ai-native-sdlc-engine@techdeveloper-org
 ```
 
 ```

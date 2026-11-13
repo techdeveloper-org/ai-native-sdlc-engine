@@ -4,7 +4,7 @@ This package builds the measurement apparatus required by GitHub issue V2-003. I
 observes; it never modifies the components it measures.
 
 NFR-1's original acceptance criterion ("delta = 0 processes attributable to
-claude-workflow-engine") could not pass as worded, because the retained user-level
+ai-native-sdlc-engine") could not pass as worded, because the retained user-level
 Stop hook is itself engine code and fires every response turn. The criterion was
 revised to require PER-COMPONENT ATTRIBUTION: pass means zero processes attributable
 to the PLUGIN specifically, with exactly one permitted exclusion (the retained

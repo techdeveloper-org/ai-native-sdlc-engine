@@ -165,7 +165,7 @@ def build_parser() -> argparse.ArgumentParser:
     """Build argument parser supporting both subcommands and --resume flag."""
     parser = argparse.ArgumentParser(
         prog="run_pipeline",
-        description="Claude Workflow Engine Level 3 Pipeline Runner",
+        description="AI-Native SDLC Engine Level 3 Pipeline Runner",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )

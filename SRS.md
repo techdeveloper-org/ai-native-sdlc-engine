@@ -1,21 +1,21 @@
 # System Requirements Analysis
 
-**Project:** Claude Workflow Engine
+**Project:** AI-Native SDLC Engine
 **Version:** 2.1.1
 **Date:** 2026-11-10
-**Author:** Claude Workflow Engine Team
+**Author:** AI-Native SDLC Engine Team
 
 ---
 
 ## Executive Summary
 
 
-Claude Workflow Engine is a LangGraph-based 3-level pipeline that automates the full Software Development Life Cycle (SDLC) — from task analysis to merged PR closure — using LLM inference, template-driven orchestration, AST-based call graph analysis, and 13 MCP servers (295 tools). It is the only AI tool that automates all 8 active SDLC steps including GitHub Issues, branch creation, code review, PR merge, Jira tracking, Figma design-to-code, Jenkins CI/CD, SonarQube scanning, UML generation, and documentation updates.
+AI-Native SDLC Engine is a LangGraph-based 3-level pipeline that automates the full Software Development Life Cycle (SDLC) — from task analysis to merged PR closure — using LLM inference, template-driven orchestration, AST-based call graph analysis, and 13 MCP servers (295 tools). It is the only AI tool that automates all 8 active SDLC steps including GitHub Issues, branch creation, code review, PR merge, Jira tracking, Figma design-to-code, Jenkins CI/CD, SonarQube scanning, UML generation, and documentation updates.
 
 ---
 
 ## 1. Purpose
-Claude Workflow Engine automates software development lifecycle tasks that normally require human coordination across multiple tools (GitHub, Jira, Figma, Jenkins, SonarQube, LLM APIs). A developer provides a natural language task description; the engine handles everything from analysis to delivery.
+AI-Native SDLC Engine automates software development lifecycle tasks that normally require human coordination across multiple tools (GitHub, Jira, Figma, Jenkins, SonarQube, LLM APIs). A developer provides a natural language task description; the engine handles everything from analysis to delivery.
 
 The system aims to:
 - Automate the full SDLC pipeline from task intake to issue closure
@@ -1129,7 +1129,7 @@ User Prompt
 
 ### Planned
 
-- [ ] PyPI package (`pip install claude-workflow-engine`)
+- [ ] PyPI package (`pip install ai-native-sdlc-engine`)
 - [ ] CLI interface (`cwe run "fix the bug"`)
 - [ ] Configuration wizard for first-time setup
 - [ ] Multi-region / team deployment

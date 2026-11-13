@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Integration Tests for Claude Workflow Engine
+Comprehensive Integration Tests for AI-Native SDLC Engine
 
 Tests end-to-end workflows including:
 - User authentication flow

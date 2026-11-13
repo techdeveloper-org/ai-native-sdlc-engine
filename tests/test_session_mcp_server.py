@@ -58,14 +58,14 @@ class TestSessionSave:
         _, sessions, _ = temp_session_dir
         result = _parse(
             session_save(
-                "2026-03-15-14-30", "summary", "# Session Summary\n\nWorked on MCP servers.", "claude-workflow-engine"
+                "2026-03-15-14-30", "summary", "# Session Summary\n\nWorked on MCP servers.", "ai-native-sdlc-engine"
             )
         )
         assert result["success"] is True
         assert result["data_type"] == "summary"
 
         # Verify file exists
-        saved = sessions / "claude-workflow-engine" / "session-2026-03-15-14-30.md"
+        saved = sessions / "ai-native-sdlc-engine" / "session-2026-03-15-14-30.md"
         assert saved.exists()
         assert "MCP servers" in saved.read_text(encoding="utf-8")
 

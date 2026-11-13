@@ -1,4 +1,4 @@
-"""Resource resolver -- the local-path bridge between claude-workflow-engine
+"""Resource resolver -- the local-path bridge between ai-native-sdlc-engine
 and its sibling claude-global-library.
 
 Implements the ADR-1 3-tier Chain-of-Responsibility resolver documented in
@@ -185,7 +185,7 @@ def locate_library_root(engine_root: Optional[Path] = None) -> Optional[Path]:
         3. ``None`` if neither exists.
 
     Args:
-        engine_root: Root of the claude-workflow-engine checkout. Defaults to
+        engine_root: Root of the ai-native-sdlc-engine checkout. Defaults to
             three parents above this file (``langgraph_engine/library/resolver.py``).
 
     Returns:
@@ -335,7 +335,7 @@ class GitHubAdapter:
 
     def _attempt(self, url: str) -> "tuple[Optional[str], int]":
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "claude-workflow-engine-resolver/1.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "ai-native-sdlc-engine-resolver/1.0"})
             with urllib.request.urlopen(req, timeout=self.timeout) as response:
                 raw = response.read()
                 return raw.decode("utf-8", errors="replace"), 200
@@ -417,7 +417,7 @@ def build_default_resolver(
     Tier 3: ``HardFailAdapter``, always present (terminal).
 
     Args:
-        engine_root: Root of the claude-workflow-engine checkout, forwarded to
+        engine_root: Root of the ai-native-sdlc-engine checkout, forwarded to
             ``locate_library_root()``.
         github_raw_base: Override for the GitHub raw-content base URL. Defaults
             to ``CLAUDE_SKILL_REPO_URL`` (or the standard raw.githubusercontent.com

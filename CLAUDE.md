@@ -1,6 +1,6 @@
-# Claude Workflow Engine - Project Context
+# AI-Native SDLC Engine - Project Context
 
-**Project:** Claude Workflow Engine
+**Project:** AI-Native SDLC Engine
 **Version:** 2.1.1
 **Type:** LangGraph Orchestration Pipeline with Call Graph Intelligence + Template Fast-Path
 **Last Updated:** 2026-11-10
@@ -9,7 +9,7 @@
 
 ## Project Overview
 
-Claude Workflow Engine is a 3-level LangGraph-based orchestration pipeline for automating Claude Code development workflows. It handles session sync, coding standards enforcement, and end-to-end 9-step active execution (Steps 0-8) with GitHub integration and hybrid LLM inference across 2 providers (claude_cli, anthropic).
+AI-Native SDLC Engine is a 3-level LangGraph-based orchestration pipeline for automating Claude Code development workflows. It handles session sync, coding standards enforcement, and end-to-end 9-step active execution (Steps 0-8) with GitHub integration and hybrid LLM inference across 2 providers (claude_cli, anthropic).
 
 ### Quick Info
 

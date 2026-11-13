@@ -619,7 +619,7 @@ class Level3GitHubWorkflow:
         if verification_steps:
             parts.extend(["## Verification Steps", "1. " + "\n2. ".join(verification_steps), ""])
 
-        parts.extend(["---", "*Resolved by Claude Workflow Engine execution pipeline*"])
+        parts.extend(["---", "*Resolved by AI-Native SDLC Engine execution pipeline*"])
 
         return "\n".join(parts)
 

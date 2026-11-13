@@ -1,4 +1,4 @@
-"""
+﻿"""
 create_mcp_repos.py - Automates creation of individual MCP repos under techdeveloper-org.
 
 Each repo:
@@ -421,7 +421,7 @@ SERVERS = [
         ],
         "pip_deps": ["mcp", "fastmcp"],
         "engine_dep": True,
-        "engine_note": "Depends on langgraph_engine/uml_generators.py and diagrams/ package from claude-workflow-engine",
+        "engine_note": "Depends on langgraph_engine/uml_generators.py and diagrams/ package from ai-native-sdlc-engine",
     },
     {
         "repo": "mcp-drawio-diagram",
@@ -446,7 +446,7 @@ SERVERS = [
         ],
         "pip_deps": ["mcp", "fastmcp"],
         "engine_dep": True,
-        "engine_note": "Depends on langgraph_engine/diagrams/ package and call_graph_builder.py from claude-workflow-engine",
+        "engine_note": "Depends on langgraph_engine/diagrams/ package and call_graph_builder.py from ai-native-sdlc-engine",
     },
 ]
 
@@ -512,15 +512,15 @@ def make_readme(server):
         engine_note_block = f"""
 ## Engine Dependency
 
-> **Note:** This server depends on `claude-workflow-engine` internals.
+> **Note:** This server depends on `ai-native-sdlc-engine` internals.
 >
 > {server.get('engine_note', '')}
 >
-> Ensure `claude-workflow-engine` is cloned alongside this repo and its
+> Ensure `ai-native-sdlc-engine` is cloned alongside this repo and its
 > `scripts/` directory is on your `PYTHONPATH`.
 
 ```bash
-export PYTHONPATH=/path/to/claude-workflow-engine/scripts:$PYTHONPATH
+export PYTHONPATH=/path/to/ai-native-sdlc-engine/scripts:$PYTHONPATH
 ```
 """
 
@@ -615,11 +615,11 @@ Add to your `{settings_display}`:
 
 ## Project Context
 
-This MCP server is part of the **Claude Workflow Engine** ecosystem -- a LangGraph-based
+This MCP server is part of the **AI-Native SDLC Engine** ecosystem -- a LangGraph-based
 orchestration pipeline for automating Claude Code development workflows.
 
 Related repos:
-- [`claude-workflow-engine`](https://github.com/techdeveloper-org/claude-workflow-engine) -- Main pipeline
+- [`ai-native-sdlc-engine`](https://github.com/techdeveloper-org/ai-native-sdlc-engine) -- Main pipeline
 - [`mcp-base`](https://github.com/techdeveloper-org/mcp-base) -- Shared base utilities used by all MCP servers
 
 ---
@@ -645,7 +645,7 @@ def make_claude_md(server):
 Set PYTHONPATH to include the workflow engine scripts directory before running:
 
 ```bash
-export PYTHONPATH=/path/to/claude-workflow-engine/scripts:$PYTHONPATH
+export PYTHONPATH=/path/to/ai-native-sdlc-engine/scripts:$PYTHONPATH
 ```
 """
 
@@ -1073,8 +1073,8 @@ Install only what you need based on which clients your server uses.
 
 ## Project Context
 
-Part of the **Claude Workflow Engine** MCP ecosystem.
-See [`claude-workflow-engine`](https://github.com/techdeveloper-org/claude-workflow-engine) for the full pipeline.
+Part of the **AI-Native SDLC Engine** MCP ecosystem.
+See [`ai-native-sdlc-engine`](https://github.com/techdeveloper-org/ai-native-sdlc-engine) for the full pipeline.
 
 ---
 
@@ -1170,7 +1170,7 @@ def main():
     )
     args = parser.parse_args()
 
-    print("Claude Workflow Engine -- MCP Repos Creator")
+    print("AI-Native SDLC Engine -- MCP Repos Creator")
     print(f"Organization: {ORG}")
     print(f"Workspace: {WORKSPACE}")
     print(f"Targets: {len(SERVERS) + 1} (1 base + {len(SERVERS)} servers)")

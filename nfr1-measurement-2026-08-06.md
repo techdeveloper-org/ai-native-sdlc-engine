@@ -19,7 +19,7 @@ PRD NFR-1, as revised at Phase 2.1: *with the plugin installed but not invoked, 
 process count is taken immediately before and after 10 tool calls in a fresh session,
 attributed per component. Pass = 0 processes attributable to the plugin.*
 
-Plugin: `claude-workflow-engine` v0.1.0, installed from the local marketplace
+Plugin: `ai-native-sdlc-engine` v0.1.0, installed from the local marketplace
 `techdeveloper-org` and confirmed loaded — its eleven skills were live in the measuring
 session. Zero bundled hooks (ADR-010), zero bundled MCP servers (ADR-019).
 

@@ -540,7 +540,7 @@ def _network_classify(name: str, build_system: str) -> Optional[str]:
         else:
             return None
 
-        req = urllib.request.Request(url, headers={"User-Agent": "claude-workflow-engine/bdr"})
+        req = urllib.request.Request(url, headers={"User-Agent": "ai-native-sdlc-engine/bdr"})
         with urllib.request.urlopen(req, timeout=3) as resp:
             if resp.status == 200:
                 return "external_known"

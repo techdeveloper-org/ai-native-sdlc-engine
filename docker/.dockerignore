@@ -1,5 +1,5 @@
 # =============================================================================
-# Claude Workflow Engine - .dockerignore
+# AI-Native SDLC Engine - .dockerignore
 # Excludes files that must not be copied into the Docker build context.
 # Smaller context = faster builds, no accidental secret leakage.
 # =============================================================================

@@ -11,7 +11,7 @@ dependency, ordering or scope change in that pass.)
 (revised again 2026-08-02 by scrum-master-agent -- V2-004 re-pointed 8 -> 3 RE-ESTIMATED; two
 missing dependency edges added, V2-017 -> V2-026 and V2-017 -> V2-027; section 4's chain figures
 recomputed and one of them corrected. Totals moved 111 -> 106.)
-**Target:** `claude-workflow-engine` v1.21.5 -> v2.0.0
+**Target:** `ai-native-sdlc-engine` v1.21.5 -> v2.0.0
 **Status of this document:** DRAFT. Nothing in it has been created on GitHub. `github_issues.json`
 in this directory holds 37 issue drafts, none created.
 

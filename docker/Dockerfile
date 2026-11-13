@@ -1,6 +1,6 @@
 # =============================================================================
-# Claude Workflow Engine - Dockerfile
-# Version: 1.6.1
+# AI-Native SDLC Engine - Dockerfile
+# Version: 2.1.1
 # Description: LangGraph orchestration pipeline with RAG
 # Base: python:3.10-slim (multi-stage build)
 # =============================================================================
@@ -37,10 +37,10 @@ RUN pip install --upgrade pip && \
 # -----------------------------------------------------------------------------
 FROM python:3.10-slim AS runtime
 
-LABEL org.opencontainers.image.title="Claude Workflow Engine" \
+LABEL org.opencontainers.image.title="AI-Native SDLC Engine" \
       org.opencontainers.image.description="LangGraph 3-level orchestration pipeline with RAG" \
-      org.opencontainers.image.version="1.6.1" \
-      org.opencontainers.image.source="https://github.com/techdeveloper-org/claude-workflow-engine"
+      org.opencontainers.image.version="2.1.1" \
+      org.opencontainers.image.source="https://github.com/techdeveloper-org/ai-native-sdlc-engine"
 
 # Install minimal runtime OS libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \

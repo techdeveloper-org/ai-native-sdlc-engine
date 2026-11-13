@@ -134,8 +134,8 @@ every downstream comparison meaningless.
 ### 4.2 Install the plugin
 
 ```
-claude plugin marketplace add techdeveloper-org/claude-workflow-engine
-claude plugin install claude-workflow-engine@techdeveloper-org
+claude plugin marketplace add techdeveloper-org/ai-native-sdlc-engine
+claude plugin install ai-native-sdlc-engine@techdeveloper-org
 ```
 
 Snapshot again into `after-install.json` and `after-install-settings.json` using the same two
@@ -164,7 +164,7 @@ Record two further facts, because they are the actual subject of the test:
 ### 4.4 Uninstall
 
 ```
-claude plugin uninstall claude-workflow-engine@techdeveloper-org
+claude plugin uninstall ai-native-sdlc-engine@techdeveloper-org
 ```
 
 Snapshot into `after-uninstall.json` and `after-uninstall-settings.json`.

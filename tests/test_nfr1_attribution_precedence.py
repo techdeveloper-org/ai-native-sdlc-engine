@@ -703,7 +703,7 @@ class TestPluginMarkersAreSpecificEnough:
     wrong reason is no better than one that cannot fail at all.
     """
 
-    REAL_ROOT = "C:/Users/x/dev/claude-workflow-engine/plugin"
+    REAL_ROOT = "C:/Users/x/dev/ai-native-sdlc-engine/plugin"
 
     def test_an_unrelated_process_mentioning_plugins_is_not_charged(self):
         registry = components.build_default_registry(self.REAL_ROOT)
@@ -721,7 +721,7 @@ class TestPluginMarkersAreSpecificEnough:
     def test_the_qualified_marker_survives_a_relocated_checkout(self):
         """The point of a short marker: match the plugin at a different absolute path."""
         registry = components.build_default_registry(self.REAL_ROOT)
-        moved = "D:/elsewhere/claude-workflow-engine/plugin/scripts/entry.py"
+        moved = "D:/elsewhere/ai-native-sdlc-engine/plugin/scripts/entry.py"
         result = attribution_mod.attribute([_record(1, cmdline="python " + moved)], registry)
         assert result.plugin_count == 1
 
@@ -738,4 +738,4 @@ class TestPluginMarkersAreSpecificEnough:
         assert components.qualified_tail("plugin") is None
 
     def test_a_two_component_root_yields_the_pair(self):
-        assert components.qualified_tail("C:/claude-workflow-engine/plugin") == "claude-workflow-engine/plugin"
+        assert components.qualified_tail("C:/ai-native-sdlc-engine/plugin") == "ai-native-sdlc-engine/plugin"

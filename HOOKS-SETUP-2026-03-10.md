@@ -1,4 +1,4 @@
-# Claude Workflow Engine - Hooks Setup Complete (2026-03-10)
+# AI-Native SDLC Engine - Hooks Setup Complete (2026-03-10)
 
 ## ✅ Status: PRODUCTION READY
 

@@ -2,7 +2,7 @@
 description: Report what this plugin installed, what it deliberately did not install, and which capabilities are still unreachable.
 ---
 
-# About the Claude Workflow Engine plugin
+# About the AI-Native SDLC Engine plugin
 
 Report the plugin's install surface to the user. Read the values below from the
 plugin tree rather than restating them from memory, and resolve every path from

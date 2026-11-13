@@ -1,6 +1,6 @@
 # =============================================================================
-# Claude Workflow Engine - docker-compose.yml
-# Version: 1.6.1
+# AI-Native SDLC Engine - docker-compose.yml
+# Version: 2.1.1
 #
 # Services:
 #   engine  - The workflow orchestration pipeline (the main application)
@@ -19,14 +19,14 @@
 services:
 
   # ---------------------------------------------------------------------------
-  # engine: Claude Workflow Engine (3-level LangGraph pipeline)
+  # engine: AI-Native SDLC Engine (3-level LangGraph pipeline)
   # ---------------------------------------------------------------------------
   engine:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: claude-workflow-engine
-    image: workflow-engine:1.6.1
+    container_name: ai-native-sdlc-engine
+    image: ai-native-sdlc-engine:2.1.1
 
     # Load all environment variables from .env file.
     # Required vars: ANTHROPIC_API_KEY, GITHUB_TOKEN

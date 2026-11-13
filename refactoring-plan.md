@@ -1,5 +1,5 @@
 # Refactoring Execution Plan
-# Claude Workflow Engine - Modular Sub-Package Decomposition
+# AI-Native SDLC Engine - Modular Sub-Package Decomposition
 # Version: 1.0  |  Date: 2026-04-03  |  Status: APPROVED FOR EXECUTION
 
 ---

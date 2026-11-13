@@ -17,7 +17,7 @@ HISTORICAL NOTE (issue #202):
   be moved INTO each corresponding MCP server repo as the test owner.
 
   This module-level skip stops the entire file from running in the
-  claude-workflow-engine test suite. Re-enable for session-mgr tests by
+  ai-native-sdlc-engine test suite. Re-enable for session-mgr tests by
   moving them to a dedicated tests/test_session_mcp_integration.py file.
 """
 

@@ -238,7 +238,7 @@ spawn 2: pid 28084, cwd = .../fresh-session-cwd
 ```
 
 (A third, separate spawn -- pid 27968, `cwd` = the *unrelated*
-`claude-workflow-engine\scripts` directory -- was also logged around the
+`ai-native-sdlc-engine\scripts` directory -- was also logged around the
 same time. This did not come from the isolated `-p` command above; the
 most plausible explanation is that an already-running, separate Claude
 Code session sharing this same user's `~/.claude` config picked up the

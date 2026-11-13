@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Runner for Claude Workflow Engine
+Test Runner for AI-Native SDLC Engine
 
 Runs all unit tests and generates coverage report.
 
@@ -141,7 +141,7 @@ def run_with_coverage(verbosity=2):
 
 def main():
     """Main entry point"""
-    parser = argparse.ArgumentParser(description="Run Claude Workflow Engine test suite")
+    parser = argparse.ArgumentParser(description="Run AI-Native SDLC Engine test suite")
     parser.add_argument("--coverage", action="store_true", help="Run with coverage reporting")
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
     parser.add_argument("--quiet", action="store_true", help="Minimal output")

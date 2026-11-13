@@ -1,4 +1,4 @@
-# Getting Started with Claude Workflow Engine
+# Getting Started with AI-Native SDLC Engine
 
 **Version:** 1.15.1 | **Status:** Active
 
@@ -6,7 +6,7 @@
 
 ## What Is This?
 
-Claude Workflow Engine automates the Software Development Life Cycle using a
+AI-Native SDLC Engine automates the Software Development Life Cycle using a
 3-level LangGraph orchestration pipeline. From a single natural language prompt,
 it handles task analysis, GitHub issues, branching, PR creation, code review,
 documentation, and issue closure.

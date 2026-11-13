@@ -44,7 +44,7 @@ def _clear_cache(monkeypatch):
 @pytest.fixture
 def engine_and_sibling(tmp_path):
     """A fake engine checkout with a sibling claude-global-library next to it."""
-    engine_root = tmp_path / "claude-workflow-engine"
+    engine_root = tmp_path / "ai-native-sdlc-engine"
     sibling_root = tmp_path / "claude-global-library"
     engine_root.mkdir()
     sibling_root.mkdir()
@@ -95,7 +95,7 @@ class TestPullSuccess:
 
 class TestSiblingAbsent:
     def test_sibling_absent_exits_2_with_actionable_message(self, tmp_path, capsys):
-        engine_root = tmp_path / "claude-workflow-engine"
+        engine_root = tmp_path / "ai-native-sdlc-engine"
         engine_root.mkdir()
         runner = FakeRunner()
 
@@ -110,7 +110,7 @@ class TestSiblingAbsent:
         assert sync_library.ENV_LIBRARY_PATH in captured.err
 
     def test_sibling_absent_with_pull_flag_still_exits_2_without_attempting_pull(self, tmp_path):
-        engine_root = tmp_path / "claude-workflow-engine"
+        engine_root = tmp_path / "ai-native-sdlc-engine"
         engine_root.mkdir()
         runner = FakeRunner()
 

@@ -2,7 +2,7 @@
 
 **Version:** 1.0.0
 **Date:** 2026-02-17
-**Purpose:** Automatically sync 3-Level Architecture policies from global memory system to Claude Workflow Engine
+**Purpose:** Automatically sync 3-Level Architecture policies from global memory system to AI-Native SDLC Engine
 
 ---
 
@@ -10,7 +10,7 @@
 
 **Before:** When you update 3-level architecture policies in global `~/.claude/memory/`, you had to manually:
 1. Find which policies changed
-2. Update file paths in Claude Workflow Engine
+2. Update file paths in AI-Native SDLC Engine
 3. Fix path issues
 4. Update PolicyChecker code
 5. Test everything
@@ -22,8 +22,8 @@
 ## 🚀 Quick Start
 
 ```bash
-# Navigate to Claude Workflow Engine
-cd claude-workflow-engine
+# Navigate to AI-Native SDLC Engine
+cd ai-native-sdlc-engine
 
 # Run auto-sync
 python scripts/auto-sync-policies.py
@@ -183,12 +183,12 @@ Auto-Sync Policies from Global Memory System
 **In Global CLAUDE.md (`~/.claude/CLAUDE.md`)**, add this reminder:
 
 ```markdown
-## 🔄 Sync to Claude Workflow Engine
+## 🔄 Sync to AI-Native SDLC Engine
 
-When you update 3-Level Architecture policies, sync to Claude Workflow Engine:
+When you update 3-Level Architecture policies, sync to AI-Native SDLC Engine:
 
 ```bash
-cd /path/to/claude-workflow-engine
+cd /path/to/ai-native-sdlc-engine
 python scripts/auto-sync-policies.py
 ```
 
@@ -317,4 +317,4 @@ python scripts/auto-sync-policies.py
 
 **Created:** 2026-02-17
 **Status:** ✅ WORKING
-**Location:** `claude-workflow-engine/scripts/auto-sync-policies.py`
+**Location:** `ai-native-sdlc-engine/scripts/auto-sync-policies.py`

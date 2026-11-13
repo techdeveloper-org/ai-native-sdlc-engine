@@ -1,5 +1,5 @@
 # =============================================================================
-# Claude Workflow Engine - Horizontal Pod Autoscaler
+# AI-Native SDLC Engine - Horizontal Pod Autoscaler
 # Scales between 2 and 6 replicas based on CPU utilisation.
 # The minimum of 2 ensures high availability across availability zones.
 # =============================================================================

@@ -1,17 +1,17 @@
 openapi: 3.0.3
 
 info:
-  title: Claude Workflow Engine API
-  version: 1.6.1
+  title: AI-Native SDLC Engine API
+  version: 2.1.1
   description: |
-    Health, readiness, and metrics endpoints for the Claude Workflow Engine
+    Health, readiness, and metrics endpoints for the AI-Native SDLC Engine
     LangGraph orchestration pipeline.
 
     These endpoints are served by the MCP servers and the pipeline process.
     They are intended for load balancers, Kubernetes liveness/readiness probes,
     and Prometheus scraping.
   contact:
-    name: Claude Workflow Engine
+    name: AI-Native SDLC Engine
   license:
     name: MIT
 

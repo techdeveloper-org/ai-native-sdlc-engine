@@ -1,4 +1,4 @@
-# Contributing to Claude Workflow Engine
+# Contributing to AI-Native SDLC Engine
 
 Thank you for your interest in contributing! This document explains how to get started, what the codebase expects, and how to submit good contributions.
 
@@ -20,7 +20,7 @@ Thank you for your interest in contributing! This document explains how to get s
 
 ## Before You Start
 
-- Check [open issues](https://github.com/techdeveloper-org/claude-workflow-engine/issues) — your idea may already be tracked.
+- Check [open issues](https://github.com/techdeveloper-org/ai-native-sdlc-engine/issues) — your idea may already be tracked.
 - For significant changes, **open an issue first** to align on approach before writing code.
 - For bug fixes, feel free to go straight to a PR.
 
@@ -38,8 +38,8 @@ Thank you for your interest in contributing! This document explains how to get s
 ### Setup
 
 ```bash
-git clone https://github.com/techdeveloper-org/claude-workflow-engine
-cd claude-workflow-engine
+git clone https://github.com/techdeveloper-org/ai-native-sdlc-engine
+cd ai-native-sdlc-engine
 pip install -r requirements.txt
 cp .env.example .env
 # Fill in your ANTHROPIC_API_KEY and GITHUB_TOKEN in .env
@@ -214,4 +214,4 @@ To keep the scope focused, we are **not accepting** PRs that:
 
 ## Questions?
 
-Open a [Discussion](https://github.com/techdeveloper-org/claude-workflow-engine/discussions) or file an issue with the `question` label.
+Open a [Discussion](https://github.com/techdeveloper-org/ai-native-sdlc-engine/discussions) or file an issue with the `question` label.

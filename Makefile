@@ -1,4 +1,4 @@
-# Claude Workflow Engine — Developer Makefile
+# AI-Native SDLC Engine — Developer Makefile
 # ─────────────────────────────────────────────────────────────────────────────
 # Usage:
 #   make install    — full dev setup (deps + git hooks)

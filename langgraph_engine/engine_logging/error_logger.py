@@ -1,4 +1,4 @@
-"""Comprehensive Error Logging System for Claude Workflow Engine.
+"""Comprehensive Error Logging System for AI-Native SDLC Engine.
 
 Provides centralized error logging with:
 - Timestamp + severity tracking

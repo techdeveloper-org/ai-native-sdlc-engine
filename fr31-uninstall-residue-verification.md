@@ -109,8 +109,8 @@ one containing `.claude-plugin/plugin.json`.
 ### 4.2 Install the plugin
 
 ```
-claude plugin marketplace add techdeveloper-org/claude-workflow-engine
-claude plugin install claude-workflow-engine@techdeveloper-org
+claude plugin marketplace add techdeveloper-org/ai-native-sdlc-engine
+claude plugin install ai-native-sdlc-engine@techdeveloper-org
 ```
 
 ### 4.3 Register, then snapshot the BEFORE state
@@ -136,7 +136,7 @@ copy is what the verdict is computed from either way.
 ### 4.4 Uninstall
 
 ```
-claude plugin uninstall claude-workflow-engine@techdeveloper-org
+claude plugin uninstall ai-native-sdlc-engine@techdeveloper-org
 ```
 
 ### 4.5 Snapshot the AFTER state, and run the test

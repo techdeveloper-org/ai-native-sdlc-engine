@@ -1,5 +1,5 @@
 """
-Path Resolver for Claude Workflow Engine.
+Path Resolver for AI-Native SDLC Engine.
 
 Single source of truth for ALL path resolution across the project.
 No file should ever hardcode absolute paths - everything goes through here.
@@ -87,7 +87,7 @@ def _env_path(var_name, default):
 
 
 class PathResolver:
-    """Resolve data storage paths for Claude Workflow Engine with a three-tier priority chain.
+    """Resolve data storage paths for AI-Native SDLC Engine with a three-tier priority chain.
 
     Single source of truth for ALL paths. No hardcoded absolute paths anywhere.
     Every path is resolved via env var override -> cross-platform default.
@@ -117,7 +117,7 @@ class PathResolver:
         self.logs_root = _env_path("CLAUDE_LOGS_DIR", self.claude_home / "logs")
 
         # Priority 0: Environment variable (set by IDE)
-        env_data_dir = os.environ.get("CLAUDE_WORKFLOW_ENGINE_DATA_DIR")
+        env_data_dir = os.environ.get("AI_NATIVE_SDLC_ENGINE_DATA_DIR") or os.environ.get("CLAUDE_WORKFLOW_ENGINE_DATA_DIR")
         if env_data_dir:
             self.base_dir = Path(env_data_dir)
             self.mode = "IDE"

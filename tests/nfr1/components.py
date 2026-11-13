@@ -244,7 +244,7 @@ def build_default_registry(plugin_root=None, extra_plugin_markers=None):
     Returns:
         ComponentRegistry ordered most specific first.
     """
-    plugin_markers = ["claude_plugin_root", "claude-workflow-engine-plugin"]
+    plugin_markers = ["claude_plugin_root", "ai-native-sdlc-engine-plugin"]
     if plugin_root:
         normalised = str(plugin_root).replace("\\", "/").rstrip("/")
         plugin_markers.append(normalised.lower())
@@ -299,7 +299,7 @@ def build_default_registry(plugin_root=None, extra_plugin_markers=None):
         ComponentSpec(
             key=KEY_ENGINE,
             role=ROLE_OBSERVED,
-            markers=["langgraph_engine", "3-level-flow", "claude-workflow-engine"],
+            markers=["langgraph_engine", "3-level-flow", "ai-native-sdlc-engine"],
             description=(
                 "Engine code outside the plugin boundary. Reported for completeness; " "outside the plugin verdict."
             ),

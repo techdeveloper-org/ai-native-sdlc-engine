@@ -1,4 +1,4 @@
-# Publish to PyPI — Claude Workflow Engine
+# Publish to PyPI — AI-Native SDLC Engine
 # Triggered automatically when a GitHub Release is published.
 # Uses PYPI_TOKEN secret (Settings > Secrets and variables > Actions).
 #

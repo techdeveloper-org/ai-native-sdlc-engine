@@ -1,4 +1,4 @@
-"""Core reusable abstractions for the claude-workflow-engine pipeline.
+"""Core reusable abstractions for the ai-native-sdlc-engine pipeline.
 
 This package consolidates cross-cutting utilities that were previously
 duplicated across 20-30 individual pipeline modules.  Importing from

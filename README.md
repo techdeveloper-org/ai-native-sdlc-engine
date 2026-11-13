@@ -1,10 +1,10 @@
-# Claude Workflow Engine
+# AI-Native SDLC Engine
 
 > Automate your entire software development lifecycle — from task to merged PR — using Claude AI.
 
 [![Version](https://img.shields.io/badge/Version-2.1.0-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-green)](https://python.org)
-[![CI](https://github.com/techdeveloper-org/claude-workflow-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/techdeveloper-org/claude-workflow-engine/actions/workflows/ci.yml)
+[![CI](https://github.com/techdeveloper-org/ai-native-sdlc-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/techdeveloper-org/ai-native-sdlc-engine/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-106%20files%20·%205%20integration-brightgreen)](tests/)
 [![Discussions](https://img.shields.io/badge/Discussions-GitHub-blueviolet)](../../discussions)
@@ -13,7 +13,7 @@
 
 ## What Is This?
 
-Claude Workflow Engine is a **LangGraph-based AI orchestration pipeline** that automates the full software development lifecycle. You give it a task description. It handles everything else — from analyzing your codebase, creating a GitHub issue, writing the code, opening a PR, running a code review, and closing the issue.
+AI-Native SDLC Engine is a **LangGraph-based AI orchestration pipeline** that automates the full software development lifecycle. You give it a task description. It handles everything else — from analyzing your codebase, creating a GitHub issue, writing the code, opening a PR, running a code review, and closing the issue.
 
 Most AI coding tools generate code and stop there. This engine does what a full engineering team does.
 
@@ -73,8 +73,8 @@ Most AI coding tools generate code and stop there. This engine does what a full 
 Not published to PyPI. Install from source:
 
 ```bash
-git clone https://github.com/techdeveloper-org/claude-workflow-engine
-cd claude-workflow-engine
+git clone https://github.com/techdeveloper-org/ai-native-sdlc-engine
+cd ai-native-sdlc-engine
 pip install -r requirements.txt
 cp .env.example .env
 # Edit .env — set ANTHROPIC_API_KEY and GITHUB_TOKEN at minimum
@@ -90,16 +90,16 @@ is in `scripts/pipeline_invocation.py`.
 **The supported route is the plugin.** Its commands declare the invocation for you:
 
 ```
-/claude-workflow-engine:plan          Steps 0-1  — analyse and decompose, change nothing
-/claude-workflow-engine:implement     Steps 2-4  — issue, branch, code
-/claude-workflow-engine:review        Steps 5-6  — PR, automated review, close the issue
-/claude-workflow-engine:document      Step 7     — docs and diagrams
-/claude-workflow-engine:release       Step 8     — telemetry and summary
-/claude-workflow-engine:run-pipeline  Steps 0-8  — all of it, in order
+/ai-native-sdlc-engine:plan          Steps 0-1  — analyse and decompose, change nothing
+/ai-native-sdlc-engine:implement     Steps 2-4  — issue, branch, code
+/ai-native-sdlc-engine:review        Steps 5-6  — PR, automated review, close the issue
+/ai-native-sdlc-engine:document      Step 7     — docs and diagrams
+/ai-native-sdlc-engine:release       Step 8     — telemetry and summary
+/ai-native-sdlc-engine:run-pipeline  Steps 0-8  — all of it, in order
 ```
 
 MCP-backed capabilities stay unreachable until you run
-`/claude-workflow-engine:register-mcp` once.
+`/ai-native-sdlc-engine:register-mcp` once.
 
 **Direct CLI** — for a container entry point or a manual run, declare the command
 yourself with `--invoked-by=`:
@@ -404,7 +404,7 @@ a regression.
 ## Directory Structure
 
 ```
-claude-workflow-engine/           # 369 Python files total
+ai-native-sdlc-engine/           # 369 Python files total
 ├── langgraph_engine/             # Core engine — 211 Python files
 │   ├── orchestrator.py           # Main StateGraph pipeline definition
 │   ├── pipeline_builder.py       # Builder Pattern: chainable add_level*().build()
@@ -599,8 +599,8 @@ Step 6:  COMMENT  "Implementation complete" with PR link
 ### Docker
 
 ```bash
-docker build -t claude-workflow-engine .
-docker run --env-file .env claude-workflow-engine \
+docker build -t ai-native-sdlc-engine .
+docker run --env-file .env ai-native-sdlc-engine \
   python scripts/3-level-flow.py --invoked-by=run-pipeline --message="your task"
 ```
 
@@ -729,7 +729,7 @@ The AST-based call graph (578 classes, 3,985 methods across Python, Java, TypeSc
 
 ### GitHub Discussions
 
-We use [GitHub Discussions](https://github.com/techdeveloper-org/claude-workflow-engine/discussions) for:
+We use [GitHub Discussions](https://github.com/techdeveloper-org/ai-native-sdlc-engine/discussions) for:
 
 - **Feature requests** — new integrations, pipeline steps, MCP server ideas
 - **Integration questions** — connecting with Latenode, n8n, custom MCP servers, CI systems
@@ -760,14 +760,14 @@ The engine is designed as a self-contained pipeline but the following no-code/lo
 | **n8n** | Self-hosted node calling `3-level-flow.py` via subprocess | Community interest |
 | **Zapier** | Webhook trigger + GitHub Actions bridge | Not planned (closed platform) |
 
-If you are building an integration or have used the engine with an automation platform, share it in [Discussions](https://github.com/techdeveloper-org/claude-workflow-engine/discussions).
+If you are building an integration or have used the engine with an automation platform, share it in [Discussions](https://github.com/techdeveloper-org/ai-native-sdlc-engine/discussions).
 
 ### Give Feedback
 
 | Channel | Purpose |
 |---------|---------|
-| [GitHub Issues](https://github.com/techdeveloper-org/claude-workflow-engine/issues) | Bug reports, reproducible problems |
-| [GitHub Discussions](https://github.com/techdeveloper-org/claude-workflow-engine/discussions) | Feature ideas, questions, workflow sharing |
+| [GitHub Issues](https://github.com/techdeveloper-org/ai-native-sdlc-engine/issues) | Bug reports, reproducible problems |
+| [GitHub Discussions](https://github.com/techdeveloper-org/ai-native-sdlc-engine/discussions) | Feature ideas, questions, workflow sharing |
 | Security issues | Open a private GitHub Security Advisory (repo → Security tab) |
 
 ---

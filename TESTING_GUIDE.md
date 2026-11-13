@@ -1,6 +1,6 @@
-# Testing Guide for Claude Workflow Engine
+# Testing Guide for AI-Native SDLC Engine
 
-This guide explains how to run and write tests for Claude Workflow Engine.
+This guide explains how to run and write tests for AI-Native SDLC Engine.
 
 ---
 
@@ -19,7 +19,7 @@ pip install -r requirements-test.txt
 ### Run All Tests
 
 ```bash
-cd /path/to/claude-workflow-engine
+cd /path/to/ai-native-sdlc-engine
 python tests/run_all_tests.py
 ```
 
@@ -367,7 +367,7 @@ chmod +x .git/hooks/pre-commit
 
 **Solution:** Ensure you're running from the project root:
 ```bash
-cd /path/to/claude-workflow-engine
+cd /path/to/ai-native-sdlc-engine
 python tests/run_all_tests.py
 ```
 

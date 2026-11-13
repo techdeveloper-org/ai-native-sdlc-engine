@@ -104,8 +104,8 @@ full copy: a hash tells you *that* something changed and not *what*.
 ### 4.2 Install the plugin
 
 ```
-claude plugin marketplace add techdeveloper-org/claude-workflow-engine
-claude plugin install claude-workflow-engine@techdeveloper-org
+claude plugin marketplace add techdeveloper-org/ai-native-sdlc-engine
+claude plugin install ai-native-sdlc-engine@techdeveloper-org
 ```
 
 Then, in the session:
@@ -171,7 +171,7 @@ reaches Step 8, which creates a GitHub issue, a branch, a pull request and a mer
 ### 4.6 Uninstall and restore
 
 ```
-claude plugin uninstall claude-workflow-engine@techdeveloper-org
+claude plugin uninstall ai-native-sdlc-engine@techdeveloper-org
 ```
 
 Restore the settings file from the 4.1 copy if the run touched a live scope, then re-diff

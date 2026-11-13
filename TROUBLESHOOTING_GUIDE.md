@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-**Project:** Claude Workflow Engine
+**Project:** AI-Native SDLC Engine
 **Version:** 1.15.1
 **Last Updated:** 2026-04-04
 
