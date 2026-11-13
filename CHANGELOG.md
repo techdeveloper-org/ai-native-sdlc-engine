@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- **Fixed color contrast and text readability in README Mermaid diagrams.** Upgraded node containers to high-contrast dark-slate cards (`#1e293b`) with crisp pure-white text (`#ffffff`, WCAG AAA compliant) and vibrant 2px semantic borders across both the Zero-Debt Architecture and End-to-End Workflow flowcharts. (#336)
 - **Documented all 42 SDLC governance policies with practical examples in README.md.** Added comprehensive tables across 7 functional domains with relative file links, core behavioral rules, and concrete real-world developer scenarios for each policy, and updated directory structure. (#335)
 - **Genuine policy specifications relocated to dedicated `policies/` directory (42 files).** Moved all 42 genuine policy specifications into `policies/` for unified governance and clean structure, while strictly keeping historical reports, bug fix logs, and architectural flow diagrams decoupled in their respective categories. (#334)
 - **Architectural UML diagrams moved to dedicated `uml/` directory (19 files).** Relocated all pure visual architectural UML diagram markdown files into `uml/` and updated `.gitignore` to track `uml/` while keeping audit reports (`mermaid_generation_report.md`, `drawio_generation_report.md`, `callgraph_coverage_probe.md`) and `.drawio` artifacts cleanly decoupled. (#333)

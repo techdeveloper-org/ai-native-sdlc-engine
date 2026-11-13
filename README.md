@@ -67,11 +67,12 @@ flowchart LR
     RE_TEST --> SQ
     DEC -- "Zero Debt Clean" --> PR["Pull Request & Review\nStep 5"]
 
-    style GEN fill:#fef3c7,stroke:#d97706
-    style SQ fill:#fee2e2,stroke:#ef4444
-    style FIX fill:#fef2f2,stroke:#b91c1c
-    style RE_TEST fill:#e0f2fe,stroke:#0284c7
-    style PR fill:#dcfce7,stroke:#16a34a
+    style GEN fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#ffffff
+    style SQ fill:#1e293b,stroke:#ef4444,stroke-width:2px,color:#ffffff
+    style DEC fill:#1e293b,stroke:#8b5cf6,stroke-width:2px,color:#ffffff
+    style FIX fill:#1e293b,stroke:#f43f5e,stroke-width:2px,color:#ffffff
+    style RE_TEST fill:#1e293b,stroke:#06b6d4,stroke-width:2px,color:#ffffff
+    style PR fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#ffffff
 ```
 
 ### Why "Zero-Debt by Construction"?
@@ -116,19 +117,22 @@ flowchart TD
 
     IN --> L0 --> L1 --> ST --> L2 --> OUT
 
-    style L0 fill:#f3e8ff,stroke:#a855f7
-    style L1 fill:#e0f2fe,stroke:#0284c7
-    style ST fill:#fef9c3,stroke:#ca8a04
-    style S0 fill:#f0fdf4,stroke:#16a34a
-    style S1 fill:#dcfce7,stroke:#16a34a
-    style S2 fill:#eff6ff,stroke:#2563eb
-    style S3 fill:#eff6ff,stroke:#2563eb
-    style S4 fill:#fef3c7,stroke:#d97706
-    style S4_DEBT fill:#fee2e2,stroke:#ef4444
-    style S5 fill:#fef3c7,stroke:#d97706
-    style S6 fill:#f0fdf4,stroke:#16a34a
-    style S7 fill:#f0fdf4,stroke:#16a34a
-    style S8 fill:#fae8ff,stroke:#d946ef
+    style IN fill:#0f172a,stroke:#64748b,stroke-width:2px,color:#ffffff
+    style OUT fill:#0f172a,stroke:#10b981,stroke-width:2px,color:#ffffff
+    style L0 fill:#1e293b,stroke:#a855f7,stroke-width:2px,color:#ffffff
+    style L1 fill:#1e293b,stroke:#0284c7,stroke-width:2px,color:#ffffff
+    style ST fill:#1e293b,stroke:#eab308,stroke-width:2px,color:#ffffff
+    style S0 fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#ffffff
+    style S1 fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#ffffff
+    style S2 fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#ffffff
+    style S3 fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#ffffff
+    style S4 fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#ffffff
+    style S4_TEST fill:#1e293b,stroke:#06b6d4,stroke-width:2px,color:#ffffff
+    style S4_DEBT fill:#1e293b,stroke:#ef4444,stroke-width:2px,color:#ffffff
+    style S5 fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#ffffff
+    style S6 fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#ffffff
+    style S7 fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#ffffff
+    style S8 fill:#1e293b,stroke:#d946ef,stroke-width:2px,color:#ffffff
 ```
 
 ---
