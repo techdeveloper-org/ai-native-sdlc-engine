@@ -554,6 +554,9 @@ ai-native-sdlc-engine/
 
 ## Contributing & Community
 
+- **Contribution Guide**: [`docs/contributing/contributing-guide.md`](docs/contributing/contributing-guide.md)
+- **Code of Conduct**: [`docs/contributing/code-of-conduct.md`](docs/contributing/code-of-conduct.md)
+- **Documentation Index**: [`docs/README.md`](docs/README.md)
 - **Issues & Defects**: [GitHub Issues](https://github.com/techdeveloper-org/ai-native-sdlc-engine/issues)
 - **Discussions & Architecture Ideas**: [GitHub Discussions](https://github.com/techdeveloper-org/ai-native-sdlc-engine/discussions)
 - **Security Disclosures**: Open a private advisory under the Security tab.

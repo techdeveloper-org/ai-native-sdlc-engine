@@ -8,7 +8,7 @@
 ## Why This Matters
 
 Four production bugs were found during the v1.16.x cleanup sprint — all hidden by `# ruff: noqa: F821` file-level suppressors.
-See [CONTRIBUTING.md](../contributing/CONTRIBUTING.md) and the [Known Issues section in README](../README.md#known-issues--cleanup-history) for full history.
+See [CONTRIBUTING.md](../contributing/contributing-guide.md) and the [Known Issues section in README](../../README.md#known-issues--cleanup-history) for full history.
 
 ---
 

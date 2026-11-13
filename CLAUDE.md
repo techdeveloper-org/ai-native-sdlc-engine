@@ -234,7 +234,7 @@ unversioned: if that machine is lost, so are they.
 
 <!-- Added 2026-09-15 | GH #323 | Cause: docs across this repo still described PreToolUse as live -->
 
-**`Stop` is the only registered hook.** ADR-006 (`docs/architecture/ADR-006-hook-free-execution.md`,
+**`Stop` is the only registered hook.** ADR-006 (`docs/architecture/adr-006-hook-free-execution.md`,
 executed 2026-08-04, commit `2e371f6`) removed the `UserPromptSubmit`, `PreToolUse` and
 `PostToolUse` **registrations** in v2.0.0 while deliberately retaining the source files. Verified
 2026-09-15: `~/.claude/settings.json` registers `Stop` only, and `scripts/settings-config.json`

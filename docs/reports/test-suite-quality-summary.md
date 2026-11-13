@@ -339,8 +339,7 @@ Need unit tests for:
 
 ### Documentation
 
-- [CODE_QUALITY_REPORT.md](../guides/TESTING_GUIDE.md) - Detailed quality report
-- [TESTING_GUIDE.md](../guides/TESTING_GUIDE.md) - Complete testing guide
+- [TESTING_GUIDE.md](../guides/testing-guide.md) - Complete testing guide
 
 ### Test Files
 
