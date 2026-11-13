@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- **Docker configuration files moved to `docker/`.** Moved `Dockerfile`, `docker-compose.yml`, and `.dockerignore` into a dedicated `docker/` directory, updating the build context paths to maintain clean root packaging. (#329)
 - **Markdown documentation consolidated to root (196 files).** All markdown documentation and diagram files previously scattered across `docs/`, `uml/`, and `plugin/` were moved directly into the repository root to streamline project packaging and navigation. (#326)
 - **Plugin id renamed `claude-workflow-engine` to `ai-native-sdlc-engine`** to match the repository rename. Slash commands are now `/ai-native-sdlc-engine:*`; reinstall via `/plugin` (marketplace update, install the new id, uninstall the old one). Broader text references in docs, scripts and `setup.py` are a separate sweep. (#325)
 

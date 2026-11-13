@@ -23,8 +23,8 @@ services:
   # ---------------------------------------------------------------------------
   engine:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: claude-workflow-engine
     image: workflow-engine:1.6.1
 
@@ -33,7 +33,7 @@ services:
     # Optional vars: CLAUDE_DEBUG, CLAUDE_HOOK_MODE
     # The .env file is excluded from the image via .dockerignore.
     env_file:
-      - .env
+      - ../.env
 
     # Override or supplement specific environment variables here.
     # These take precedence over values in .env.
