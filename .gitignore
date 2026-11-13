@@ -85,7 +85,6 @@ nul
 context.toon.json
 
 # Rule 45 SS 2 -- auto-generated diagrams, never committed
-/uml/
 /drawio/
 
 # Regenerable call-graph analysis output (each >500 KB, blocked by the
