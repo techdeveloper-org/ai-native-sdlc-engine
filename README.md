@@ -1,6 +1,6 @@
 # AI-Native SDLC Engine
 
-> **The Universal, Model-Agnostic Zero-Debt SDLC Automation Framework**  
+> **The Universal, Model-Agnostic Zero-Debt SDLC Automation Framework**
 > *Automate the entire software engineering lifecycle — from task planning to merged PR — with continuous technical debt auto-remediation across any AI model, IDE, terminal, or CI/CD pipeline.*
 
 [![Version](https://img.shields.io/badge/Version-2.1.1-blue)](CHANGELOG.md)
@@ -88,53 +88,162 @@ The AI-Native SDLC Engine enforces **Zero-Debt by Construction**:
 
 ## End-to-End Workflow
 
+The AI-Native SDLC Engine operates an autonomous, policy-governed execution pipeline. Every task transitions deterministically through 3 structural execution levels and 10 policy-enforced stages, ensuring zero technical debt, verified security, and continuous traceability.
+
 ```mermaid
 flowchart TD
-    IN(["Task Input"])
+    IN(["Task Input / Ticket / PR Request"]) --> L0["Level 0: Pre-Flight Guard & Sanitization
+Unicode · UTF-8 · Path Norm · Context Budget"]
+    L0 --> L1["Level 1: Context & State Sync
+Complexity Scoring [1-25] · Token Budgeting"]
 
-    L0["Level 0: Pre-Flight Guard\nUnicode check · encoding fix · path normalization"]
-    L1["Level 1: Context & Session Sync\nParallel complexity [1-25] and context extraction"]
-    ST["Standards & Policies\nLoaded from disk dynamically — zero overhead"]
-    
-    subgraph L2["Level 2: SDLC Execution Core (9 Active Steps)"]
+    subgraph L2["Level 2: Autonomous SDLC Core (10 Policy-Governed Stages)"]
         direction TB
-        S0["Step 0: CallGraph Scan & Pre-Analysis\nHot nodes · danger zones · blast radius · template fast-path"]
-        S1["Step 1: Task Orchestration & Planning\nMaster template prompt assembly · dynamic agent routing"]
-        S2["Step 2: Issue Lifecycle\nGitHub Issue created · Jira ticket synced"]
-        S3["Step 3: Branch Provisioning\nfeature/PROJ-123 or issue branch"]
-        S4["Step 4: Implementation & Standards Enforcement\nClean architecture · Level 2.2 docstrings · zero inline narration"]
-        S4_TEST["Step 4b: Triad Test Generation\nPositive · Negative · Edge-case test suites"]
-        S4_DEBT["Step 4c: Zero-Debt Healing Loop\nSonarQube scan + AST auto-fixer"]
-        S5["Step 5: Pull Request & Automated Code Review\nPR opened · Call graph diff review · Quality gates"]
-        S6["Step 6: Issue & Ticket Closure\nGitHub + Jira closed · notification dispatched"]
-        S7["Step 7: Living Documentation & Diagrams\n13 UML diagram types (Mermaid + Draw.io) · API spec update"]
-        S8["Step 8: Final Telemetry & Audit Release\nPrometheus metrics · OTel spans · JSON audit log · voice alert"]
-        
-        S0 --> S1 --> S2 --> S3 --> S4 --> S4_TEST --> S4_DEBT --> S5 --> S6 --> S7 --> S8
+        S0["Stage 0: AST CallGraph Scan
+Blast radius · Danger zones · Knowledge graph"]
+        S1["Stage 1: Planning & Model Cascading
+Task decomposition · Model routing · Prompt assembly"]
+        S2["Stage 2: Issue & Workspace Provisioning
+GitHub/Jira ticket · Branch feature/ISSUE-KEY"]
+        S3["Stage 3: Implementation & Clean Code
+Level 2.2 Docstrings · Clean arch · Expand-contract DB"]
+        S4["Stage 4: Triad Test Generation
+Positive · Negative · Edge-case parameterized tests"]
+        S5["Stage 5: Zero-Debt Healing & Convergence
+SonarQube scan + AST auto-fixer (Iter ≤ 3)"]
+        S6["Stage 6: Security, Secrets & License Gate
+TruffleHog/Gitleaks regex · Shannon entropy · Category C ban"]
+        S7["Stage 7: PR Review & HITL Escalation
+Call-graph diff · GACS confidence (≥ 0.85) · CI abort"]
+        S8["Stage 8: Performance Regression Benchmark
+p95 latency (≤ 1.05x) · 10-min soak · Complexity guard"]
+        S9["Stage 9: Issue Closure & Ticket Transition
+PR merge verify · Commit linkage · Jira closed"]
+        S10["Stage 10: Living Docs, Diagrams & Release
+13 UML diagrams · OpenAPI sync · Prometheus 9090"]
+
+        S0 --> S1 --> S2 --> S3 --> S4 --> S5
+        S5 -- "Quality Issues (Iter ≤ 3)" --> S3
+        S5 -- "Clean Gate" --> S6 --> S7
+        S7 -- "Changes Requested" --> S3
+        S7 -- "Review Approved" --> S8 --> S9 --> S10
     end
 
-    OUT(["Zero-Debt Shipped PR"])
-
-    IN --> L0 --> L1 --> ST --> L2 --> OUT
+    S10 --> OUT(["Zero-Debt Shipped PR & Release"])
+    L1 --> L2
 
     style IN fill:#0f172a,stroke:#64748b,stroke-width:2px,color:#ffffff
     style OUT fill:#0f172a,stroke:#10b981,stroke-width:2px,color:#ffffff
     style L0 fill:#1e293b,stroke:#a855f7,stroke-width:2px,color:#ffffff
     style L1 fill:#1e293b,stroke:#0284c7,stroke-width:2px,color:#ffffff
-    style ST fill:#1e293b,stroke:#eab308,stroke-width:2px,color:#ffffff
     style S0 fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#ffffff
     style S1 fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#ffffff
     style S2 fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#ffffff
-    style S3 fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#ffffff
-    style S4 fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#ffffff
-    style S4_TEST fill:#1e293b,stroke:#06b6d4,stroke-width:2px,color:#ffffff
-    style S4_DEBT fill:#1e293b,stroke:#ef4444,stroke-width:2px,color:#ffffff
-    style S5 fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#ffffff
-    style S6 fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#ffffff
-    style S7 fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#ffffff
-    style S8 fill:#1e293b,stroke:#d946ef,stroke-width:2px,color:#ffffff
+    style S3 fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#ffffff
+    style S4 fill:#1e293b,stroke:#06b6d4,stroke-width:2px,color:#ffffff
+    style S5 fill:#1e293b,stroke:#ef4444,stroke-width:2px,color:#ffffff
+    style S6 fill:#1e293b,stroke:#ec4899,stroke-width:2px,color:#ffffff
+    style S7 fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#ffffff
+    style S8 fill:#1e293b,stroke:#06b6d4,stroke-width:2px,color:#ffffff
+    style S9 fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#ffffff
+    style S10 fill:#1e293b,stroke:#d946ef,stroke-width:2px,color:#ffffff
 ```
 
+### Comprehensive 10-Stage Policy-Governed Lifecycle
+
+The execution core orchestrates 47 modular policies across the following stages:
+
+#### 1. Stage 0: Pre-Flight Guard & Environment Sanitization (Level 0)
+- **Role**: Ensures deterministic environment baselines before any execution begins.
+- **Governing Policies**:
+  - [`policies/windows-path-policy.md`](policies/windows-path-policy.md): Enforces forward slashes (`/`) and POSIX path normalization across all platforms.
+  - [`policies/encoding-validation-policy.md`](policies/encoding-validation-policy.md): Validates strict UTF-8 encoding without Byte Order Mark (BOM).
+  - [`policies/unicode-fix-policy.md`](policies/unicode-fix-policy.md): Strips unprintable Unicode characters, zero-width spaces, and emojis from CLI commands.
+  - [`policies/recovery-policy.md`](policies/recovery-policy.md): Detects dangling lock files or aborted runs and restores workspace integrity.
+  - [`policies/context-reading-policy.md`](policies/context-reading-policy.md): Bounds file reads to maximum line budgets (default 800 lines) to prevent memory crashes.
+  - [`policies/user-preferences-policy.md`](policies/user-preferences-policy.md): Loads developer conventions, language nuances, and pair-programming tone.
+
+#### 2. Stage 1: Context & State Synchronization (Level 1)
+- **Role**: Dynamically balances token budgets, session history, and task complexity.
+- **Governing Policies**:
+  - [`policies/context-management-policy.md`](policies/context-management-policy.md): Allocates 4 tiers of context window budgeting; triggers automatic deduplication at 75% threshold.
+  - [`policies/cost-and-token-budget-policy.md`](policies/cost-and-token-budget-policy.md): Sets hard budget caps ($2 per PR, $10 per batch run); halts execution on runaway loops.
+  - [`policies/session-management-policy.md`](policies/session-management-policy.md): Hydrates conversation state, historical context, and work-item tags from persistent SQLite storage.
+
+#### 3. Stage 2: AST CallGraph Scan & Pre-Analysis (Level 2, Step 0)
+- **Role**: Computes structural blast radius, danger zones, and dependency coupling before touching any source file.
+- **Governing Policies**:
+  - [`policies/callgraph-analysis-policy.md`](policies/callgraph-analysis-policy.md): Scans multi-language ASTs (Python, Java, TypeScript, Go) to map callers, callees, and impacted modules.
+  - [`policies/code-graph-analysis-policy.md`](policies/code-graph-analysis-policy.md): Computes afferent/efferent coupling metrics and circular dependency warnings.
+  - [`policies/cross-project-patterns-policy.md`](policies/cross-project-patterns-policy.md): Injects proven architecture patterns across repositories into prompt context.
+  - [`policies/architecture-script-mapping-policy.md`](policies/architecture-script-mapping-policy.md): Maps architectural intents deterministically to validated automation scripts.
+  - [`policies/intelligent-decision-engine-policy.md`](policies/intelligent-decision-engine-policy.md): Scores task risk [1-25] and determines fast-track vs full-governance execution pathways.
+
+#### 4. Stage 3: Task Planning, Model Cascading & Prompt Assembly (Level 2, Step 1)
+- **Role**: Breaks down tasks into atomic phases and routes each subtask to optimal LLM tiers.
+- **Governing Policies**:
+  - [`policies/automatic-task-breakdown-policy.md`](policies/automatic-task-breakdown-policy.md): Deconstructs ambiguous objectives into sequential, verifiable sub-phases.
+  - [`policies/task-phase-enforcement-policy.md`](policies/task-phase-enforcement-policy.md): Enforces Plan Mode first; blocks write actions until formal plan approval.
+  - [`policies/intelligent-model-selection-policy.md`](policies/intelligent-model-selection-policy.md): Cascades tasks across Haiku (fast analysis), Sonnet (coding/refactoring), and Opus (architecture/audit).
+  - [`policies/prompt-generation-policy.md`](policies/prompt-generation-policy.md): Constructs master system prompts with anti-drift rules, tool definitions, and domain skills.
+  - [`policies/anti-hallucination-enforcement.md`](policies/anti-hallucination-enforcement.md): Mandates ground-truth code verification against repository ASTs before generating modifications.
+  - [`policies/proactive-consultation-policy.md`](policies/proactive-consultation-policy.md): Automatically assesses ambiguous requirements and applies conservative defaults.
+
+#### 5. Stage 4: Issue Lifecycle & Workspace Provisioning (Level 2, Steps 2-3)
+- **Role**: Establishes traceability by provisioning tracking tickets and isolated feature branches.
+- **Governing Policies**:
+  - [`policies/github-issues-integration-policy.md`](policies/github-issues-integration-policy.md): Creates an issue first with classification labels before code modification.
+  - [`policies/task-progress-tracking-policy.md`](policies/task-progress-tracking-policy.md): Emits fine-grained status checkpoints to task trackers and session ledgers.
+  - [`policies/file-management-policy.md`](policies/file-management-policy.md): Prevents overwriting untracked files and enforces atomic staging.
+  - [`policies/mcp-plugin-discovery-policy.md`](policies/mcp-plugin-discovery-policy.md): Connects to required MCP servers (`git-ops`, `github-api`, `uml-diagram`).
+  - [`policies/common-failures-prevention.md`](policies/common-failures-prevention.md): Pre-screens commands against known failure patterns (PowerShell quote expansion, BOM insertion).
+
+#### 6. Stage 5: Implementation, Clean Architecture & Database Migrations (Level 2, Step 4)
+- **Role**: Writes idiomatic, decoupled code with contract docstrings and zero-downtime database schemas.
+- **Governing Policies**:
+  - [`policies/implementation-execution-policy.md`](policies/implementation-execution-policy.md): Enforces Single Responsibility and Hexagonal/Clean Architecture separation.
+  - [`policies/parallel-execution-policy.md`](policies/parallel-execution-policy.md): Dispatches independent sub-agent tasks concurrently to minimize execution latency.
+  - [`policies/coding-standards-enforcement-policy.md`](policies/coding-standards-enforcement-policy.md): Enforces strict Level 2.2 Docstrings; prohibits inline narration comments.
+  - [`policies/common-standards-policy.md`](policies/common-standards-policy.md): Unifies naming conventions, error hierarchy, and Result wrapper types.
+  - [`policies/database-migration-policy.md`](policies/database-migration-policy.md): Enforces Expand/Contract zero-downtime migrations; forbids destructive `DROP` or table locks.
+  - [`policies/tool-optimization-policy.md`](policies/tool-optimization-policy.md): Optimizes tool parameter sizing and AST grep filters to preserve context budget.
+  - [`policies/error-recovery-policy.md`](policies/error-recovery-policy.md): Intercepts transient syntax errors and compilation failures with targeted backoff.
+
+#### 7. Stage 6: Triad Test Generation & Regression Verification (Level 2, Step 4b)
+- **Role**: Produces comprehensive test suites ensuring zero regression across the blast radius.
+- **Governing Policies**:
+  - [`policies/test-case-policy.md`](policies/test-case-policy.md): Mandates the Triad testing strategy (Positive happy path, Negative error validation, Edge-case boundary conditions).
+  - [`policies/test-generation-policy.md`](policies/test-generation-policy.md): Generates parameterized, mock-isolated unit and integration tests (JUnit 5, PyTest, Jasmine).
+
+#### 8. Stage 7: Zero-Debt Healing & Convergence Guard (Level 2, Step 4c)
+- **Role**: Guarantees zero technical debt via continuous static analysis and AST refactoring loops.
+- **Governing Policies**:
+  - [`policies/quality-gate-policy.md`](policies/quality-gate-policy.md): Scans modified files via SonarQube; triggers `auto_fixer.py` for smells or bugs (capped at 3 iterations to prevent infinite loops).
+  - [`policies/cost-and-token-budget-policy.md`](policies/cost-and-token-budget-policy.md): Monitors healing token consumption and enforces loop exit criteria.
+
+#### 9. Stage 8: Security, Secret Scanning & Pre-Commit Gates (Level 2, Step 4d)
+- **Role**: Prevents secret leaks, insecure licenses, and unverified commits.
+- **Governing Policies**:
+  - [`policies/security-and-secrets-policy.md`](policies/security-and-secrets-policy.md): Multi-layered secret scanning (TruffleHog, Gitleaks regex, Shannon entropy > 4.5); blocks commits containing keys.
+  - [`policies/license-compliance-policy.md`](policies/license-compliance-policy.md): Bans viral Category C licenses (GPL-3.0, AGPL) in proprietary/permissive codebases.
+  - [`policies/git-auto-commit-policy.md`](policies/git-auto-commit-policy.md): Formats atomic, descriptive Conventional Commits referencing tracking issues.
+  - [`policies/version-release-policy.md`](policies/version-release-policy.md): Validates semantic versioning bumps (`major.minor.patch`) against SemVer 2.0 specifications.
+
+#### 10. Stage 9: PR Review, Performance Benchmarking & HITL Escalation (Level 2, Steps 5-6)
+- **Role**: Validates PRs through automated architectural review, performance thresholds, and human-in-the-loop gates.
+- **Governing Policies**:
+  - [`policies/pr-code-review-policy.md`](policies/pr-code-review-policy.md): Performs call-graph-informed differential reviews with automated inline suggestions.
+  - [`policies/human-in-the-loop-escalation-policy.md`](policies/human-in-the-loop-escalation-policy.md): Evaluates changes via the 4-tier GACS framework; halts execution if confidence < 0.85.
+  - [`policies/performance-benchmark-policy.md`](policies/performance-benchmark-policy.md): Enforces latency budgets (p95 latency degradation <= 1.05x), 10-minute memory soak tests, and time complexity guards.
+  - [`policies/issue-closure-policy.md`](policies/issue-closure-policy.md): Closes GitHub issues and transitions Jira tickets with verification proofs and commit hashes.
+
+#### 11. Stage 10: Living Documentation, 13 UML Diagrams & Telemetry Release (Level 2, Steps 7-8)
+- **Role**: Generates synchronized architecture diagrams, documentation, SBOM artifacts, and exports metrics.
+- **Governing Policies**:
+  - [`policies/documentation-update-policy.md`](policies/documentation-update-policy.md): Synchronizes OpenAPI 3.0 specs, `README.md`, and SRS documents in the same release commit.
+  - [`policies/metrics-monitoring-policy.md`](policies/metrics-monitoring-policy.md): Exports Prometheus metrics on port `9090` (`GET /metrics`) and exposes liveness/readiness probes on port `8080` (`GET /health`, `GET /readiness`).
+  - [`policies/hook-system-policy.md`](policies/hook-system-policy.md): Triggers post-pipeline lifecycle notifications and distributed OpenTelemetry trace spans.
+  - [`policies/final-summary-policy.md`](policies/final-summary-policy.md): Compiles an append-only audit trail and human-readable execution summary.
 ---
 
 ## Multi-Model & Multi-Platform Execution

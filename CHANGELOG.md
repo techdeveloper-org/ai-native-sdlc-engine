@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [2.1.1] - 2026-11-10
 
 ### Changed
+- **Redesigned End-to-End Workflow in README.md with deep policy-governed architecture.** Upgraded the high-level workflow diagram to an expanded, high-contrast flowchart featuring feedback loops (SonarQube debt healing, test regressions, budget guards) and added an exhaustive 10-stage lifecycle guide mapping each execution phase directly to the 47 governing policies in `policies/` with verified link integrity, clean GitHub rendering, and consistent telemetry port mappings (Prometheus 9090, health/readiness 8080). (#338)
 
 - Bumped from 2.1.0 to 2.1.1
 
