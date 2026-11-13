@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- **Genuine policy specifications relocated to dedicated `policies/` directory (42 files).** Moved all 42 genuine policy specifications into `policies/` for unified governance and clean structure, while strictly keeping historical reports, bug fix logs, and architectural flow diagrams decoupled in their respective categories. (#334)
 - **Architectural UML diagrams moved to dedicated `uml/` directory (19 files).** Relocated all pure visual architectural UML diagram markdown files into `uml/` and updated `.gitignore` to track `uml/` while keeping audit reports (`mermaid_generation_report.md`, `drawio_generation_report.md`, `callgraph_coverage_probe.md`) and `.drawio` artifacts cleanly decoupled. (#333)
 - **README reframed as Universal AI-Native Zero-Debt SDLC Framework.** Transformed documentation to highlight the 10-phase engineering lifecycle, continuous SonarQube debt auto-remediation, extensible quality tooling, multi-model execution (Claude, OpenAI, Gemini, Ollama), and multi-runner modalities (CLI, Docker, K8s, CI/CD, plugin). (#332)
 - **Comprehensive sweep to `ai-native-sdlc-engine`.** Updated all 66 markdown documentation files, `setup.py`, `pyproject.toml`, Docker configuration, Kubernetes manifests, shell/batch scripts, and python modules to use `ai-native-sdlc-engine` / `AI-Native SDLC Engine` branding and URLs. (#331)
