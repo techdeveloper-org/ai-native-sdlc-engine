@@ -78,6 +78,7 @@ safety-report.json
 tests/htmlcov/
 .coverage
 htmlcov/
+.benchmarks/
 
 # Windows null device (created accidentally by some shells)
 nul

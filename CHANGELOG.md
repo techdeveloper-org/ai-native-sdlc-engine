@@ -16,9 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- **Markdown documentation consolidated to root (196 files).** All markdown documentation and diagram files previously scattered across `docs/`, `uml/`, and `plugin/` were moved directly into the repository root to streamline project packaging and navigation. (#326)
 - **Plugin id renamed `claude-workflow-engine` to `ai-native-sdlc-engine`** to match the repository rename. Slash commands are now `/ai-native-sdlc-engine:*`; reinstall via `/plugin` (marketplace update, install the new id, uninstall the old one). Broader text references in docs, scripts and `setup.py` are a separate sweep. (#325)
 
 ### Removed
+- **`plugin/snapshot/` and empty directories.** Cleaned up 508 duplicate `agent.md` files and redundant knowledge graph snapshots in `plugin/snapshot/` (authoritative source of truth is `claude-global-library`). Removed empty `.benchmarks/` and `data/` directories to maintain clean packaging. (#327, #328)
 - **`docs/standards/` (52 files).** It duplicated the Claude rules in `~/.claude/rules/` and had drifted: 8 files were older than the live rules, and 6 existed only in the repo. The 6 repo-only files (java, csharp, django, flask, spring-boot, TOOL-OPTIMIZATION) moved to `~/.claude/rules/` with `paths:` frontmatter. `load_framework_standards()` and `load_language_standards()` in `standards/selector.py` now read `~/.claude/rules/`, and `TestRuleFilePaths` reads it too, skipping where it is not installed. (#320)
 
 ## [2.1.0] - 2026-08-07
