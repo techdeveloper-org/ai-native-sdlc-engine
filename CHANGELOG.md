@@ -15,7 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **6 enterprise governance policies authored via Claude Global Library specialists.** Added `security-and-secrets-policy.md`, `database-migration-policy.md`, `cost-and-token-budget-policy.md`, `license-compliance-policy.md`, `human-in-the-loop-escalation-policy.md`, and `performance-benchmark-policy.md` incorporating 10/10 bulletproof production guardrails (cross-platform LF/forward-slash rules, headless CI deterministic aborts, and 3-iteration auto-fix convergence limits). (#337)
+
 ### Changed
+- **Policy corpus refined and consolidated (47 policies total).** Consolidated `tool-usage-optimization-policy.md` into `tool-optimization-policy.md` (eliminating duplicate), reframed `proactive-consultation-policy.md` into active Automated Risk Evaluation Policy, modernized `hook-system-policy.md` to Universal Pipeline Execution Lifecycle Policy, and updated `README.md` tables across 7 functional domains. (#337)
 - **Fixed color contrast and text readability in README Mermaid diagrams.** Upgraded node containers to high-contrast dark-slate cards (`#1e293b`) with crisp pure-white text (`#ffffff`, WCAG AAA compliant) and vibrant 2px semantic borders across both the Zero-Debt Architecture and End-to-End Workflow flowcharts. (#336)
 - **Documented all 42 SDLC governance policies with practical examples in README.md.** Added comprehensive tables across 7 functional domains with relative file links, core behavioral rules, and concrete real-world developer scenarios for each policy, and updated directory structure. (#335)
 - **Genuine policy specifications relocated to dedicated `policies/` directory (42 files).** Moved all 42 genuine policy specifications into `policies/` for unified governance and clean structure, while strictly keeping historical reports, bug fix logs, and architectural flow diagrams decoupled in their respective categories. (#334)
