@@ -47,15 +47,14 @@ Homepage = "https://github.com/techdeveloper-org/ai-native-sdlc-engine"
 Repository = "https://github.com/techdeveloper-org/ai-native-sdlc-engine"
 
 [tool.hatch.version]
-path = "langgraph_engine/__init__.py"
+path = "sdlc_engine/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["langgraph_engine", "src/mcp"]
+packages = ["sdlc_engine"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "/langgraph_engine",
-    "/src/mcp",
+    "/sdlc_engine",
     "/scripts",
     "/policies",
     "/rules",

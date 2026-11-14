@@ -115,7 +115,7 @@ from typing import Iterable, Iterator
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-DEFAULT_SCOPE = ("langgraph_engine", "hooks", "scripts", "src")
+DEFAULT_SCOPE = ("sdlc_engine", "hooks", "scripts")
 
 SKIP_DIR_NAMES = frozenset(
     {
@@ -136,7 +136,7 @@ SKIP_DIR_NAMES = frozenset(
     }
 )
 
-EXCLUDED_FROM_ENFORCEMENT = frozenset({"src/utils/path_resolver.py"})
+EXCLUDED_FROM_ENFORCEMENT = frozenset({"src/utils/path_resolver.py", "sdlc_engine/shared/utils/path_resolver.py"})
 
 _TILDE = chr(126)
 _PERCENT = chr(37)

@@ -24,9 +24,9 @@ from __future__ import annotations
 from typing import Optional, Tuple
 from unittest.mock import Mock
 
-from langgraph_engine.sdlc_pipeline import faithfulness_gate
-from langgraph_engine.sdlc_pipeline.faithfulness_gate import build_faithfulness_prompt, run_faithfulness_check
-from langgraph_engine.sdlc_pipeline.quality_gate import _evaluate_faithfulness_gate
+from sdlc_engine.nodes import faithfulness_gate
+from sdlc_engine.nodes.faithfulness_gate import build_faithfulness_prompt, run_faithfulness_check
+from sdlc_engine.nodes.quality_gate import _evaluate_faithfulness_gate
 
 # ---------------------------------------------------------------------------
 # Fake caller helpers

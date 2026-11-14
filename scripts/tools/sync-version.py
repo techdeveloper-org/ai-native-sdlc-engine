@@ -46,7 +46,7 @@ TARGETS = [
     {"file": PROJECT_ROOT / "CLAUDE.md", "patterns": [_VERSION_LINE, _LAST_UPDATED]},
     {"file": PROJECT_ROOT / "SRS.md", "patterns": [_VERSION_LINE, _DATE_LINE, _LAST_UPDATED]},
     {
-        "file": PROJECT_ROOT / "langgraph_engine" / "__init__.py",
+        "file": PROJECT_ROOT / "sdlc_engine" / "__init__.py",
         "patterns": [(r'__version__\s*=\s*["\'][\d.]+["\']', '__version__ = "{version}"')],
     },
 ]

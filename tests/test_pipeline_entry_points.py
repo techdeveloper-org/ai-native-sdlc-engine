@@ -62,8 +62,8 @@ PLUGIN_ROOT = REPO_ROOT / "plugin"
 SCRIPT_DIR = PLUGIN_ROOT / "scripts"
 COMMANDS_DIR = PLUGIN_ROOT / "commands"
 ENTRY_SCRIPT = SCRIPT_DIR / "pipeline_entry.py"
-SUBGRAPH_SOURCE = REPO_ROOT / "langgraph_engine" / "sdlc_pipeline" / "subgraph.py"
-PROCEDURE_DOC = REPO_ROOT / "docs" / "guides" / "fr17-entry-point-invocation-verification.md"
+SUBGRAPH_SOURCE = REPO_ROOT / "sdlc_engine" / "pipeline" / "subgraph.py"
+PROCEDURE_DOC = REPO_ROOT / "docs" / "guides" / "fr17-entry-point-verification-guide.md"
 
 LIVE_INSTALL_ENV = "CWE_ALLOW_LIVE_PLUGIN_INSTALL"
 DISCOVERED_COMMANDS_ENV = "CWE_FR17_DISCOVERED_COMMANDS"
@@ -496,7 +496,7 @@ def measured_graph():
     Returns:
         dict: by_step mapping and the forward edge list.
     """
-    from langgraph_engine.orchestrator import create_flow_graph
+    from sdlc_engine.pipeline.orchestrator import create_flow_graph
 
     drawn = create_flow_graph(hook_mode=False).get_graph()
     names = list(drawn.nodes)
@@ -523,7 +523,7 @@ class TestTheGraphCarriesStepsZeroToEightInOrder:
 
     def test_the_retry_edge_exists_and_is_the_only_backward_edge(self, measured_graph):
         """The exclusion rule is checked against what it actually excludes."""
-        from langgraph_engine.orchestrator import create_flow_graph
+        from sdlc_engine.pipeline.orchestrator import create_flow_graph
 
         drawn = create_flow_graph(hook_mode=False).get_graph()
         all_edges = [(edge.source, edge.target) for edge in drawn.edges]

@@ -75,7 +75,9 @@ def _usable_bash():
         if not candidate or not Path(candidate).exists():
             continue
         try:
-            probe = subprocess.run([candidate, "-c", "exit 0"], capture_output=True, timeout=30)
+            probe = subprocess.run(
+                [candidate, "-c", "python3 --version || python --version"], capture_output=True, timeout=30
+            )
         except OSError:
             continue
         if probe.returncode == 0:
@@ -580,7 +582,7 @@ class TestCiWiring:
         runs = [s.get("run", "") for s in self._steps()]
         assert any("SPECIFICITY CONTROL" in r for r in runs)
 
-    @pytest.mark.skipif(BASH is None, reason="no working bash on this runner")
+    @pytest.mark.skipif(BASH is None or sys.platform == "win32", reason="no working bash on this runner; step is executed in CI")
     @pytest.mark.parametrize("marker", ["NEGATIVE CONTROL", "SPECIFICITY CONTROL"])
     def test_control_steps_run_from_their_stored_form(self, marker):
         """Execute the stored control scripts, not a reimplementation of them."""

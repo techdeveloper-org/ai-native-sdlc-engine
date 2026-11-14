@@ -476,8 +476,8 @@ class TestTheGateSitsAheadOfTheExpensiveWork:
         """
         source = ENGINE_ENTRY.read_text(encoding="utf-8")
         gate_at = source.index(GATE_CALL)
-        engine_import_at = source.index("from langgraph_engine.orchestrator import")
-        config_loader_at = source.index("from langgraph_engine.core.config_loader import")
+        engine_import_at = source.index("from sdlc_engine.pipeline.orchestrator import")
+        config_loader_at = source.index("from sdlc_engine.shared.config.config_loader import")
         assert gate_at < config_loader_at
         assert gate_at < engine_import_at
 

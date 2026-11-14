@@ -47,8 +47,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from langgraph_engine.library.resolver import LibrarySetupError, locate_library_root  # noqa: E402
-from langgraph_engine.selection import (  # noqa: E402
+from sdlc_engine.standards.resolver import LibrarySetupError, locate_library_root  # noqa: E402
+from sdlc_engine.agents import (  # noqa: E402
     DomainKgAdapter,
     Lexicon,
     LibraryCatalogue,
@@ -57,14 +57,14 @@ from langgraph_engine.selection import (  # noqa: E402
     RiskSignal,
     TruncatedRiskSignal,
 )
-from langgraph_engine.selection import kg_adapter as kg_adapter_module  # noqa: E402
-from langgraph_engine.selection import load_catalogue, select_agents  # noqa: E402
-from langgraph_engine.selection.catalogue import CatalogueUnavailable  # noqa: E402
-from langgraph_engine.selection.ids import candidate_refs, normalise_ref  # noqa: E402
-from langgraph_engine.selection.risk import ENV_MAX_FILES, ENV_MAX_PATHS, probe_builder_coverage  # noqa: E402
-from langgraph_engine.selection.selector import REASON_NO_QUERY_TERMS, ComplexityOutOfRange, build_lexicon  # noqa: E402
+from sdlc_engine.agents import kg_adapter as kg_adapter_module  # noqa: E402
+from sdlc_engine.agents import load_catalogue, select_agents  # noqa: E402
+from sdlc_engine.agents.catalogue import CatalogueUnavailable  # noqa: E402
+from sdlc_engine.agents.ids import candidate_refs, normalise_ref  # noqa: E402
+from sdlc_engine.agents.risk import ENV_MAX_FILES, ENV_MAX_PATHS, probe_builder_coverage  # noqa: E402
+from sdlc_engine.agents.selector import REASON_NO_QUERY_TERMS, ComplexityOutOfRange, build_lexicon  # noqa: E402
 
-SELECTION_PACKAGE = PROJECT_ROOT / "langgraph_engine" / "selection"
+SELECTION_PACKAGE = PROJECT_ROOT / "sdlc_engine" / "agents"
 SPRINT_ISSUES = PROJECT_ROOT / "docs" / "phase-6-sprint" / "github_issues.json"
 ROUTING_MAP = PROJECT_ROOT / "docs" / "phase-7-routing" / "routing_map.json"
 
@@ -261,7 +261,11 @@ class TestNoHardcodedNames:
         names = set(catalogue.agents) | set(catalogue.skills)
         assert len(names) == EXPECTED_AGENT_COUNT + EXPECTED_SKILL_COUNT
 
-        modules = sorted(SELECTION_PACKAGE.glob("*.py"))
+        SELECTION_MODULES = {
+            "__init__.py", "catalogue.py", "explainability.py", "ids.py",
+            "kg_adapter.py", "lexicon.py", "risk.py", "selector.py",
+        }
+        modules = sorted([p for p in SELECTION_PACKAGE.glob("*.py") if p.name in SELECTION_MODULES])
         assert modules, "no modules found on the selection path"
 
         offenders = {}
@@ -695,7 +699,7 @@ class TestTenSampleTasks:
         outscore everything, but with no presence in any graph. It must not
         appear, because an entry with no edge path would violate criterion 2.
         """
-        from langgraph_engine.selection.catalogue import AgentRecord
+        from sdlc_engine.agents.catalogue import AgentRecord
 
         marker = "qqzxjv"
         phantom = "zzz-phantom-probe-agent"
@@ -998,7 +1002,7 @@ class TestCoveragePrecondition:
         monkeypatch.delenv(ENV_MAX_FILES, raising=False)
         monkeypatch.delenv(ENV_MAX_PATHS, raising=False)
 
-        from langgraph_engine.sdlc_pipeline.call_graph_analyzer import analyze_impact_before_change
+        from sdlc_engine.nodes.call_graph_analyzer import analyze_impact_before_change
 
         analysis = analyze_impact_before_change(
             str(PROJECT_ROOT), target_files=["langgraph_engine/selection/selector.py"]

@@ -26,7 +26,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from langgraph_engine.sdlc_pipeline.architecture.prompt_gen_expert_caller import _render_sample  # noqa: E402
+from sdlc_engine.nodes.architecture.prompt_gen_expert_caller import _render_sample  # noqa: E402
 
 WINDOWS_CMDLINE_LIMIT = 32767
 
@@ -138,7 +138,7 @@ class TestTheNodeSendsTheCappedShape:
     """The cap must live in the node, not only in this test's helper."""
 
     def test_the_node_source_caps_both_lists_and_sends_totals(self):
-        source = (_PROJECT_ROOT / "langgraph_engine" / "sdlc_pipeline" / "nodes" / "task_orchestration.py").read_text(
+        source = (_PROJECT_ROOT / "sdlc_engine" / "nodes" / "task_orchestration.py").read_text(
             encoding="utf-8"
         )
         assert "danger_zones_total" in source, "the node must send the danger_zones total"

@@ -142,7 +142,7 @@ class TestArgumentValidation:
 class TestLineEndingPreservation:
     """Propagation must not rewrite a file's line terminators."""
 
-    TARGETS = ("README.md", "CLAUDE.md", "SRS.md", "langgraph_engine/__init__.py")
+    TARGETS = ("README.md", "CLAUDE.md", "SRS.md", "sdlc_engine/__init__.py")
 
     def test_sync_preserves_each_target_line_endings(self):
         before = {}
@@ -177,7 +177,7 @@ class TestVersionConsistency:
             ("README.md", r"\*\*Version:\*\*\s*([\d.]+)"),
             ("CLAUDE.md", r"\*\*Version:\*\*\s*([\d.]+)"),
             ("SRS.md", r"\*\*Version:\*\*\s*([\d.]+)"),
-            ("langgraph_engine/__init__.py", r'__version__\s*=\s*["\']([\d.]+)["\']'),
+            ("sdlc_engine/__init__.py", r'__version__\s*=\s*["\']([\d.]+)["\']'),
         )
         for name, pattern in checks:
             text = (REPO_ROOT / name).read_text(encoding="utf-8")

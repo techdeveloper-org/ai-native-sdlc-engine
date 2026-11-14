@@ -3,6 +3,8 @@
 > **The Universal, Model-Agnostic Zero-Debt SDLC Automation Framework**
 > *Automate the entire software engineering lifecycle — from task planning to merged PR — with continuous technical debt auto-remediation across any AI model, IDE, terminal, or CI/CD pipeline.*
 
+**Version:** 2.1.1 | **Last Updated:** 2026-11-14
+
 [![Version](https://img.shields.io/badge/Version-2.1.1-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-green)](https://python.org)
 [![Engine](https://img.shields.io/badge/Engine-LangGraph%200.2.0%2B-purple)](https://github.com/langchain-ai/langgraph)

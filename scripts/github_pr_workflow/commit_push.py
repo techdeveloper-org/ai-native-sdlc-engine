@@ -74,7 +74,7 @@ def _commit_session_changes(repo_root: str, session_summary: dict, issue_numbers
             script_dir = os.path.dirname(os.path.abspath(__file__))
             if script_dir not in sys.path:
                 sys.path.insert(0, script_dir)
-            from langgraph_engine.llm_call import generate_llm_commit_title
+            from sdlc_engine.llm.llm_call import generate_llm_commit_title
 
             commit_title = generate_llm_commit_title(cwd=repo_root) or ""
             if commit_title:

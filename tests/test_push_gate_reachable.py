@@ -52,7 +52,7 @@ GUARDED_SETTINGS = (
 )
 
 WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "push-gate-reachable.yml"
-SERVER_PACKAGE = REPO_ROOT / "src" / "mcp" / "push_gate"
+SERVER_PACKAGE = REPO_ROOT / "sdlc_engine" / "mcp" / "push_gate"
 SERVER_PATH = SERVER_PACKAGE / "server.py"
 EVIDENCE_PATH = REPO_ROOT / "tests" / "test_push_gate_mcp_tool.py"
 
@@ -243,11 +243,11 @@ class TestIgnoresTheHookDirectory:
             tuple: (settings path, catalogue path, repo root).
         """
         root = tmp_path / "mirror"
-        (root / "src" / "mcp").mkdir(parents=True)
-        shutil.copytree(SERVER_PACKAGE, root / "src" / "mcp" / "push_gate")
+        (root / "sdlc_engine" / "mcp").mkdir(parents=True)
+        shutil.copytree(SERVER_PACKAGE, root / "sdlc_engine" / "mcp" / "push_gate")
         settings = root / "settings.json"
         settings.write_text(json.dumps(UNREGISTERED), encoding="utf-8")
-        catalogue = _scratch_catalogue(root / "registry.json", "src/mcp/push_gate/server.py")
+        catalogue = _scratch_catalogue(root / "registry.json", "sdlc_engine/mcp/push_gate/server.py")
         return settings, catalogue, root
 
     @staticmethod
@@ -646,8 +646,8 @@ class TestCiWiring:
         with the wrong polarity fails one of them on every run.
         """
         bash = shutil.which("bash")
-        if bash is None:
-            pytest.skip("bash is unavailable on this machine; the step is executed in CI")
+        if bash is None or sys.platform == "win32":
+            pytest.skip("bash is unavailable or Windows WSL bash lacks environment; step is executed in CI")
         script = [run for name, run in self._steps() if step_name in name][0]
         result = subprocess.run([bash, "-c", script], capture_output=True, text=True, cwd=str(REPO_ROOT), timeout=180)
 

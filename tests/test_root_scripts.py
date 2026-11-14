@@ -474,19 +474,11 @@ class TestPipelineBenchmark:
     def _import_module(self, tmp_path):
         """Import PipelineBenchmark with benchmark_dir in tmp_path."""
         self.tmp_path = tmp_path
-        sys.path.insert(
-            0,
-            str(Path(__file__).resolve().parent.parent / "langgraph_engine"),
-        )
-        try:
-            import importlib
+        import importlib
+        import sdlc_engine.metrics.performance_benchmarks as pb
 
-            import performance_benchmarks as pb
-
-            importlib.reload(pb)
-            self.pb = pb
-        finally:
-            pass
+        importlib.reload(pb)
+        self.pb = pb
         yield
 
     def _make_bench(self):
@@ -589,13 +581,8 @@ class TestMetricsDashboard:
     def _import_module(self, tmp_path):
         """Import MetricsDashboard with dirs in tmp_path."""
         self.tmp_path = tmp_path
-        sys.path.insert(
-            0,
-            str(Path(__file__).resolve().parent.parent / "langgraph_engine"),
-        )
         import importlib
-
-        import metrics_dashboard as md
+        import sdlc_engine.metrics.dashboard as md
 
         importlib.reload(md)
         self.md = md

@@ -47,26 +47,8 @@ _REPO_ROOT = str(Path(__file__).resolve().parent.parent)
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 
-_LE_ROOT = Path(_REPO_ROOT) / "langgraph_engine"
-
-_le = types.ModuleType("langgraph_engine")
-_le.__path__ = [str(_LE_ROOT)]
-_le.__package__ = "langgraph_engine"
-sys.modules["langgraph_engine"] = _le
-
-
-def _load_module(name, rel_path):
-    full_path = _LE_ROOT / rel_path
-    spec = importlib.util.spec_from_file_location(name, str(full_path))
-    mod = importlib.util.module_from_spec(spec)
-    mod.__package__ = "langgraph_engine"
-    sys.modules[name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_cp_mod = _load_module("langgraph_engine.checkpoint_manager", "checkpoint_manager.py")
-_ledger_mod = _load_module("langgraph_engine.effect_ledger", "effect_ledger.py")
+import sdlc_engine.pipeline.checkpoint_manager as _cp_mod
+import sdlc_engine.security.effect_ledger as _ledger_mod
 
 CheckpointManager = _cp_mod.CheckpointManager
 CheckpointDegradedError = _cp_mod.CheckpointDegradedError
@@ -103,21 +85,9 @@ _CRASH_CHILD = textwrap.dedent(
     sys.modules["loguru"] = m
 
     sys.path.insert(0, repo_root)
-    le_root = Path(repo_root) / "langgraph_engine"
-    le = types.ModuleType("langgraph_engine")
-    le.__path__ = [str(le_root)]
-    le.__package__ = "langgraph_engine"
-    sys.modules["langgraph_engine"] = le
+    from sdlc_engine.pipeline.checkpoint_manager import CheckpointManager
 
-    spec = importlib.util.spec_from_file_location(
-        "langgraph_engine.checkpoint_manager", str(le_root / "checkpoint_manager.py")
-    )
-    mod = importlib.util.module_from_spec(spec)
-    mod.__package__ = "langgraph_engine"
-    sys.modules["langgraph_engine.checkpoint_manager"] = mod
-    spec.loader.exec_module(mod)
-
-    cp = mod.CheckpointManager(session_id=session_id, base_dir=base_dir)
+    cp = CheckpointManager(session_id=session_id, base_dir=base_dir)
     for step in range(0, 9):
         if step == crash_at:
             os._exit(137)

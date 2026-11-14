@@ -31,7 +31,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from langgraph_engine.sdlc_pipeline.call_graph_analyzer import refresh_call_graph_if_stale  # noqa: E402
+from sdlc_engine.nodes.call_graph_analyzer import refresh_call_graph_if_stale  # noqa: E402
 
 CACHED = {"nodes": ["cached_node"], "call_graph_available": True}
 FRESH = {"nodes": ["fresh_node"], "call_graph_available": True}
@@ -45,7 +45,7 @@ def not_stale_state():
 
 def _run(state, tmp_path):
     """Call the guard with snapshot_call_graph stubbed, returning (result, mock)."""
-    with patch("langgraph_engine.sdlc_pipeline.call_graph_analyzer.snapshot_call_graph") as mock_snap:
+    with patch("sdlc_engine.nodes.call_graph_analyzer.snapshot_call_graph") as mock_snap:
         mock_snap.return_value = dict(FRESH)
         result = refresh_call_graph_if_stale(state, str(tmp_path))
     return result, mock_snap

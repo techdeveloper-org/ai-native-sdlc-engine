@@ -20,7 +20,7 @@ sys.path.insert(0, str(_PROJECT_ROOT))
 
 
 def _parsers():
-    from langgraph_engine.build_dependency_resolver import parsers
+    from sdlc_engine.pipeline import parsers
 
     return parsers
 

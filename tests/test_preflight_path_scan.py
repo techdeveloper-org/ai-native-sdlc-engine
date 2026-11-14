@@ -13,7 +13,7 @@ entirely.
 
 import pytest
 
-from langgraph_engine.preflight_guard.path_scan import has_drive_path
+from sdlc_engine.preflight_guard.path_scan import has_drive_path
 
 SEP = chr(92)
 

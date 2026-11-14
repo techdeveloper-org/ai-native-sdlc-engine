@@ -269,13 +269,13 @@ class TestRepositoryIsClean:
         violation assertion trivially true.
         """
         remediated = {
-            "langgraph_engine/engine_logging/setup.py": 1,
-            "langgraph_engine/sdlc_pipeline/documentation_generator.py": 4,
-            "langgraph_engine/sdlc_pipeline/architecture/01-task-breakdown/task_auto_analyzer.py": 1,
+            "sdlc_engine/shared/logging/setup.py": 1,
+            "sdlc_engine/nodes/documentation_generator.py": 4,
+            "sdlc_engine/nodes/architecture/01-task-breakdown/task_auto_analyzer.py": 1,
             "scripts/agents/computer-use-agent.py": 1,
             "scripts/agents/dummy-project-seeder.py": 5,
             "scripts/agents/verify-computer-use-prerequisites.py": 3,
-            "src/services/claude_integration.py": 4,
+            "sdlc_engine/integrations/claude/integration.py": 4,
         }
         assert sum(remediated.values()) == 19
         findings, _ = gate.scan_paths(gate.iter_python_files(REPO_ROOT), REPO_ROOT)

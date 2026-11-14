@@ -9,7 +9,7 @@ passing test was reported as missing one.
 
 from pathlib import Path
 
-from langgraph_engine.sdlc_pipeline.quality_gate import _evaluate_tests_exist_gate
+from sdlc_engine.nodes.quality_gate import _evaluate_tests_exist_gate
 
 _PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
 

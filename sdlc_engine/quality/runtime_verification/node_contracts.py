@@ -1,0 +1,92 @@
+"""NodeContract definitions for 3 core Level 2 (SDLC Execution Core) LangGraph nodes.
+
+Contracts declare which FlowState keys each node requires as preconditions
+and guarantees as postconditions. The verifier (RuntimeVerifier) evaluates
+these at node entry/exit when ENABLE_RUNTIME_VERIFICATION=1.
+
+Key names are sourced directly from the node implementations:
+  - orchestration_pre_analysis_node -> orchestration.py
+  - step1_task_analysis_node (prompt_gen + orchestrator) -> task_orchestration.py
+  - FlowState field names -> state/state_definition.py
+
+Windows-safe: ASCII only.
+"""
+
+from __future__ import annotations
+
+from sdlc_engine.quality.runtime_verification.contracts import NodeContract, PostconditionSpec, PreconditionSpec
+
+# ---------------------------------------------------------------------------
+# orchestration_pre_analysis_node
+#
+# Reads:  user_message (primary task input), project_root (callgraph scan)
+# Writes: pre_analysis_result, call_graph_metrics, template_fast_path
+# Fail-open: any exception returns empty metrics -- never blocks pipeline
+# ---------------------------------------------------------------------------
+PRE_ANALYSIS_CONTRACT = NodeContract(
+    node_name="orchestration_pre_analysis_node",
+    preconditions=[
+        PreconditionSpec(key="user_message", expected_type=str, required=True, min_val=1),
+        PreconditionSpec(key="project_root", expected_type=str, required=False),
+    ],
+    postconditions=[
+        PostconditionSpec(key="pre_analysis_result", non_null=True, min_length=0),
+        PostconditionSpec(key="call_graph_metrics", non_null=True, min_length=0),
+    ],
+)
+
+# ---------------------------------------------------------------------------
+# prompt_gen_expert_caller (Step 0 Phase 1)
+#
+# Reads:  user_message (task input), combined_complexity_score (Level 1 1-25),
+#         call_graph_metrics (from pre_analysis, optional)
+# Writes: orchestration_prompt (min 200 chars for a useful prompt)
+# ---------------------------------------------------------------------------
+PROMPT_GEN_CONTRACT = NodeContract(
+    node_name="prompt_gen_expert_caller",
+    preconditions=[
+        PreconditionSpec(key="user_message", expected_type=str, required=True, min_val=1),
+        PreconditionSpec(key="combined_complexity_score", expected_type=int, required=False),
+        PreconditionSpec(key="call_graph_metrics", expected_type=dict, required=False),
+    ],
+    postconditions=[
+        PostconditionSpec(key="orchestration_prompt", non_null=True, min_length=200),
+    ],
+)
+
+# ---------------------------------------------------------------------------
+# step1_task_analysis_node (fused prompt_gen + orchestrator, v1.14+)
+#
+# The prompt-gen and orchestrator phases run inside a single node, so
+# orchestration_prompt is produced internally and is NOT present on entry -- the
+# separate PROMPT_GEN contract above (kept for its phase semantics) does not fit
+# the fused node. The precondition guards the real node input (user_message);
+# the postconditions guarantee both phase outputs. A short raw-task fallback is
+# a legitimate degraded path, so orchestration_prompt is only required
+# non-empty, not the 200-char "useful prompt" bar.
+#
+# An ORCHESTRATOR_CONTRACT sat beside PROMPT_GEN until 2026-08-07, describing an
+# orchestrator_agent_caller node. That script is gone, and a contract naming a
+# node that cannot run is not dormant -- it is wrong, and the registry would
+# have offered it for lookup under a name nothing can produce.
+# ---------------------------------------------------------------------------
+STEP1_CONTRACT = NodeContract(
+    node_name="step1_task_analysis_node",
+    preconditions=[
+        PreconditionSpec(key="user_message", expected_type=str, required=True, min_val=1),
+        PreconditionSpec(key="combined_complexity_score", expected_type=int, required=False),
+    ],
+    postconditions=[
+        PostconditionSpec(key="orchestration_prompt", non_null=True, min_length=1),
+        PostconditionSpec(key="orchestrator_result", non_null=True, min_length=0),
+    ],
+)
+
+# ---------------------------------------------------------------------------
+# Registry -- maps node_name -> NodeContract for verifier lookup
+# ---------------------------------------------------------------------------
+NODE_CONTRACT_REGISTRY = {
+    PRE_ANALYSIS_CONTRACT.node_name: PRE_ANALYSIS_CONTRACT,
+    PROMPT_GEN_CONTRACT.node_name: PROMPT_GEN_CONTRACT,
+    STEP1_CONTRACT.node_name: STEP1_CONTRACT,
+}

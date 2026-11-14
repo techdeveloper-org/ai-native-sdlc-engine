@@ -49,7 +49,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from langgraph_engine.model_fallback import (  # noqa: E402
+from sdlc_engine.llm.model_fallback import (  # noqa: E402
     ACTION_ESCALATE_TO_USER,
     ACTION_NO_FALLBACK,
     ACTION_RETRY_NEXT_TIER,
@@ -281,7 +281,7 @@ class TestTierArithmetic:
         agents at the remaining tier does not fail the suite.
         """
         try:
-            from langgraph_engine.library.resolver import LibrarySetupError, locate_library_root
+            from sdlc_engine.standards.resolver import LibrarySetupError, locate_library_root
         except ImportError:
             pytest.skip("library resolver unavailable")
 

@@ -46,11 +46,11 @@ def _script_mock(prompt_text):
 
 def _run_node(prompt_text):
     """Drive step1_task_analysis_node with a mocked prompt-gen response."""
-    from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import step1_task_analysis_node
+    from sdlc_engine.nodes.task_orchestration import step1_task_analysis_node
 
     state = {"user_message": "Add a new endpoint", "project_root": str(_PROJECT_ROOT)}
     with patch(
-        "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+        "sdlc_engine.nodes.helpers.call_execution_script",
         side_effect=_script_mock(prompt_text),
     ):
         return step1_task_analysis_node(state)

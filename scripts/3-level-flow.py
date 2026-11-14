@@ -65,7 +65,7 @@ enforce_explicit_invocation(sys.argv[1:])
 # CONFIG LOADER - JSON config -> os.environ (before any imports that read env)
 # ============================================================================
 try:
-    from langgraph_engine.core.config_loader import load_workflow_config
+    from sdlc_engine.shared.config.config_loader import load_workflow_config
 
     load_workflow_config()
 except Exception:
@@ -77,9 +77,9 @@ except Exception:
 
 try:
     # Try importing LangGraph engine
-    from langgraph_engine.checkpointer import get_invoke_config
-    from langgraph_engine.context.flow_trace_converter import print_flow_checkpoint, write_flow_trace_json
-    from langgraph_engine.orchestrator import create_flow_graph, create_initial_state
+    from sdlc_engine.pipeline.checkpointer import get_invoke_config
+    from sdlc_engine.context.flow_trace_converter import print_flow_checkpoint, write_flow_trace_json
+    from sdlc_engine.pipeline.orchestrator import create_flow_graph, create_initial_state
 
     _LANGGRAPH_AVAILABLE = True
 except ImportError as e:

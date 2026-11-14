@@ -3,7 +3,7 @@
 **Project:** AI-Native SDLC Engine
 **Version:** 2.1.1
 **Type:** LangGraph Orchestration Pipeline with Call Graph Intelligence + Template Fast-Path
-**Last Updated:** 2026-11-10
+**Last Updated:** 2026-11-14
 
 ---
 
@@ -18,9 +18,9 @@ AI-Native SDLC Engine is a 3-level LangGraph-based orchestration pipeline for au
 | **Languages** | Python |
 | **Frameworks** | LangGraph 0.2.0+, LangChain, FastMCP (mcp package) |
 | **Status** | Active Development |
-| **Primary Location** | langgraph_engine/ |
-| **MCP Servers** | 13 servers -- all in separate repos under [techdeveloper-org](https://github.com/orgs/techdeveloper-org/repositories); 1 also keeps an in-engine copy in `src/mcp/` |
-| **Total Python Files** | 248 (langgraph_engine/); 494 repo-wide |
+| **Primary Location** | sdlc_engine/ |
+| **MCP Servers** | 13 servers -- all in separate repos under [techdeveloper-org](https://github.com/orgs/techdeveloper-org/repositories); 1 in-engine copy in sdlc_engine/mcp/ |
+| **Total Python Files** | ~272 (sdlc_engine/); 499 repo-wide |
 | **Test Files** | 106 (97 unit, 5 integration, 3 e2e, 1 load) |
 | **Call Graph** | 578 classes, 3,985 methods, 4 languages (Python/Java/TS/Kotlin) |
 
@@ -485,7 +485,7 @@ See environment variables in `.env.example`:
 
 ---
 
-**Last Updated:** 2026-11-10
+**Last Updated:** 2026-11-14
 
 
 <!-- execution-insight- -->

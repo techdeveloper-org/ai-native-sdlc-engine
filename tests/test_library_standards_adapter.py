@@ -22,14 +22,14 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from langgraph_engine.library.resolver import _reset_library_root_cache  # noqa: E402
-from langgraph_engine.standards.library_adapter import (  # noqa: E402
+from sdlc_engine.standards.resolver import _reset_library_root_cache  # noqa: E402
+from sdlc_engine.standards.library_adapter import (  # noqa: E402
     _FRAMEWORK_SKILL_MAP,
     PRIORITY_LIBRARY_SKILL,
     LibrarySkillStandardsAdapter,
     _extract_standards_content,
 )
-from langgraph_engine.standards.selector import PRIORITY_FRAMEWORK, PRIORITY_LANGUAGE, resolve_conflicts  # noqa: E402
+from sdlc_engine.standards.selector import PRIORITY_FRAMEWORK, PRIORITY_LANGUAGE, resolve_conflicts  # noqa: E402
 
 _REAL_LIBRARY_ROOT = _PROJECT_ROOT.parent / "claude-global-library"
 _HAS_REAL_LIBRARY = _REAL_LIBRARY_ROOT.is_dir()
@@ -77,14 +77,14 @@ class TestExtractStandardsContent:
 class TestLibrarySkillStandardsAdapterUnmapped:
     def test_unmapped_framework_returns_empty_with_zero_resolver_calls(self):
         adapter = LibrarySkillStandardsAdapter()
-        with patch("langgraph_engine.standards.library_adapter.build_default_resolver") as mock_build:
+        with patch("sdlc_engine.standards.library_adapter.build_default_resolver") as mock_build:
             result = adapter.load("python", "definitely-not-a-mapped-framework")
         assert result == []
         mock_build.assert_not_called()
 
     def test_unknown_project_type_returns_empty(self):
         adapter = LibrarySkillStandardsAdapter()
-        with patch("langgraph_engine.standards.library_adapter.build_default_resolver") as mock_build:
+        with patch("sdlc_engine.standards.library_adapter.build_default_resolver") as mock_build:
             result = adapter.load("unknown", "unknown")
         assert result == []
         mock_build.assert_not_called()
@@ -93,7 +93,9 @@ class TestLibrarySkillStandardsAdapterUnmapped:
 class TestLibrarySkillStandardsAdapterSiblingMissing:
     def test_sibling_missing_returns_empty_without_raising(self):
         adapter = LibrarySkillStandardsAdapter()
-        with patch("langgraph_engine.library.resolver.locate_library_root", return_value=None):
+        with patch("sdlc_engine.standards.library_resolver.locate_library_root", return_value=None), patch(
+            "sdlc_engine.standards.resolver.locate_library_root", return_value=None
+        ):
             result = adapter.load("python", "fastapi")
         assert result == []
 

@@ -16,7 +16,7 @@ Error path: len(violations) >= 1, check_type == "transition"
 
 import pytest
 
-from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
 # ---------------------------------------------------------------------------
 # Fixture: singleton isolation

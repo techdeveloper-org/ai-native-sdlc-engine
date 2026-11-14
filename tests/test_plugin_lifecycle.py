@@ -98,11 +98,11 @@ SCRIPT_DIR = PLUGIN_ROOT / "scripts"
 GATE_SCRIPT = REPO_ROOT / "scripts" / "verify_plugin_conformance.py"
 PLUGIN_MANIFEST = PLUGIN_ROOT / ".claude-plugin" / "plugin.json"
 MARKETPLACE_MANIFEST = REPO_ROOT / ".claude-plugin" / "marketplace.json"
-PROCEDURE_DOC = REPO_ROOT / "docs" / "guides" / "nfr11-lifecycle-verification.md"
+PROCEDURE_DOC = REPO_ROOT / "docs" / "guides" / "nfr11-lifecycle-verification-guide.md"
 
 ATTRIBUTION_TEST_PATH = TESTS_DIR / "test_uninstall_residue_attribution.py"
 REGISTER_TEST_PATH = TESTS_DIR / "test_register_mcp.py"
-REVIEW_INDEX_PATH = REPO_ROOT / "docs" / "REVIEW-INDEX.md"
+REVIEW_INDEX_PATH = REPO_ROOT / "docs" / "reports" / "v2.0.0-review-index.md"
 
 RULING_CLAUSES = (
     "ADR-020 Path C wins",
@@ -598,7 +598,7 @@ class TestInstallSettingsDelta:
         constant to that document so a silent widening of the tolerated set is
         visible.
         """
-        spike = REPO_ROOT / "docs" / "phase-1-architecture" / "plugin_schema_spike.md"
+        spike = REPO_ROOT / "docs" / "phase-1-architecture" / "plugin-schema-spike-report.md"
         text = spike.read_text(encoding="utf-8")
         for key in MEASURED_INSTALL_KEYS:
             assert key in text, key

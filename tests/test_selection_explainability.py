@@ -46,11 +46,11 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from langgraph_engine.library.resolver import locate_library_root  # noqa: E402
-from langgraph_engine.selection import DomainKgAdapter, RiskSignal  # noqa: E402
-from langgraph_engine.selection import explainability as subject  # noqa: E402
-from langgraph_engine.selection import load_catalogue, select_agents  # noqa: E402
-from langgraph_engine.selection.explainability import (  # noqa: E402
+from sdlc_engine.standards.resolver import locate_library_root  # noqa: E402
+from sdlc_engine.selection import DomainKgAdapter, RiskSignal  # noqa: E402
+from sdlc_engine.selection import explainability as subject  # noqa: E402
+from sdlc_engine.selection import load_catalogue, select_agents  # noqa: E402
+from sdlc_engine.selection.explainability import (  # noqa: E402
     DISPATCH_FIELD,
     FR23_FIELDS,
     IncompleteSelectionRecord,
@@ -60,7 +60,7 @@ from langgraph_engine.selection.explainability import (  # noqa: E402
     explain_selection,
     selection_log_lines,
 )
-from langgraph_engine.selection.selector import build_lexicon  # noqa: E402
+from sdlc_engine.selection.selector import build_lexicon  # noqa: E402
 
 SRS = PROJECT_ROOT / "SRS.md"
 SPRINT_ISSUES = PROJECT_ROOT / "docs" / "phase-6-sprint" / "github_issues.json"

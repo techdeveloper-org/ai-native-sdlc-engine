@@ -19,15 +19,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 # Eagerly bind subpackages that tests patch via dotted-string targets, e.g.
-# patch("langgraph_engine.github.X"). unittest.mock._dot_lookup resolves such
+# patch("sdlc_engine.integrations.github.X"). unittest.mock._dot_lookup resolves such
 # targets with getattr(langgraph_engine, "github"), which raises AttributeError
 # unless the submodule is already imported. Import order otherwise left this to
 # chance -- it passed on Python 3.11 but broke every such patch on 3.10 in CI.
 # Importing them here makes resolution deterministic across interpreter versions.
-import langgraph_engine.github  # noqa: E402,F401
-import langgraph_engine.quality  # noqa: E402,F401
-import langgraph_engine.runtime_verification  # noqa: E402,F401
-import langgraph_engine.sdlc_pipeline  # noqa: E402,F401
+import sdlc_engine.integrations.github  # noqa: E402,F401
+import sdlc_engine.quality  # noqa: E402,F401
+import sdlc_engine.quality.runtime_verification  # noqa: E402,F401
+import sdlc_engine.nodes  # noqa: E402,F401
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -59,7 +59,7 @@ def _neutralize_llm_provider_chain(monkeypatch):
     # Import the submodule explicitly and patch the module object -- a dotted string
     # target would fail with AttributeError for a test that runs before anything else
     # has imported langgraph_engine.llm_call (getattr on the not-yet-bound submodule).
-    import langgraph_engine.llm_call as _llm_call_mod
+    import sdlc_engine.llm.llm_call as _llm_call_mod
 
     monkeypatch.setattr(_llm_call_mod, "_provider_chain", [], raising=False)
 
@@ -101,7 +101,7 @@ def _repair_langgraph_engine_attrs():
     already-cached submodule. Several test files call ``importlib.reload`` /
     ``sys.modules.pop``; once that drops e.g. the ``github`` attribute off
     ``langgraph_engine`` (while the module stays in ``sys.modules``),
-    ``patch("langgraph_engine.github.X")`` fails on 3.10 with AttributeError, because
+    ``patch("sdlc_engine.integrations.github.X")`` fails on 3.10 with AttributeError, because
     mock's ``__import__`` retry is a no-op for the cached module and never rebinds.
     Python 3.11+ self-heals, which is why this was 3.10-only in CI. Re-attaching the
     tree before each test keeps dotted-string patch targets resolvable everywhere.

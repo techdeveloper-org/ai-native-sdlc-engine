@@ -40,14 +40,14 @@ class TestCheckpointerManager:
 
     def test_import_checkpointer(self):
         """Test checkpointer module imports correctly."""
-        from langgraph_engine.checkpointer import CheckpointerManager
+        from sdlc_engine.pipeline.checkpointer import CheckpointerManager
 
         assert CheckpointerManager is not None
 
     def test_get_memory_checkpointer(self):
         """Test MemorySaver creation."""
         try:
-            from langgraph_engine.checkpointer import CheckpointerManager
+            from sdlc_engine.pipeline.checkpointer import CheckpointerManager
 
             cp = CheckpointerManager.get_memory_checkpointer()
             assert cp is not None
@@ -57,7 +57,7 @@ class TestCheckpointerManager:
     def test_get_default_checkpointer_memory_mode(self):
         """Test default checkpointer in memory mode."""
         try:
-            from langgraph_engine.checkpointer import CheckpointerManager
+            from sdlc_engine.pipeline.checkpointer import CheckpointerManager
 
             cp = CheckpointerManager.get_default_checkpointer(use_sqlite=False)
             assert cp is not None
@@ -67,7 +67,7 @@ class TestCheckpointerManager:
     def test_get_sqlite_checkpointer_with_tmp(self):
         """Test SQLite checkpointer creation with temp path."""
         try:
-            from langgraph_engine.checkpointer import CheckpointerManager
+            from sdlc_engine.pipeline.checkpointer import CheckpointerManager
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 db_path = Path(tmpdir) / "test-checkpoints.db"
@@ -78,7 +78,7 @@ class TestCheckpointerManager:
 
     def test_setup_checkpoint_db(self):
         """Test checkpoint DB setup and verification."""
-        from langgraph_engine.checkpointer import CheckpointerManager
+        from sdlc_engine.pipeline.checkpointer import CheckpointerManager
 
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = Path(tmpdir) / "test.db"
@@ -88,7 +88,7 @@ class TestCheckpointerManager:
 
     def test_get_checkpoint_info_no_db(self):
         """Test checkpoint info when no DB exists."""
-        from langgraph_engine.checkpointer import CheckpointerManager
+        from sdlc_engine.pipeline.checkpointer import CheckpointerManager
 
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = Path(tmpdir) / "nonexistent.db"
@@ -97,7 +97,7 @@ class TestCheckpointerManager:
 
     def test_get_checkpoint_info_with_db(self):
         """Test checkpoint info with existing DB."""
-        from langgraph_engine.checkpointer import CheckpointerManager
+        from sdlc_engine.pipeline.checkpointer import CheckpointerManager
 
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = Path(tmpdir) / "test.db"
@@ -109,7 +109,7 @@ class TestCheckpointerManager:
 
     def test_get_invoke_config(self):
         """Test invoke config generation."""
-        from langgraph_engine.checkpointer import get_invoke_config
+        from sdlc_engine.pipeline.checkpointer import get_invoke_config
 
         config = get_invoke_config("SESSION-test-123")
         assert config["configurable"]["thread_id"] == "SESSION-test-123"
@@ -118,7 +118,7 @@ class TestCheckpointerManager:
     def test_get_checkpointer_config(self):
         """Test checkpointer config dict."""
         try:
-            from langgraph_engine.checkpointer import get_checkpointer_config
+            from sdlc_engine.pipeline.checkpointer import get_checkpointer_config
 
             config = get_checkpointer_config()
             assert "checkpointer" in config
@@ -266,14 +266,14 @@ class TestOrchestratorCheckpointer:
 
     def test_orchestrator_imports_checkpointer(self):
         """Test orchestrator imports CheckpointerManager."""
-        from langgraph_engine.orchestrator import CheckpointerManager
+        from sdlc_engine.pipeline.orchestrator import CheckpointerManager
 
         assert CheckpointerManager is not None
 
     def test_create_flow_graph_compiles(self):
         """Test create_flow_graph compiles successfully."""
         try:
-            from langgraph_engine.orchestrator import create_flow_graph
+            from sdlc_engine.pipeline.orchestrator import create_flow_graph
 
             graph = create_flow_graph()
             assert graph is not None
@@ -282,7 +282,7 @@ class TestOrchestratorCheckpointer:
 
     def test_create_initial_state(self):
         """Test create_initial_state builds valid state."""
-        from langgraph_engine.orchestrator import create_initial_state
+        from sdlc_engine.pipeline.orchestrator import create_initial_state
 
         state = create_initial_state(
             session_id="test-session",

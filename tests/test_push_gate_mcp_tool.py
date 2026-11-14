@@ -46,7 +46,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_ROOT = REPO_ROOT / "plugin"
 HOOK_GATE_PATH = REPO_ROOT / "hooks" / "pre_tool_enforcer" / "policies" / "push_gate.py"
-MCP_PACKAGE = REPO_ROOT / "src" / "mcp" / "push_gate"
+MCP_PACKAGE = REPO_ROOT / "sdlc_engine" / "mcp" / "push_gate"
 MCP_POLICY_PATH = MCP_PACKAGE / "push_gate_policy.py"
 MCP_SERVER_PATH = MCP_PACKAGE / "server.py"
 

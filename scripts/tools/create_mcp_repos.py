@@ -1,4 +1,4 @@
-﻿"""
+"""
 create_mcp_repos.py - Automates creation of individual MCP repos under techdeveloper-org.
 
 Each repo:

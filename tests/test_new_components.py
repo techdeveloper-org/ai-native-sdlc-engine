@@ -22,7 +22,7 @@ from typing import Any, Dict
 # ---------------------------------------------------------------------------
 
 REPO_ROOT = Path(__file__).parent.parent
-SYNC_SYSTEM_DIR = REPO_ROOT / "langgraph_engine" / "context_sync" / "architecture"
+SYNC_SYSTEM_DIR = REPO_ROOT / "sdlc_engine" / "context" / "architecture"
 CODE_GRAPH_DIR = REPO_ROOT / "scripts" / "architecture" / "03-execution-system" / "00-code-graph-analysis"
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 HOOKS_DIR = REPO_ROOT / "hooks"

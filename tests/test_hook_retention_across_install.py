@@ -86,7 +86,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 TESTS_DIR = Path(__file__).resolve().parent
 TOOL_PATH = REPO_ROOT / "scripts" / "remove_hook_registrations.py"
 ATTRIBUTION_TEST_PATH = TESTS_DIR / "test_uninstall_residue_attribution.py"
-PROCEDURE_DOC = REPO_ROOT / "docs" / "guides" / "fr8-hook-retention-verification.md"
+PROCEDURE_DOC = REPO_ROOT / "docs" / "guides" / "fr8-hook-retention-verification-guide.md"
 CONFORMANCE_GATE = REPO_ROOT / "scripts" / "verify_plugin_conformance.py"
 
 LIVE_INSTALL_ENV = "CWE_ALLOW_LIVE_PLUGIN_INSTALL"

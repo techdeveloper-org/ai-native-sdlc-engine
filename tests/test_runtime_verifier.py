@@ -16,8 +16,8 @@ from __future__ import annotations
 
 import pytest
 
-from langgraph_engine.runtime_verification.contracts import NodeContract, PostconditionSpec, PreconditionSpec
-from langgraph_engine.runtime_verification.verifier import NullVerifier, RuntimeVerifier
+from sdlc_engine.quality.runtime_verification.contracts import NodeContract, PostconditionSpec, PreconditionSpec
+from sdlc_engine.quality.runtime_verification.verifier import NullVerifier, RuntimeVerifier
 
 # ---------------------------------------------------------------------------
 # Fixture: reset singleton before and after every test
@@ -263,7 +263,7 @@ def test_decorator_pass_through():
     with the env var unset by default, verify_node returns fn directly.  The decorated
     function must still be callable and return its normal result.
     """
-    from langgraph_engine.runtime_verification.decorators import verify_node
+    from sdlc_engine.quality.runtime_verification.decorators import verify_node
 
     contract = NodeContract(
         node_name="test_node",

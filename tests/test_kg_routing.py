@@ -29,7 +29,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from langgraph_engine.library.resolver import (  # noqa: E402
+from sdlc_engine.standards.resolver import (  # noqa: E402
     ChainedResourceResolver,
     HardFailAdapter,
     LibrarySetupError,
@@ -37,14 +37,14 @@ from langgraph_engine.library.resolver import (  # noqa: E402
     _reset_library_root_cache,
     build_default_resolver,
 )
-from langgraph_engine.routing.kg_lookup import (  # noqa: E402
+from sdlc_engine.routing.kg_lookup import (  # noqa: E402
     DecisionTreeTraverser,
     DomainKGReader,
     RoutingSignals,
     normalize_kg_ref,
 )
-from langgraph_engine.routing.kg_router import route_task  # noqa: E402
-from langgraph_engine.sdlc_pipeline.architecture.prompt_gen_expert_caller import (  # noqa: E402
+from sdlc_engine.routing.kg_router import route_task  # noqa: E402
+from sdlc_engine.nodes.architecture.prompt_gen_expert_caller import (  # noqa: E402
     _build_filled_prompt,
     _parse_args,
     _render_kg_routing_block,
@@ -313,7 +313,7 @@ class TestKGRouterLibraryMissing:
         monkeypatch.delenv("CLAUDE_ALLOW_GITHUB_FALLBACK", raising=False)
 
         with patch(
-            "langgraph_engine.routing.kg_router.build_default_resolver",
+            "sdlc_engine.routing.kg_router.build_default_resolver",
             side_effect=lambda: build_default_resolver(engine_root=tmp_path),
         ):
             result = route_task("anything")
@@ -463,13 +463,13 @@ class TestStep0KgRoutingPreInjection:
         return _side_effect
 
     def test_kg_routing_json_flag_present_in_prompt_gen_args(self):
-        from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import step1_task_analysis_node
+        from sdlc_engine.nodes.task_orchestration import step1_task_analysis_node
 
         captured_calls = []
         state = {"user_message": "Design a healthcare clinical FHIR interoperability system", "project_root": "."}
 
         with patch(
-            "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+            "sdlc_engine.nodes.helpers.call_execution_script",
             side_effect=self._mock_call_execution_script(captured_calls),
         ):
             result = step1_task_analysis_node(state)
@@ -489,18 +489,18 @@ class TestStep0KgRoutingPreInjection:
         step1_task_analysis_node -- PRE-INJECTION C mirrors the existing
         CallGraph pre-injection's fail-open try/except pattern.
         """
-        from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import step1_task_analysis_node
+        from sdlc_engine.nodes.task_orchestration import step1_task_analysis_node
 
         captured_calls = []
         state = {"user_message": "anything", "project_root": "."}
 
         with (
             patch(
-                "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+                "sdlc_engine.nodes.helpers.call_execution_script",
                 side_effect=self._mock_call_execution_script(captured_calls),
             ),
             patch(
-                "langgraph_engine.routing.kg_router.route_task",
+                "sdlc_engine.routing.kg_router.route_task",
                 side_effect=RuntimeError("boom"),
             ),
         ):
@@ -536,8 +536,8 @@ class TestStep1TemplateLoadIsFatal:
         return _side_effect
 
     def test_template_load_failure_aborts_the_pipeline(self):
-        from langgraph_engine.sdlc_pipeline.architecture.prompt_gen_expert_caller import ERROR_KIND_TEMPLATE_LOAD_FAILED
-        from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import (
+        from sdlc_engine.nodes.architecture.prompt_gen_expert_caller import ERROR_KIND_TEMPLATE_LOAD_FAILED
+        from sdlc_engine.nodes.task_orchestration import (
             OrchestrationTemplateUnavailable,
             step1_task_analysis_node,
         )
@@ -549,7 +549,7 @@ class TestStep1TemplateLoadIsFatal:
         }
 
         with patch(
-            "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+            "sdlc_engine.nodes.helpers.call_execution_script",
             side_effect=self._script_mock(payload),
         ):
             with pytest.raises(OrchestrationTemplateUnavailable) as excinfo:
@@ -558,7 +558,7 @@ class TestStep1TemplateLoadIsFatal:
         assert "claude-global-library not found" in str(excinfo.value)
 
     def test_llm_failure_does_not_abort_and_still_falls_back(self):
-        from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import step1_task_analysis_node
+        from sdlc_engine.nodes.task_orchestration import step1_task_analysis_node
 
         payload = {
             "status": "ERROR",
@@ -567,7 +567,7 @@ class TestStep1TemplateLoadIsFatal:
         }
 
         with patch(
-            "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+            "sdlc_engine.nodes.helpers.call_execution_script",
             side_effect=self._script_mock(payload),
         ):
             result = step1_task_analysis_node({"user_message": "build a thing", "project_root": "."})
@@ -575,12 +575,12 @@ class TestStep1TemplateLoadIsFatal:
         assert result is not None
 
     def test_success_path_is_unaffected(self):
-        from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import step1_task_analysis_node
+        from sdlc_engine.nodes.task_orchestration import step1_task_analysis_node
 
         payload = {"status": "SUCCESS", "llm_response": "", "prompt": "assembled master prompt body"}
 
         with patch(
-            "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+            "sdlc_engine.nodes.helpers.call_execution_script",
             side_effect=self._script_mock(payload),
         ):
             result = step1_task_analysis_node({"user_message": "build a thing", "project_root": "."})
