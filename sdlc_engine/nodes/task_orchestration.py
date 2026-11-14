@@ -20,19 +20,15 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
-try:
-    from loguru import logger
-except ImportError:
-    import logging
-
-    logger = logging.getLogger(__name__)
+from sdlc_engine.metrics.liveness import env_optional_seconds as _env_optional_seconds
+from sdlc_engine.shared.logging.logger_factory import get_logger
 
 try:
     from sdlc_engine.routing.flow_state import FlowState
 except ImportError:
     FlowState = dict  # type: ignore[misc,assignment]
 
-from sdlc_engine.metrics.liveness import env_optional_seconds as _env_optional_seconds
+logger = get_logger(__name__)
 
 
 def _library_version() -> str:
@@ -418,5 +414,3 @@ def _map_step1_result_to_state(
 #
 # These functions are intentionally absent or stubbed. Their FlowState outputs are now
 # populated by step1_task_analysis_node after the orchestration subprocess calls.
-
-

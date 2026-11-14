@@ -19,11 +19,12 @@ call_graph_available=False on any error rather than raising.
 Python 3.8+ compatible. ASCII-only (cp1252-safe).
 """
 
-import logging
 import os
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from sdlc_engine.shared.logging.logger_factory import get_logger
+
+logger = get_logger(__name__)
 
 # ---------------------------------------------------------------------------
 # Lazy import of call_graph_builder (same directory)
@@ -167,23 +168,34 @@ def _find_test_files(project_root, affected_fqns, file_set):
         return test_files
 
     try:
-        for py_file in root.rglob("*.py"):
-            name = py_file.name
-            if not (name.startswith("test_") or name.endswith("_test.py")):
+        search_dirs = (
+            [root / "tests", root / "test"] if ((root / "tests").is_dir() or (root / "test").is_dir()) else [root]
+        )
+        for sdir in search_dirs:
+            if not sdir.exists():
                 continue
-            # Read the file and check for imports of affected modules
-            try:
-                content = py_file.read_text(encoding="utf-8", errors="ignore")
-            except OSError:
-                continue
-            for mod in affected_modules:
-                if mod in content:
+            for dirpath, dirnames, filenames in os.walk(sdir):
+                dirnames[:] = [
+                    d
+                    for d in dirnames
+                    if d not in {".git", ".venv", "venv", "node_modules", "__pycache__", "dist", "build"}
+                ]
+                for fname in filenames:
+                    if not (fname.startswith("test_") or fname.endswith("_test.py")):
+                        continue
+                    py_file = Path(dirpath) / fname
                     try:
-                        rel = str(py_file.relative_to(root)).replace("\\", "/")
-                    except ValueError:
-                        rel = py_file.name
-                    test_files.append(rel)
-                    break
+                        content = py_file.read_text(encoding="utf-8", errors="ignore")
+                    except OSError:
+                        continue
+                    for mod in affected_modules:
+                        if mod in content:
+                            try:
+                                rel = str(py_file.relative_to(root)).replace("\\", "/")
+                            except ValueError:
+                                rel = py_file.name
+                            test_files.append(rel)
+                            break
     except Exception as exc:
         logger.debug("Test file search failed: %s", exc)
 

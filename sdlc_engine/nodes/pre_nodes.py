@@ -8,12 +8,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
-try:
-    from loguru import logger
-except ImportError:
-    import logging
-
-    logger = logging.getLogger(__name__)
+from sdlc_engine.shared.logging.logger_factory import get_logger
 
 try:
     from sdlc_engine.routing.flow_state import FlowState
@@ -29,6 +24,8 @@ try:
     _LEVEL3V2_SESSION_LOGS_DIR = get_session_logs_dir()
 except ImportError:
     _LEVEL3V2_SESSION_LOGS_DIR = Path.home() / ".claude" / "logs" / "sessions"
+
+logger = get_logger(__name__)
 
 # _run_step is defined in the parent subgraph module.  Imported via try/except
 # because subgraph.py imports this module (circular chain); the fallback keeps
@@ -256,5 +253,3 @@ class StepNodeFactory:
 # ============================================================================
 # STEP WRAPPER NODES - Full error handling + checkpointing + metrics
 # ============================================================================
-
-

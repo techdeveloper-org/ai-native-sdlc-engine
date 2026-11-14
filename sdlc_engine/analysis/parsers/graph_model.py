@@ -13,6 +13,7 @@ import builtins
 import json
 import logging
 import os
+from collections import deque
 
 logger = logging.getLogger(__name__)
 
@@ -553,20 +554,18 @@ class CallGraph:
                 reverse[dst] = set()
             reverse[dst].add(src)
 
-        # Transitive closure via BFS from each node
+        # Transitive closure via BFS from each node (O(1) popleft with deque)
         impact = {}
         for fqn in self.methods:
             affected = set()
-            queue = [fqn]
-            visited = set()
+            queue = deque([fqn])
+            visited = {fqn}
             while queue:
-                current = queue.pop(0)
-                if current in visited:
-                    continue
-                visited.add(current)
+                current = queue.popleft()
                 callers = reverse.get(current, set())
                 for caller in callers:
                     if caller not in visited:
+                        visited.add(caller)
                         affected.add(caller)
                         queue.append(caller)
             impact[fqn] = affected

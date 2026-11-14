@@ -178,19 +178,22 @@ class CallGraphBuilder:
     def _analyze_file(self, src_file):
         """Route a source file to the correct language parser.
 
+        Uses Strategy pattern dispatch dictionary mapping extensions to
+        analyzer methods for clean OCP extensibility.
+
         Returns a visitor object (or None on failure) whose .classes,
         .methods, and .edges attributes match the _CallGraphVisitor shape.
         """
         ext = src_file.suffix.lower()
-        if ext == ".py":
-            return self._analyze_python(src_file)
-        elif ext == ".java":
-            return self._analyze_java(src_file)
-        elif ext in (".ts", ".tsx"):
-            return self._analyze_typescript(src_file)
-        elif ext == ".kt":
-            return self._analyze_kotlin(src_file)
-        return None
+        parser_strategies = {
+            ".py": self._analyze_python,
+            ".java": self._analyze_java,
+            ".ts": self._analyze_typescript,
+            ".tsx": self._analyze_typescript,
+            ".kt": self._analyze_kotlin,
+        }
+        strategy = parser_strategies.get(ext)
+        return strategy(src_file) if strategy else None
 
     def _analyze_python(self, py_file):
         """Parse a single Python file and extract call graph data.

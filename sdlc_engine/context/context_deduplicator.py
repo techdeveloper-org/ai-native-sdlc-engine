@@ -16,8 +16,11 @@ Usage:
 """
 
 import hashlib
-import sys
 from typing import Dict, List, Tuple
+
+from sdlc_engine.shared.logging.logger_factory import get_logger
+
+logger = get_logger(__name__)
 
 # Only apply deduplication if it saves more than this fraction of total size
 MIN_SAVINGS_RATIO = 0.20  # 20%
@@ -108,11 +111,11 @@ def deduplicate_context(contexts: dict) -> dict:
         result["_dedup_savings_ratio"] = round(savings_ratio, 3)
         result["_dedup_original_bytes"] = original_size
         result["_dedup_new_bytes"] = new_size
-        print(
-            "[CONTEXT DEDUP] Applied: {:.1f}% savings ({} -> {} bytes)".format(
-                savings_ratio * 100, original_size, new_size
-            ),
-            file=sys.stderr,
+        logger.info(
+            "[CONTEXT DEDUP] Applied: {:.1f}% savings ({} -> {} bytes)",
+            savings_ratio * 100,
+            original_size,
+            new_size,
         )
         return result
     else:
@@ -122,11 +125,10 @@ def deduplicate_context(contexts: dict) -> dict:
         result["_dedup_savings_ratio"] = round(savings_ratio, 3)
         result["_dedup_original_bytes"] = original_size
         result["_dedup_new_bytes"] = new_size
-        print(
-            "[CONTEXT DEDUP] Skipped: {:.1f}% savings < {:.0f}% threshold".format(
-                savings_ratio * 100, MIN_SAVINGS_RATIO * 100
-            ),
-            file=sys.stderr,
+        logger.debug(
+            "[CONTEXT DEDUP] Skipped: {:.1f}% savings < {:.0f}% threshold",
+            savings_ratio * 100,
+            MIN_SAVINGS_RATIO * 100,
         )
         return result
 

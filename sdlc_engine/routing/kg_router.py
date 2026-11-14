@@ -19,15 +19,12 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, Optional
 
-try:
-    from loguru import logger
-except ImportError:
-    import logging
-
-    logger = logging.getLogger(__name__)
-
+from sdlc_engine.shared.logging.logger_factory import get_logger
 from sdlc_engine.standards.resolver import LibrarySetupError, ResourceResolver, build_default_resolver
+
 from .kg_lookup import DecisionTreeTraverser, DomainKGReader, RoutingSignals, normalize_kg_ref
+
+logger = get_logger(__name__)
 
 _PATTERNS_RELPATH = "knowledge-graph/_orchestration-decision-tree/patterns.json"
 
@@ -132,4 +129,3 @@ def route_task(task_description: str, resolver: Optional[ResourceResolver] = Non
     requiring callers to manage a ``KGRouter`` instance.
     """
     return KGRouter(resolver=resolver).route_task(task_description)
-

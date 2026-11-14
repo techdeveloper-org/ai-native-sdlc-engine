@@ -17,6 +17,7 @@ Usage:
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -88,20 +89,24 @@ def calculate_complexity(project_path: str, session_id: Optional[str] = None) ->
 
     try:
 
-        def _is_excluded(p: Path) -> bool:
-            excluded_dirs = {"__pycache__", ".venv", "venv", "node_modules", ".git", ".tox", "dist", "build"}
-            return any(part in excluded_dirs for part in p.parts)
-
-        py_files = [f for f in path.rglob("*.py") if not _is_excluded(f)]
-
+        py_files = []
         total_loc = 0
-        for py_file in py_files:
-            try:
-                lines = py_file.read_text(encoding="utf-8", errors="ignore").splitlines()
-                code_lines = [ln for ln in lines if ln.strip() and not ln.strip().startswith("#")]
-                total_loc += len(code_lines)
-            except OSError as exc:
-                _LOG.debug(f"[complexity] py file read skipped: {exc}")
+        excluded_dirs = {"__pycache__", ".venv", "venv", "node_modules", ".git", ".tox", "dist", "build"}
+
+        for dirpath, dirnames, filenames in os.walk(path):
+            dirnames[:] = [d for d in dirnames if d not in excluded_dirs]
+            for fname in filenames:
+                if fname.endswith(".py"):
+                    fpath = Path(dirpath) / fname
+                    py_files.append(fpath)
+                    try:
+                        with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+                            for line in f:
+                                stripped = line.strip()
+                                if stripped and not stripped.startswith("#"):
+                                    total_loc += 1
+                    except OSError as exc:
+                        _LOG.debug(f"[complexity] py file read skipped: {exc}")
 
         dep_count = _count_dependencies(path)
 

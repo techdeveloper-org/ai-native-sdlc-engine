@@ -11,11 +11,12 @@ Python 3.8+ compatible. ASCII-only (cp1252-safe). No external dependencies.
 """
 
 import ast
-import logging
 import re
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from sdlc_engine.shared.logging.logger_factory import get_logger
+
+logger = get_logger(__name__)
 
 # ---------------------------------------------------------------------------
 # Lazy import helpers - avoid import-time side effects
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 def _get_call_graph_builder():
     """Lazy import of CallGraphBuilder to avoid circular imports."""
     try:
-        from sdlc_engine.parsers.call_graph_builder_legacy import CallGraphBuilder
+        from sdlc_engine.analysis.parsers.call_graph_builder_legacy import CallGraphBuilder
 
         return CallGraphBuilder
     except ImportError:

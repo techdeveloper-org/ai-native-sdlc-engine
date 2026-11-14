@@ -33,16 +33,12 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
-try:
-    from loguru import logger
-except ImportError:
-    import logging
-
-    logger = logging.getLogger(__name__)
-
+from sdlc_engine.shared.logging.logger_factory import get_logger
 from sdlc_engine.standards.resolver import LibrarySetupError, ResourceResolver
+
+logger = get_logger(__name__)
 
 _PATTERNS_RELPATH = "knowledge-graph/_orchestration-decision-tree/patterns.json"
 _BRANCHES_RELPATH = "knowledge-graph/_orchestration-decision-tree/decision_branches.json"
@@ -193,6 +189,8 @@ class DecisionTreeTraverser:
 
     def __init__(self, resolver: ResourceResolver):
         self._resolver = resolver
+        self._patterns_cache: Optional[List[dict]] = None
+        self._d14_defaults_cache: Optional[Dict[str, bool]] = None
 
     def route(self, signals: RoutingSignals) -> DecisionPath:
         """Resolve ``signals.task_description`` to a pattern via D14 keyword
@@ -264,13 +262,18 @@ class DecisionTreeTraverser:
         return DecisionPath(pattern_id, [entry_note, detail, f"Outcome: {pattern_id}"], False)
 
     def _load_patterns(self) -> List[dict]:
+        if self._patterns_cache is not None:
+            return self._patterns_cache
         resource = self._resolver.fetch_kg_file(_PATTERNS_RELPATH)
         data = json.loads(resource.content)
         if not isinstance(data, list):
             raise ValueError("patterns.json root is not a list")
+        self._patterns_cache = data
         return data
 
     def _load_d14_defaults(self) -> Dict[str, bool]:
+        if self._d14_defaults_cache is not None:
+            return self._d14_defaults_cache
         resource = self._resolver.fetch_kg_file(_BRANCHES_RELPATH)
         data = json.loads(resource.content)
         if not isinstance(data, list):
@@ -282,6 +285,7 @@ class DecisionTreeTraverser:
             emits = branch.get("emits") or []
             if emits:
                 result[emits[0]] = bool(branch.get("is_default"))
+        self._d14_defaults_cache = result
         return result
 
 
@@ -338,12 +342,16 @@ class DomainKGReader:
 
     def __init__(self, resolver: ResourceResolver):
         self._resolver = resolver
+        self._agents_cache: Dict[str, List[AgentRef]] = {}
+        self._skills_cache: Dict[Tuple[str, str], List[str]] = {}
 
     def agents_for_domain(self, domain_slug: str) -> List[AgentRef]:
         """Return the agent roster for ``domain_slug``, or ``[]`` on a
         malformed/empty/unrecognized-shape file. ``LibrarySetupError``
         propagates (caught by KGRouter).
         """
+        if domain_slug in self._agents_cache:
+            return self._agents_cache[domain_slug]
         try:
             resource = self._resolver.fetch_kg_file(f"knowledge-graph/{domain_slug}/agents.json")
             data = json.loads(resource.content)
@@ -377,6 +385,7 @@ class DomainKGReader:
                     mandatory_skills=mandatory_skills,
                 )
             )
+        self._agents_cache[domain_slug] = refs
         return refs
 
     def skills_for_agent(self, domain_slug: str, agent_id: str) -> List[str]:
@@ -388,6 +397,9 @@ class DomainKGReader:
         agent (callers fall back to ``AgentRef.mandatory_skills`` in that
         case). ``LibrarySetupError`` propagates (caught by KGRouter).
         """
+        cache_key = (domain_slug, agent_id)
+        if cache_key in self._skills_cache:
+            return self._skills_cache[cache_key]
         try:
             resource = self._resolver.fetch_kg_file(f"knowledge-graph/{domain_slug}/relationships.json")
             data = json.loads(resource.content)
@@ -409,5 +421,5 @@ class DomainKGReader:
                 target = edge.get("target") or edge.get("target_id")
                 if target:
                     skills.append(normalize_kg_ref(target))
+        self._skills_cache[cache_key] = skills
         return skills
-
