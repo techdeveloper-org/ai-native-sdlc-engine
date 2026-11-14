@@ -3,6 +3,8 @@
 > **The Universal, Model-Agnostic Zero-Debt SDLC Automation Framework**
 > *Automate the entire software engineering lifecycle — from task planning to merged PR — with continuous technical debt auto-remediation across any AI model, IDE, terminal, or CI/CD pipeline.*
 
+**Version:** 2.1.1 | **Last Updated:** 2026-11-14
+
 [![Version](https://img.shields.io/badge/Version-2.1.1-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-green)](https://python.org)
 [![Engine](https://img.shields.io/badge/Engine-LangGraph%200.2.0%2B-purple)](https://github.com/langchain-ai/langgraph)
@@ -79,7 +81,7 @@ flowchart LR
 In typical projects, developers write features under time pressure, promising to "clean up technical debt later." The debt never gets resolved until system architecture degrades.
 
 The AI-Native SDLC Engine enforces **Zero-Debt by Construction**:
-- **Continuous Remediation on Every PR**: As code is implemented, the SonarQube orchestrator (`langgraph_engine/sdlc_pipeline/sonarqube/orchestrator.py`) runs static analysis directly against the modified files.
+- **Continuous Remediation on Every PR**: As code is implemented, the SonarQube orchestrator (`sdlc_engine/sonarqube/orchestrator.py`) runs static analysis directly against the modified files.
 - **Automated AST-Level Patching**: If cognitive complexity, code duplication, security hotspots, or bugs are flagged, `auto_fixer.py` generates an AST-level refactoring patch, applies it, and re-validates against test suites.
 - **Dead Code Pruning**: Step 0 Call Graph scanner identifies unreachable classes, unused exports, and orphan functions, ensuring obsolete code is excised before merge.
 - **Extensible Quality Tooling Adapter**: Standardized `QualityGate` interfaces allow plugging in additional linters, security tools, and vulnerability scanners (SonarQube, Semgrep, Snyk, Trivy, CodeQL) without modifying core graph topology.
@@ -518,19 +520,25 @@ The engine coordinates with 13 modular Model Context Protocol (MCP) servers prov
 
 ```
 ai-native-sdlc-engine/
-├── langgraph_engine/             # Core Engine & LangGraph Pipeline StateGraph
-│   ├── orchestrator.py           # Main pipeline definition & wiring
-│   ├── core/                     # Cross-cutting: LazyLoader, ErrorHandler, logger
-│   ├── state/                    # FlowState, StepKeys, WorkflowContextOptimizer
-│   ├── routing/                  # Conditional edge transition logic
-│   ├── sdlc_pipeline/            # Level 2 SDLC Execution Core (Steps 0-8)
-│   │   ├── nodes/                # Step implementation facades
-│   │   ├── sonarqube/            # SonarQube Facade & Automated Refactoring Loop
-│   │   └── architecture/         # Prompt generation & task breakdown helpers
-│   ├── diagrams/                 # 13 UML diagram generators + Draw.io converter
-│   ├── parsers/                  # Multi-language AST parsers (Python, Java, TS, Kotlin)
-│   ├── library/                  # Sibling resource resolver
-│   └── engine_logging/           # OpenTelemetry tracing, Prometheus exporter, error logger
+├── sdlc_engine/                  # Core Engine & Pipeline StateGraph (unified package)
+│   ├── pipeline/                 # Main pipeline orchestrator, builder, runner, checkpoints
+│   ├── nodes/                    # SDLC Step execution nodes (0-8)
+│   ├── routing/                  # StateGraph routing, FlowState, step keys, reducers
+│   ├── agents/                   # Agent & skill selection, catalogue, loader, explainability
+│   ├── analysis/                 # Call graph, complexity, coverage, AST parsers
+│   ├── quality/                  # Quality gates, test generator, contracts, review criteria
+│   ├── sonarqube/                # SonarQube Scanner, auto-fixer, orchestrator
+│   ├── integrations/             # Vendor adapters: GitHub, Jira, Figma, Jenkins, Claude
+│   ├── mcp/                      # FastMCP servers, session hooks, push gate
+│   ├── security/                 # Pre-flight guard, secrets manager, audit logger
+│   ├── diagrams/                 # UML diagram generators + draw.io converter
+│   ├── metrics/                  # Observability, Prometheus exporter, tracing, liveness
+│   ├── context/                  # Session & context sync, cache, dedup, complexity
+│   ├── llm/                      # Hybrid LLM provider calls, model fallback, tokens
+│   ├── standards/                # Standards integration, selector, library adapter
+│   ├── session/                  # Session manager, backup, cache, git operations
+│   ├── adapters/                 # CLI entry points (main, cli_handler, pipeline_invocation)
+│   └── shared/                   # Cross-cutting logging, config, utils, errors, decorators
 ├── docker/                       # Dedicated Containerization Package
 │   ├── Dockerfile                # Multi-stage lean build
 │   ├── docker-compose.yml        # Multi-container orchestration

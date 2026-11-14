@@ -216,15 +216,15 @@ class TestEnforcementScope:
     """Only CODE outside the canonical resolver counts toward the zero condition."""
 
     def test_a_code_occurrence_is_enforced(self):
-        item = gate.Occurrence("langgraph_engine/x.py", 1, "Assign.value", gate.CLASS_CODE, HOME)
+        item = gate.Occurrence("sdlc_engine/x.py", 1, "Assign.value", gate.CLASS_CODE, HOME)
         assert item.is_enforced() is True
 
     def test_the_canonical_resolver_is_excluded_by_name(self):
-        item = gate.Occurrence("src/utils/path_resolver.py", 1, "Assign.value", gate.CLASS_CODE, HOME)
+        item = gate.Occurrence("sdlc_engine/shared/utils/path_resolver.py", 1, "Assign.value", gate.CLASS_CODE, HOME)
         assert item.is_enforced() is False
 
     def test_a_docstring_occurrence_is_never_enforced(self):
-        item = gate.Occurrence("langgraph_engine/x.py", 1, "Module.docstring", gate.CLASS_DOCSTRING, HOME)
+        item = gate.Occurrence("sdlc_engine/x.py", 1, "Module.docstring", gate.CLASS_DOCSTRING, HOME)
         assert item.is_enforced() is False
 
     def test_record_format_matches_the_acceptance_criterion(self):
@@ -236,13 +236,13 @@ class TestGateCanFail:
     """A check that cannot fail proves nothing about the code it passes on."""
 
     def test_gate_fails_on_a_tree_containing_a_code_occurrence(self, tmp_path):
-        package = tmp_path / "langgraph_engine"
+        package = tmp_path / "sdlc_engine"
         package.mkdir()
         (package / "bad.py").write_text('BASE = "' + HOME + '/logs"\n', encoding="utf-8")
         assert gate.main(["--root", str(tmp_path)]) == 1
 
     def test_gate_passes_on_a_tree_with_only_documentation_occurrences(self, tmp_path):
-        package = tmp_path / "langgraph_engine"
+        package = tmp_path / "sdlc_engine"
         package.mkdir()
         (package / "ok.py").write_text(
             '"""Doc ' + HOME + '/logs."""\n\n# note ' + HOME + "/logs\n",
@@ -317,7 +317,7 @@ class TestDocstringRuleAgreesWithLevel0Scanner:
     """
 
     def test_docstring_node_sets_match_across_the_live_scope(self):
-        preflight = pytest.importorskip("langgraph_engine.preflight_guard.path_scan")
+        preflight = pytest.importorskip("sdlc_engine.preflight_guard.path_scan")
         checked = 0
         for path in gate.iter_python_files(REPO_ROOT, gate.DEFAULT_SCOPE):
             try:

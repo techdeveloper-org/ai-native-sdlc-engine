@@ -44,7 +44,7 @@ for _p in [str(_PROJECT_ROOT), str(_SCRIPTS_DIR), str(_SRC_MCP_DIR)]:
 @pytest.fixture(autouse=True)
 def reset_verifier():
     """Guarantee singleton isolation between every integration test."""
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     RuntimeVerifier.reset_for_tests()
     yield
@@ -148,8 +148,8 @@ def test_health_endpoint_violations_total_reflects_accumulated_violations(monkey
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("ENABLE_HEALTH_SERVER", "1")
 
-    from langgraph_engine.runtime_verification.contracts import NodeContract, PreconditionSpec
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.contracts import NodeContract, PreconditionSpec
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
     from scripts.health_server import start_health_server
 
     # Trigger a violation before starting health server
@@ -195,7 +195,7 @@ def test_prometheus_counter_increments_on_violation(monkeypatch):
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("ENABLE_METRICS", "1")
 
-    from langgraph_engine.metrics.exporter import inc_verification_violations
+    from sdlc_engine.metrics.exporter import inc_verification_violations
 
     label_set = {"level": "ERROR", "node": "test_prometheus_node"}
 
@@ -220,7 +220,7 @@ def test_otel_span_invoked_by_verify_node(monkeypatch):
     """verify_node calls create_span exactly once per node execution (ADR-4).
 
     The tracing module is patched at its import path inside decorators.py
-    (B.8 boundary: 'langgraph_engine.runtime_verification.decorators.create_span').
+    (B.8 boundary: 'sdlc_engine.quality.runtime_verification.decorators.create_span').
     This is the correct interception point because decorators.py imports
     create_span at module level from langgraph_engine.tracing.
 
@@ -238,11 +238,11 @@ def test_otel_span_invoked_by_verify_node(monkeypatch):
     span_mock.__exit__ = MagicMock(return_value=False)
 
     with patch(
-        "langgraph_engine.runtime_verification.decorators.create_span",
+        "sdlc_engine.quality.runtime_verification.decorators.create_span",
         return_value=span_mock,
     ) as mock_span_factory:
-        from langgraph_engine.runtime_verification.contracts import NodeContract, PreconditionSpec
-        from langgraph_engine.runtime_verification.decorators import verify_node
+        from sdlc_engine.quality.runtime_verification.contracts import NodeContract, PreconditionSpec
+        from sdlc_engine.quality.runtime_verification.decorators import verify_node
 
         contract = NodeContract(
             node_name="otel_integration_node",
@@ -280,7 +280,7 @@ def test_level1_to_level3_transition_violation_when_session_not_synced(monkeypat
     """
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
 
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
 
@@ -303,7 +303,7 @@ def test_level1_to_level3_transition_passes_with_valid_state(monkeypatch):
     """check_level_transition("level1", "level3", state) returns [] for valid state."""
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
 
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
 

@@ -84,7 +84,7 @@ LAST_STEP = 8
 
 DRY_RUN_SKIP_FROM = 2
 
-DRY_RUN_GUARD_SOURCE = "langgraph_engine/sdlc_pipeline/subgraph.py"
+DRY_RUN_GUARD_SOURCE = "sdlc_engine/pipeline/subgraph.py"
 
 STEP_LABELS = {
     0: "Pre-Analysis & CallGraph Scan",

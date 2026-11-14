@@ -24,19 +24,18 @@ test:
 
 coverage:
 	pytest tests/ --tb=short -q \
-		--cov=langgraph_engine \
-		--cov=src \
+		--cov=sdlc_engine \
 		--cov-report=term-missing \
 		--cov-fail-under=50
 
 # ─── Code Quality ─────────────────────────────────────────────────────────────
 
 lint:
-	ruff check langgraph_engine/ scripts/ src/ --select E,W,F --ignore E501
+	ruff check sdlc_engine/ scripts/ --select E,W,F --ignore E501
 
 fmt:
-	black langgraph_engine/ scripts/ src/ --line-length=120
-	isort langgraph_engine/ scripts/ src/ --profile=black --line-length=120
+	black sdlc_engine/ scripts/ --line-length=120
+	isort sdlc_engine/ scripts/ --profile=black --line-length=120
 
 # ─── Cleanup ─────────────────────────────────────────────────────────────────
 

@@ -34,7 +34,7 @@ _LONG_PROMPT = "A" * 250  # satisfies PROMPT_GEN_CONTRACT min_length=200
 
 def test_get_instance_returns_real_verifier_when_enabled(monkeypatch):
     """With ENABLE_RUNTIME_VERIFICATION=1, get_instance() returns RuntimeVerifier."""
-    from langgraph_engine.runtime_verification.verifier import NullVerifier, RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.verifier import NullVerifier, RuntimeVerifier
 
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     verifier = RuntimeVerifier.get_instance()
@@ -50,7 +50,7 @@ def test_get_instance_returns_real_verifier_when_enabled(monkeypatch):
 
 def test_get_instance_returns_null_verifier_when_disabled(monkeypatch):
     """Without ENABLE_RUNTIME_VERIFICATION=1, get_instance() returns NullVerifier."""
-    from langgraph_engine.runtime_verification.verifier import NullVerifier, RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.verifier import NullVerifier, RuntimeVerifier
 
     monkeypatch.delenv("ENABLE_RUNTIME_VERIFICATION", raising=False)
     verifier = RuntimeVerifier.get_instance()
@@ -67,8 +67,8 @@ def test_pre_analysis_contract_registered_on_enable(monkeypatch):
     """PRE_ANALYSIS_CONTRACT.node_name is present in verifier registry after import."""
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
 
-    from langgraph_engine.runtime_verification.node_contracts import PRE_ANALYSIS_CONTRACT
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.node_contracts import PRE_ANALYSIS_CONTRACT
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
     verifier.register(PRE_ANALYSIS_CONTRACT)
@@ -86,8 +86,8 @@ def test_pre_analysis_node_no_violations_with_valid_state(monkeypatch, base_hook
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "1")
 
-    from langgraph_engine.runtime_verification.node_contracts import PRE_ANALYSIS_CONTRACT
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.node_contracts import PRE_ANALYSIS_CONTRACT
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
     verifier.register(PRE_ANALYSIS_CONTRACT)
@@ -107,8 +107,8 @@ def test_pre_analysis_node_critical_violation_when_user_message_missing(monkeypa
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "1")
 
-    from langgraph_engine.runtime_verification.node_contracts import PRE_ANALYSIS_CONTRACT
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.node_contracts import PRE_ANALYSIS_CONTRACT
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
     verifier.register(PRE_ANALYSIS_CONTRACT)
@@ -130,8 +130,8 @@ def test_prompt_gen_postcondition_passes_with_long_prompt(monkeypatch):
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "1")
 
-    from langgraph_engine.runtime_verification.node_contracts import PROMPT_GEN_CONTRACT
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.node_contracts import PROMPT_GEN_CONTRACT
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
     verifier.register(PROMPT_GEN_CONTRACT)
@@ -152,8 +152,8 @@ def test_prompt_gen_postcondition_fails_with_short_prompt(monkeypatch):
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "1")
 
-    from langgraph_engine.runtime_verification.node_contracts import PROMPT_GEN_CONTRACT
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.node_contracts import PROMPT_GEN_CONTRACT
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
     verifier.register(PROMPT_GEN_CONTRACT)
@@ -174,8 +174,8 @@ def test_verify_node_decorator_creates_wrapper_when_enabled(monkeypatch):
     """With ENABLE_RUNTIME_VERIFICATION=1, verify_node wraps the function (__rv_wrapped__=True)."""
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
 
-    from langgraph_engine.runtime_verification.contracts import NodeContract, PostconditionSpec, PreconditionSpec
-    from langgraph_engine.runtime_verification.decorators import verify_node
+    from sdlc_engine.quality.runtime_verification.contracts import NodeContract, PostconditionSpec, PreconditionSpec
+    from sdlc_engine.quality.runtime_verification.decorators import verify_node
 
     contract = NodeContract(
         node_name="hook_mode_test_node",
@@ -200,8 +200,8 @@ def test_verify_node_passes_through_original_fn_when_disabled(monkeypatch):
     """With ENABLE_RUNTIME_VERIFICATION=0, verify_node returns original fn unchanged."""
     monkeypatch.delenv("ENABLE_RUNTIME_VERIFICATION", raising=False)
 
-    from langgraph_engine.runtime_verification.contracts import NodeContract
-    from langgraph_engine.runtime_verification.decorators import verify_node
+    from sdlc_engine.quality.runtime_verification.contracts import NodeContract
+    from sdlc_engine.quality.runtime_verification.decorators import verify_node
 
     contract = NodeContract(
         node_name="hook_mode_disabled_node",
@@ -231,8 +231,8 @@ def test_otel_span_attributes_set_via_decorators_module(monkeypatch, mock_create
 
     mock_patch, span_mock = mock_create_span
 
-    from langgraph_engine.runtime_verification.contracts import NodeContract, PreconditionSpec
-    from langgraph_engine.runtime_verification.decorators import verify_node
+    from sdlc_engine.quality.runtime_verification.contracts import NodeContract, PreconditionSpec
+    from sdlc_engine.quality.runtime_verification.decorators import verify_node
 
     contract = NodeContract(
         node_name="otel_span_test_node",
@@ -267,8 +267,8 @@ def test_build_report_reflects_hook_mode_violations(monkeypatch):
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "1")
 
-    from langgraph_engine.runtime_verification.contracts import NodeContract, PreconditionSpec
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.contracts import NodeContract, PreconditionSpec
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
 

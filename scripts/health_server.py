@@ -80,7 +80,7 @@ def _collect_verification_snapshot():
     if os.environ.get("ENABLE_RUNTIME_VERIFICATION", "0") != "1":
         return _ZERO
     try:
-        from langgraph_engine.runtime_verification.verifier import RuntimeVerifier  # noqa: PLC0415
+        from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier  # noqa: PLC0415
     except ImportError:
         return _ZERO
     verifier = RuntimeVerifier.get_instance()

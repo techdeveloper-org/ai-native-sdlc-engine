@@ -18,7 +18,7 @@ scripts_dir = str(Path(__file__).resolve().parent.parent / "scripts")
 if scripts_dir not in sys.path:
     sys.path.insert(0, scripts_dir)
 
-from langgraph_engine.uml_generators import (  # noqa: E402
+from sdlc_engine.diagrams.uml.legacy_generator import (  # noqa: E402
     KrokiRenderer,
     UMLAstAnalyzer,
     UMLDiagramGenerator,
@@ -319,7 +319,7 @@ class TestKrokiRenderer:
         mock_response.status_code = 200
         mock_response.content = b"<svg>test</svg>"
 
-        with patch("langgraph_engine.uml_generators.KrokiRenderer.render") as mock:
+        with patch("sdlc_engine.diagrams.uml.legacy_generator.KrokiRenderer.render") as mock:
             mock.return_value = b"<svg>test</svg>"
             result = renderer.render("@startuml\nclass A\n@enduml", "plantuml", "svg")
         assert result == b"<svg>test</svg>"
@@ -327,7 +327,7 @@ class TestKrokiRenderer:
     def test_render_mermaid_svg(self):
         """Kroki API call for Mermaid (mocked)."""
         renderer = KrokiRenderer()
-        with patch("langgraph_engine.uml_generators.KrokiRenderer.render") as mock:
+        with patch("sdlc_engine.diagrams.uml.legacy_generator.KrokiRenderer.render") as mock:
             mock.return_value = b"<svg>mermaid</svg>"
             result = renderer.render("classDiagram\n    class A", "mermaid", "svg")
         assert result == b"<svg>mermaid</svg>"
@@ -433,8 +433,8 @@ class TestIntegration:
         analyzer = UMLAstAnalyzer(str(project_root))
 
         # Should find classes in the project
-        classes = analyzer.extract_all_classes(project_root / "langgraph_engine")
-        assert len(classes) > 0, "Should find classes in langgraph_engine"
+        classes = analyzer.extract_all_classes(project_root / "sdlc_engine")
+        assert len(classes) > 0, "Should find classes in sdlc_engine"
 
         # Generate class diagram
         gen = UMLDiagramGenerator(str(project_root), "uml")
@@ -508,7 +508,7 @@ class TestCallGraphIntegration:
 
     def test_get_call_graph_with_prebuilt(self, tmp_project):
         """When call_graph is injected at construction, _get_call_graph returns it."""
-        from langgraph_engine.analysis.call_graph_builder import build_call_graph
+        from sdlc_engine.analysis.call_graph_builder import build_call_graph
 
         cg = build_call_graph(str(tmp_project))
         if cg is None:
@@ -521,7 +521,7 @@ class TestCallGraphIntegration:
 
     def test_classes_from_call_graph(self, tmp_project):
         """_classes_from_call_graph() returns list of ClassInfo dicts."""
-        from langgraph_engine.analysis.call_graph_builder import build_call_graph
+        from sdlc_engine.analysis.call_graph_builder import build_call_graph
 
         cg = build_call_graph(str(tmp_project))
         if cg is None or not cg.classes:
@@ -552,7 +552,7 @@ class TestCallGraphIntegration:
 
     def test_dep_graph_from_call_graph(self, tmp_project):
         """_dep_graph_from_call_graph() returns dict mapping module -> set of deps."""
-        from langgraph_engine.analysis.call_graph_builder import build_call_graph
+        from sdlc_engine.analysis.call_graph_builder import build_call_graph
 
         cg = build_call_graph(str(tmp_project))
         gen = UMLDiagramGenerator(str(tmp_project))
@@ -573,7 +573,7 @@ class TestCallGraphIntegration:
 
     def test_call_chains_from_call_graph(self, tmp_project):
         """_call_chains_from_call_graph() returns list of chain dicts."""
-        from langgraph_engine.analysis.call_graph_builder import build_call_graph
+        from sdlc_engine.analysis.call_graph_builder import build_call_graph
 
         cg = build_call_graph(str(tmp_project))
         if cg is None:
@@ -595,7 +595,7 @@ class TestCallGraphIntegration:
 
     def test_call_chains_has_fqn_data(self, tmp_project):
         """call_chains produced from CallGraph have non-empty caller_fqn and callee_fqn."""
-        from langgraph_engine.analysis.call_graph_builder import build_call_graph
+        from sdlc_engine.analysis.call_graph_builder import build_call_graph
 
         cg = build_call_graph(str(tmp_project))
         if cg is None:
@@ -693,7 +693,7 @@ class TestCallGraphDiagram:
 
     def test_call_graph_diagram_with_prebuilt_graph(self, tmp_path):
         """generate_call_graph_diagram() accepts a pre-built CallGraph object."""
-        from langgraph_engine.analysis.call_graph_builder import build_call_graph
+        from sdlc_engine.analysis.call_graph_builder import build_call_graph
 
         project = self._make_two_class_project(tmp_path)
         cg = build_call_graph(str(project))
@@ -875,7 +875,7 @@ class TestSequenceDiagramFQN:
 
     def test_sequence_diagram_from_call_graph(self, tmp_path):
         """Sequence diagram from a project with two interacting classes uses FQN path."""
-        from langgraph_engine.analysis.call_graph_builder import build_call_graph
+        from sdlc_engine.analysis.call_graph_builder import build_call_graph
 
         src = tmp_path / "interaction.py"
         src.write_text(

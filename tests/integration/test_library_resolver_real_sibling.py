@@ -21,14 +21,14 @@ if str(_PROJECT_ROOT) not in sys.path:
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
-import utils.import_manager as import_manager_module  # noqa: E402
-from langgraph_engine.library.resolver import (  # noqa: E402
+import sdlc_engine.shared.utils.import_manager as import_manager_module  # noqa: E402
+from sdlc_engine.standards.resolver import (  # noqa: E402
     _reset_library_root_cache,
     build_default_resolver,
     locate_library_root,
 )
-from langgraph_engine.routing.kg_router import KGRouter  # noqa: E402
-from utils.import_manager import ImportManager  # noqa: E402
+from sdlc_engine.routing.kg_router import KGRouter  # noqa: E402
+from sdlc_engine.shared.utils.import_manager import ImportManager  # noqa: E402
 
 _REAL_LIBRARY_ROOT = _PROJECT_ROOT.parent / "claude-global-library"
 
@@ -196,8 +196,8 @@ def test_prompt_contains_real_skill_content():
     content, not an invented rubric. This reads the real SKILL.md from the
     sibling claude-global-library and asserts a specific, real phrase from it
     appears verbatim in the generated prompt."""
-    from langgraph_engine.sdlc_pipeline import faithfulness_gate
-    from langgraph_engine.sdlc_pipeline.faithfulness_gate import build_faithfulness_prompt
+    from sdlc_engine.nodes import faithfulness_gate
+    from sdlc_engine.nodes.faithfulness_gate import build_faithfulness_prompt
 
     resolver = build_default_resolver()
     resource = resolver.fetch_skill("hallucination-detection-core")

@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-_MCP_DIR = Path(__file__).parent.parent / "src" / "mcp"
+_MCP_DIR = Path(__file__).parent.parent / "sdlc_engine" / "mcp"
 
 
 def _load_module(name, file_path):

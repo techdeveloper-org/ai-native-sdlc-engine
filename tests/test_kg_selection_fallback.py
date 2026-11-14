@@ -41,8 +41,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from langgraph_engine.library.resolver import LibrarySetupError  # noqa: E402
-from langgraph_engine.selection import (  # noqa: E402
+from sdlc_engine.standards.resolver import LibrarySetupError  # noqa: E402
+from sdlc_engine.selection import (  # noqa: E402
     OUTCOME_LOW_CONFIDENCE,
     OUTCOME_NO_MATCH,
     OUTCOME_SELECTED,
@@ -57,8 +57,8 @@ from langgraph_engine.selection import (  # noqa: E402
     outcome_for,
     select_agents,
 )
-from langgraph_engine.selection import selector as selector_module  # noqa: E402
-from langgraph_engine.selection.selector import (  # noqa: E402
+from sdlc_engine.selection import selector as selector_module  # noqa: E402
+from sdlc_engine.selection.selector import (  # noqa: E402
     REASON_BELOW_THRESHOLD,
     REASON_KG_UNREADABLE,
     REASON_NO_DOMAIN_SIGNAL,

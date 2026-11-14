@@ -29,7 +29,7 @@ _ENGINE_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_ENGINE_ROOT) not in sys.path:
     sys.path.insert(0, str(_ENGINE_ROOT))
 
-from langgraph_engine.library.resolver import ENV_LIBRARY_PATH, LibrarySetupError, locate_library_root  # noqa: E402
+from sdlc_engine.standards.resolver import ENV_LIBRARY_PATH, LibrarySetupError, locate_library_root  # noqa: E402
 
 EXIT_OK = 0
 EXIT_SIBLING_NOT_FOUND = 2

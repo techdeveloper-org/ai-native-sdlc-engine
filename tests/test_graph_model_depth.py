@@ -19,7 +19,7 @@ import logging
 
 import pytest
 
-from langgraph_engine.parsers.graph_model import (
+from sdlc_engine.parsers.graph_model import (
     DEFAULT_MAX_DEPTH,
     DEFAULT_MAX_PATHS,
     CallGraph,
@@ -118,7 +118,7 @@ class TestComputeCallPathsPathsLimit:
 
     def test_hitting_max_paths_logs_warning(self, caplog):
         g = _build_star_graph(fanout=10)
-        with caplog.at_level(logging.WARNING, logger="langgraph_engine.parsers.graph_model"):
+        with caplog.at_level(logging.WARNING, logger="sdlc_engine.parsers.graph_model"):
             g.compute_call_paths(max_paths=5)
         # Check that a warning was emitted mentioning the cap.
         matching = [
@@ -135,7 +135,7 @@ class TestComputeCallPathsEnvVarOverride:
         monkeypatch.setenv("CLAUDE_CG_MAX_DEPTH", "7")
         monkeypatch.setenv("CLAUDE_CG_MAX_PATHS", "13")
 
-        import langgraph_engine.parsers.graph_model as gm
+        import sdlc_engine.parsers.graph_model as gm
 
         importlib.reload(gm)
         try:
@@ -151,7 +151,7 @@ class TestComputeCallPathsEnvVarOverride:
         monkeypatch.setenv("CLAUDE_CG_MAX_DEPTH", "not_a_number")
         monkeypatch.setenv("CLAUDE_CG_MAX_PATHS", "")
 
-        import langgraph_engine.parsers.graph_model as gm
+        import sdlc_engine.parsers.graph_model as gm
 
         importlib.reload(gm)
         try:

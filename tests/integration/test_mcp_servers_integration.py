@@ -57,7 +57,7 @@ class TestGitMcpServerToolSchema:
         mock_repo.index.diff.return_value = []
         mock_repo.untracked_files = []
 
-        with patch("base.clients.GitRepoClient.for_path", return_value=mock_repo):
+        with patch("sdlc_engine.mcp.base.clients.GitRepoClient.for_path", return_value=mock_repo):
             try:
                 from git_mcp_server import git_status
             except ImportError:
@@ -88,7 +88,7 @@ class TestGitMcpServerToolSchema:
         mock_repo.index.diff.side_effect = [modified, []]
         mock_repo.untracked_files = ["notes.txt"]
 
-        with patch("base.clients.GitRepoClient.for_path", return_value=mock_repo):
+        with patch("sdlc_engine.mcp.base.clients.GitRepoClient.for_path", return_value=mock_repo):
             try:
                 from git_mcp_server import git_status
             except ImportError:

@@ -66,8 +66,8 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_ROOT = REPO_ROOT / "plugin"
 SCRIPT_DIR = PLUGIN_ROOT / "scripts"
-RUNBOOK_PATH = REPO_ROOT / "docs" / "guides" / "uninstall-residue.md"
-PROCEDURE_DOC = REPO_ROOT / "docs" / "guides" / "fr31-uninstall-residue-verification.md"
+RUNBOOK_PATH = REPO_ROOT / "docs" / "guides" / "uninstall-residue-runbook.md"
+PROCEDURE_DOC = REPO_ROOT / "docs" / "guides" / "fr31-uninstall-residue-verification-guide.md"
 RUNBOOK_TEST_PATH = Path(__file__).resolve().parent / "test_uninstall_residue_runbook.py"
 TESTS_DIR = Path(__file__).resolve().parent
 

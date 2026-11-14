@@ -14,8 +14,8 @@ import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-GENERATOR = REPO_ROOT / "langgraph_engine" / "sdlc_pipeline" / "documentation_generator.py"
-MANAGER = REPO_ROOT / "langgraph_engine" / "sdlc_pipeline" / "documentation_manager.py"
+GENERATOR = REPO_ROOT / "sdlc_engine" / "nodes" / "documentation_generator.py"
+MANAGER = REPO_ROOT / "sdlc_engine" / "nodes" / "documentation_manager.py"
 
 
 def _generator_source():

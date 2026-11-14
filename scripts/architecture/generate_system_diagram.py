@@ -745,7 +745,7 @@ if __name__ == "__main__":
     print("Shareable URL:")
     sys.path.insert(0, str(project_root / "scripts"))
     try:
-        from langgraph_engine.diagrams.drawio_converter import get_shareable_url
+        from sdlc_engine.diagrams.drawio_converter import get_shareable_url
 
         url = get_shareable_url(xml)
         print(url[:120] + "..." if len(url) > 120 else url)

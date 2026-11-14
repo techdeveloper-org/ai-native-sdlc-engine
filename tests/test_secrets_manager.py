@@ -30,7 +30,7 @@ if str(_SCRIPTS_DIR) not in sys.path:
 # ---------------------------------------------------------------------------
 
 try:
-    from langgraph_engine.security.secrets_manager import (
+    from sdlc_engine.security.secrets_manager import (
         REQUIRED_SECRETS,
         SecretsMissingError,
         rotate_key_hint,
@@ -175,7 +175,7 @@ class TestRotateKeyHintWarnsWithin7Days:
         saved = os.environ.get("ANTHROPIC_KEY_EXPIRY")
         try:
             os.environ["ANTHROPIC_KEY_EXPIRY"] = expiry
-            with caplog.at_level(logging.WARNING, logger="langgraph_engine.secrets_manager"):
+            with caplog.at_level(logging.WARNING, logger="sdlc_engine.security.secrets_manager"):
                 rotate_key_hint()
             warning_records = [r for r in caplog.records if r.levelno >= logging.WARNING]
             assert len(warning_records) > 0, "Expected WARNING log for key expiring in 3 days"
@@ -191,7 +191,7 @@ class TestRotateKeyHintWarnsWithin7Days:
         saved = os.environ.get("ANTHROPIC_KEY_EXPIRY")
         try:
             os.environ["ANTHROPIC_KEY_EXPIRY"] = expiry
-            with caplog.at_level(logging.WARNING, logger="langgraph_engine.secrets_manager"):
+            with caplog.at_level(logging.WARNING, logger="sdlc_engine.security.secrets_manager"):
                 rotate_key_hint()
             warning_records = [r for r in caplog.records if r.levelno >= logging.WARNING]
             assert len(warning_records) > 0
@@ -207,7 +207,7 @@ class TestRotateKeyHintWarnsWithin7Days:
         saved = os.environ.get("ANTHROPIC_KEY_EXPIRY")
         try:
             os.environ["ANTHROPIC_KEY_EXPIRY"] = expiry
-            with caplog.at_level(logging.WARNING, logger="langgraph_engine.secrets_manager"):
+            with caplog.at_level(logging.WARNING, logger="sdlc_engine.security.secrets_manager"):
                 rotate_key_hint()
             warning_records = [r for r in caplog.records if r.levelno >= logging.WARNING]
             assert len(warning_records) > 0
@@ -232,12 +232,12 @@ class TestRotateKeyHintSilentWhenFarFuture:
         saved = os.environ.get("ANTHROPIC_KEY_EXPIRY")
         try:
             os.environ["ANTHROPIC_KEY_EXPIRY"] = expiry
-            with caplog.at_level(logging.WARNING, logger="langgraph_engine.secrets_manager"):
+            with caplog.at_level(logging.WARNING, logger="sdlc_engine.security.secrets_manager"):
                 rotate_key_hint()
             warning_records = [
                 r
                 for r in caplog.records
-                if r.levelno >= logging.WARNING and "langgraph_engine.secrets_manager" in (r.name or "")
+                if r.levelno >= logging.WARNING and "sdlc_engine.security.secrets_manager" in (r.name or "")
             ]
             assert len(warning_records) == 0, "Unexpected WARNING for key expiring in 30 days: {}".format(
                 [r.message for r in warning_records]
@@ -252,7 +252,7 @@ class TestRotateKeyHintSilentWhenFarFuture:
         """When ANTHROPIC_KEY_EXPIRY is not set, no WARNING must be emitted."""
         saved = os.environ.pop("ANTHROPIC_KEY_EXPIRY", None)
         try:
-            with caplog.at_level(logging.WARNING, logger="langgraph_engine.secrets_manager"):
+            with caplog.at_level(logging.WARNING, logger="sdlc_engine.security.secrets_manager"):
                 rotate_key_hint()
             warning_records = [
                 r for r in caplog.records if r.levelno >= logging.WARNING and "rotation" in r.getMessage().lower()

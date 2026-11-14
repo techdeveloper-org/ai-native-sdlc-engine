@@ -16,7 +16,7 @@ project_root = str(Path(__file__).resolve().parent.parent)
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from langgraph_engine.diagrams import legacy_generator as lg  # noqa: E402
+from sdlc_engine.diagrams import legacy_generator as lg  # noqa: E402
 
 UDM_FIXTURES = {
     "class": {

@@ -32,27 +32,7 @@ for _p in [_REPO_ROOT, _SCRIPTS]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-_LE_ROOT = Path(_REPO_ROOT) / "langgraph_engine"
-
-# Stub langgraph_engine as a bare namespace (skip __init__.py)
-_le = types.ModuleType("langgraph_engine")
-_le.__path__ = [str(_LE_ROOT)]
-_le.__package__ = "langgraph_engine"
-sys.modules["langgraph_engine"] = _le
-
-
-def _load_module(name, rel_path):
-    full_path = _LE_ROOT / rel_path
-    spec = importlib.util.spec_from_file_location(name, str(full_path))
-    mod = importlib.util.module_from_spec(spec)
-    mod.__package__ = "langgraph_engine"
-    sys.modules[name] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_cp_mod = _load_module("langgraph_engine.checkpoint_manager", "checkpoint_manager.py")
-CheckpointManager = _cp_mod.CheckpointManager
+from sdlc_engine.pipeline.checkpoint_manager import CheckpointManager
 
 
 # ---------------------------------------------------------------------------

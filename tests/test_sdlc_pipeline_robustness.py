@@ -77,7 +77,7 @@ class TestStepTimeout(unittest.TestCase):
     LIVE_STEPS = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
     def setUp(self):
-        from langgraph_engine.timeout_wrapper import STEP_TIMEOUTS, StepTimeout, run_with_timeout
+        from sdlc_engine.pipeline.timeout_wrapper import STEP_TIMEOUTS, StepTimeout, run_with_timeout
 
         self.StepTimeout = StepTimeout
         self.run_with_timeout = run_with_timeout
@@ -110,7 +110,7 @@ class TestStepTimeout(unittest.TestCase):
         import importlib
         import os
 
-        import langgraph_engine.timeout_wrapper as module
+        import sdlc_engine.timeout_wrapper as module
 
         previous = os.environ.get("STEP4_TIMEOUT")
         os.environ["STEP4_TIMEOUT"] = "45"
@@ -217,7 +217,7 @@ class TestConflictResolver(unittest.TestCase):
     """Tests for ConflictResolver: skill, standard, and branch conflicts."""
 
     def setUp(self):
-        from langgraph_engine.conflict_resolver import ConflictResolver
+        from sdlc_engine.pipeline.conflict_resolver import ConflictResolver
 
         self.session_dir = tempfile.mkdtemp()
         self.ConflictResolver = ConflictResolver
@@ -353,7 +353,7 @@ class TestReviewCriteria(unittest.TestCase):
     """Tests for ReviewCriteria code review checklist."""
 
     def setUp(self):
-        from langgraph_engine.review_criteria import REVIEW_RULES, SEVERITY_BLOCKING, SEVERITY_WARNING, ReviewCriteria
+        from sdlc_engine.quality.review_criteria import REVIEW_RULES, SEVERITY_BLOCKING, SEVERITY_WARNING, ReviewCriteria
 
         self.tmpdir = tempfile.mkdtemp()
         self.criteria = ReviewCriteria(project_root=self.tmpdir)

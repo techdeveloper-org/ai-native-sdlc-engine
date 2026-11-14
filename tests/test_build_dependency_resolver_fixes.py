@@ -97,7 +97,7 @@ class TestD1StepWrapperGuard:
             return {"error": None}
 
         monkeypatch.setattr(
-            "langgraph_engine.build_dependency_resolver.resolver.resolve_and_enhance",
+            "sdlc_engine.pipeline.resolver.resolve_and_enhance",
             mock_resolve_and_enhance,
             raising=False,
         )
@@ -171,7 +171,7 @@ class TestD2EdgeDedupSchema:
         Sub-graph edges with {"from": ..., "to": ..., "type": ...} should be
         merged into main_graph -- edge count increases by count of unique edges.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         main = _make_graph(edges=[])
         sub = _make_graph(
@@ -192,7 +192,7 @@ class TestD2EdgeDedupSchema:
         Duplicate edge (same from/to/type) in sub_graph must be deduplicated.
         Edge count increases by count of UNIQUE (from, to, type) tuples only.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         main = _make_graph(edges=[])
         sub = _make_graph(
@@ -224,7 +224,7 @@ class TestD2EdgeDedupSchema:
 
         Total = 3 edges (correct behavior -- namespace prevents silent collision).
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         existing_edge = {"from": "A.foo", "to": "B.bar", "type": "call"}
         main = _make_graph(edges=[existing_edge])
@@ -256,7 +256,7 @@ class TestD2EdgeDedupSchema:
         Sub-graph edges using caller/callee schema (not from/to) should also be
         recognized and deduped correctly using the fallback key extraction.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         main = _make_graph(edges=[])
         sub = _make_graph(
@@ -286,7 +286,7 @@ class TestD3FQNNamespacing:
         After merging, sub_graph node 'helper.Util.method' should appear in
         main_graph as 'dep::mylib::helper.Util.method'.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         main = _make_graph()
         sub = _make_graph(
@@ -310,7 +310,7 @@ class TestD3FQNNamespacing:
         - main owns 'helper.Util.method' (unchanged)
         - dep's copy becomes 'dep::depA::helper.Util.method'
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         main = _make_graph(
             nodes={"helper.Util.method": {"owner": "main"}},
@@ -334,7 +334,7 @@ class TestD3FQNNamespacing:
         After merge, edge.from and edge.to in the sub_graph edges must be
         rewritten to include the dep:: prefix.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         main = _make_graph()
         sub = _make_graph(
@@ -376,7 +376,7 @@ class TestD4ParentSearchEnvGate:
 
         root = tmp_path  # search root -- dep_dir is NOT under this
 
-        from langgraph_engine.build_dependency_resolver.parsers import _find_local_source
+        from sdlc_engine.pipeline.parsers import _find_local_source
 
         result = _find_local_source(root, "my_secret_dep")
         # Should NOT find it (parent search disabled)
@@ -395,7 +395,7 @@ class TestD4ParentSearchEnvGate:
 
         root = tmp_path
 
-        from langgraph_engine.build_dependency_resolver.parsers import _dir_has_code, _find_local_source
+        from sdlc_engine.pipeline.parsers import _dir_has_code, _find_local_source
 
         # Clear lru_cache so env change takes effect
         _dir_has_code.cache_clear()
@@ -417,7 +417,7 @@ class TestD5BoundedDirHasCode:
         """
         A directory with 50 mixed files (code and non-code) should return True quickly.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _dir_has_code
+        from sdlc_engine.pipeline.parsers import _dir_has_code
 
         _dir_has_code.cache_clear()
 
@@ -437,7 +437,7 @@ class TestD5BoundedDirHasCode:
         """
         A directory with only .txt/.json files must return False.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _dir_has_code
+        from sdlc_engine.pipeline.parsers import _dir_has_code
 
         _dir_has_code.cache_clear()
 
@@ -453,7 +453,7 @@ class TestD5BoundedDirHasCode:
         Second call to _dir_has_code with the same path must be faster than
         first call (or equal) -- demonstrates caching effect.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _dir_has_code
+        from sdlc_engine.pipeline.parsers import _dir_has_code
 
         _dir_has_code.cache_clear()
 
@@ -489,7 +489,7 @@ class TestD5BoundedDirHasCode:
         On a directory tree exceeding max_files_scanned (1000), function must
         terminate and return within a reasonable time (< 2 seconds).
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _dir_has_code
+        from sdlc_engine.pipeline.parsers import _dir_has_code
 
         _dir_has_code.cache_clear()
 
@@ -524,7 +524,7 @@ class TestD6CircularImportBroken:
         Importing PYTHON_WELL_KNOWN from registries must succeed without
         triggering any ImportError (no circular dependency).
         """
-        from langgraph_engine.build_dependency_resolver.registries import PYTHON_WELL_KNOWN
+        from sdlc_engine.pipeline.registries import PYTHON_WELL_KNOWN
 
         assert isinstance(PYTHON_WELL_KNOWN, frozenset), "PYTHON_WELL_KNOWN must be a frozenset"
         assert len(PYTHON_WELL_KNOWN) > 0, "PYTHON_WELL_KNOWN must not be empty"
@@ -538,7 +538,7 @@ class TestD6CircularImportBroken:
         """
 
         # Import parsers module to trigger its imports
-        from langgraph_engine.build_dependency_resolver import parsers as parsers_mod
+        from sdlc_engine.pipeline import parsers as parsers_mod
 
         # Verify parsers module has the PYTHON_WELL_KNOWN_NORMALIZED attribute
         # (imported directly from registries)
@@ -552,7 +552,7 @@ class TestD6CircularImportBroken:
         All 5 frozensets (PYTHON, JAVA, NODE, GO, RUST) and their normalized
         variants must exist in registries.py.
         """
-        from langgraph_engine.build_dependency_resolver import registries
+        from sdlc_engine.pipeline import registries
 
         for name in (
             "PYTHON_WELL_KNOWN",
@@ -588,7 +588,7 @@ class TestD7DelAttrCacheInvalidation:
 
         The D7 fix explicitly uses delattr, so after enhance the attrs should be gone.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import enhance_call_graph
+        from sdlc_engine.pipeline.resolver import enhance_call_graph
 
         graph = _make_graph()
         # Pre-populate the cache attributes (simulating stale state)
@@ -612,7 +612,7 @@ class TestD7DelAttrCacheInvalidation:
         If the cached attrs do NOT exist on the graph, delattr must not raise.
         The fix uses try/except AttributeError -- confirm it is truly a no-op.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import enhance_call_graph
+        from sdlc_engine.pipeline.resolver import enhance_call_graph
 
         graph = _make_graph()
         # Confirm attrs are absent
@@ -649,8 +649,8 @@ class TestD8DeltaTracking:
         The underlying import defect (resolver.py does not import _merge_sub_graph)
         is a separate finding that must be reported to the implementation team.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
-        from langgraph_engine.build_dependency_resolver.resolver import enhance_call_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.resolver import enhance_call_graph
 
         # Build main graph with 10 classes, 50 methods
         main_classes = {f"Main.Class{i}": {} for i in range(10)}
@@ -689,7 +689,7 @@ class TestD8DeltaTracking:
         We simulate having classes added to main_graph BEFORE enhance_call_graph
         reads the after stats, to confirm the delta computation.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import enhance_call_graph
+        from sdlc_engine.pipeline.resolver import enhance_call_graph
 
         # Graph starts with 5 classes
         main_graph = _make_graph(
@@ -727,7 +727,7 @@ class TestD8DeltaTracking:
         so delta = sub-graph's count).
         When resolved_deps is empty: new_classes == 0, new_methods == 0.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import enhance_call_graph
+        from sdlc_engine.pipeline.resolver import enhance_call_graph
 
         graph = _make_graph(
             classes={"A.Class": {}},
@@ -743,7 +743,7 @@ class TestD8DeltaTracking:
         """
         When graph=None, enhance_call_graph must return a safe fallback dict with error='graph is None'.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import enhance_call_graph
+        from sdlc_engine.pipeline.resolver import enhance_call_graph
 
         result = enhance_call_graph(None, [])
 
@@ -767,7 +767,7 @@ class TestD12NormalizedFrozensetLookup:
 
     def test_classify_dep_flask_is_external_known(self, tmp_path):
         """'flask' must classify as external_known via normalized lookup."""
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep
+        from sdlc_engine.pipeline.parsers import _classify_dep
 
         dep = self._make_dep("flask")
         result = _classify_dep(tmp_path, dep, "python-pip")
@@ -779,7 +779,7 @@ class TestD12NormalizedFrozensetLookup:
         and still NOT match (it's not in PYTHON_WELL_KNOWN). But 'sqlalchemy'
         (which IS in the set) should match.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep
+        from sdlc_engine.pipeline.parsers import _classify_dep
 
         # sqlalchemy is in the well-known set
         dep = self._make_dep("sqlalchemy")
@@ -788,7 +788,7 @@ class TestD12NormalizedFrozensetLookup:
 
     def test_classify_dep_requests_is_external_known(self, tmp_path):
         """'requests' must classify as external_known."""
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep
+        from sdlc_engine.pipeline.parsers import _classify_dep
 
         dep = self._make_dep("requests")
         result = _classify_dep(tmp_path, dep, "python-pip")
@@ -799,7 +799,7 @@ class TestD12NormalizedFrozensetLookup:
         Classifying the same dep twice must return the same result.
         Frozenset is immutable; iteration order does not affect membership test.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep
+        from sdlc_engine.pipeline.parsers import _classify_dep
 
         dep = self._make_dep("django")
         result1 = _classify_dep(tmp_path, dep, "python-pip")
@@ -811,7 +811,7 @@ class TestD12NormalizedFrozensetLookup:
         """
         An unknown package name should NOT be classified as external_known.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep
+        from sdlc_engine.pipeline.parsers import _classify_dep
 
         dep = self._make_dep("totally-unknown-pkg-xyz123")
         result = _classify_dep(tmp_path, dep, "python-pip")
@@ -831,7 +831,7 @@ class TestD14SingleStrategyImport:
         _import_call_graph_builder must not mutate sys.path.
         Capture sys.path before and after; assert it is unchanged.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _import_call_graph_builder
+        from sdlc_engine.pipeline.parsers import _import_call_graph_builder
 
         path_before = sys.path[:]
         _import_call_graph_builder(Path("."))
@@ -849,7 +849,7 @@ class TestD14SingleStrategyImport:
         """
         import inspect
 
-        from langgraph_engine.build_dependency_resolver import parsers
+        from sdlc_engine.pipeline import parsers
 
         source = inspect.getsource(parsers._import_call_graph_builder)
         assert "spec_from_file_location" not in source, (
@@ -862,7 +862,7 @@ class TestD14SingleStrategyImport:
         _import_call_graph_builder must return either None (import failed) or
         a callable class (import succeeded). Never raises.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _import_call_graph_builder
+        from sdlc_engine.pipeline.parsers import _import_call_graph_builder
 
         result = _import_call_graph_builder(Path("."))
         assert result is None or callable(result), f"Must return None or callable, got {type(result)}"
@@ -880,7 +880,7 @@ class TestD15BuildSystemsPlural:
         """
         Project with only pom.xml: build_system='maven', build_systems=['maven'].
         """
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         (tmp_path / "pom.xml").write_text("<project/>")
 
@@ -896,7 +896,7 @@ class TestD15BuildSystemsPlural:
         Project with pom.xml AND package.json: build_systems contains both
         'maven' and 'npm'. build_system (singular) is the first priority match = 'maven'.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         (tmp_path / "pom.xml").write_text("<project/>")
         (tmp_path / "package.json").write_text('{"name": "test"}')
@@ -916,7 +916,7 @@ class TestD15BuildSystemsPlural:
         """
         Empty project dir: build_system='unknown', build_systems=[].
         """
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         result = detect_build_system(tmp_path)
 
@@ -928,7 +928,7 @@ class TestD15BuildSystemsPlural:
         """
         Non-existent project root: returns error with unknown systems.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         result = detect_build_system("/nonexistent/path/that/cannot/exist/abc123xyz")
 
@@ -939,7 +939,7 @@ class TestD15BuildSystemsPlural:
         """
         Project with requirements.txt AND pyproject.toml: both python build systems detected.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         (tmp_path / "requirements.txt").write_text("flask>=2.0\n")
         (tmp_path / "pyproject.toml").write_text("[project]\nname='test'\n")
@@ -968,14 +968,14 @@ class TestD6CrossModuleImport:
         resolver.py must re-export PYTHON_WELL_KNOWN (and others) from registries.
         This is the backward-compatibility shim described in the resolver docstring.
         """
-        from langgraph_engine.build_dependency_resolver import resolver
+        from sdlc_engine.pipeline import resolver
 
         assert hasattr(resolver, "PYTHON_WELL_KNOWN"), "resolver must re-export PYTHON_WELL_KNOWN"
         assert hasattr(resolver, "JAVA_WELL_KNOWN"), "resolver must re-export JAVA_WELL_KNOWN"
         assert hasattr(resolver, "NODE_WELL_KNOWN"), "resolver must re-export NODE_WELL_KNOWN"
 
         # Confirm they are the same objects as registries (not copies)
-        from langgraph_engine.build_dependency_resolver import registries
+        from sdlc_engine.pipeline import registries
 
         assert (
             resolver.PYTHON_WELL_KNOWN is registries.PYTHON_WELL_KNOWN
@@ -1004,7 +1004,7 @@ class TestTransitiveDepthAfterMerge:
 
         This validates that merging preserves the full transitive depth of the dep graph.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         main = _make_graph(
             nodes={"A.call": {}, "B.handle": {}},
@@ -1042,7 +1042,7 @@ class TestTransitiveDepthAfterMerge:
         After merge, total node count = main nodes + sub-graph nodes (no duplicates
         because sub-graph FQNs are namespaced).
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         main = _make_graph(nodes={"main.A": {}, "main.B": {}})
         sub = _make_graph(nodes={"A": {}, "B": {}, "C": {}})  # 3 nodes, will be namespaced
@@ -1065,7 +1065,7 @@ class TestEdgeCasesAndBoundaryValues:
 
     def test_merge_sub_graph_empty_sub_graph(self):
         """Merging an empty sub-graph must not alter main_graph."""
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         main = _make_graph(
             nodes={"A": {}},
@@ -1083,7 +1083,7 @@ class TestEdgeCasesAndBoundaryValues:
         Sub-graph FQN that already starts with 'dep::' must not be double-prefixed.
         The _prefixed() helper checks for the prefix.
         """
-        from langgraph_engine.build_dependency_resolver.parsers import _merge_sub_graph
+        from sdlc_engine.pipeline.parsers import _merge_sub_graph
 
         main = _make_graph()
         # Simulate a sub-graph that already has dep:: prefix (edge case)
@@ -1102,7 +1102,7 @@ class TestEdgeCasesAndBoundaryValues:
 
     def test_enhance_call_graph_improvement_pct_is_numeric(self):
         """improvement_pct in enhance_call_graph result must be a float."""
-        from langgraph_engine.build_dependency_resolver.resolver import enhance_call_graph
+        from sdlc_engine.pipeline.resolver import enhance_call_graph
 
         graph = _make_graph()
         result = enhance_call_graph(graph, [])
@@ -1113,7 +1113,7 @@ class TestEdgeCasesAndBoundaryValues:
 
     def test_detect_build_system_result_has_all_required_keys(self, tmp_path):
         """detect_build_system result always has the required keys."""
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         result = detect_build_system(tmp_path)
 
@@ -1132,7 +1132,7 @@ class TestBuildFileParsers:
 
     def test_parse_python_deps_requirements_txt(self, tmp_path):
         """_parse_python_deps correctly reads requirements.txt."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_python_deps
+        from sdlc_engine.pipeline.parsers import _parse_python_deps
 
         req = tmp_path / "requirements.txt"
         req.write_text("flask>=2.0\nrequests==2.28.0\n# comment\n-r other.txt\n")
@@ -1147,7 +1147,7 @@ class TestBuildFileParsers:
 
     def test_parse_python_deps_dev_requirements(self, tmp_path):
         """_parse_python_deps reads requirements-dev.txt."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_python_deps
+        from sdlc_engine.pipeline.parsers import _parse_python_deps
 
         req = tmp_path / "requirements-dev.txt"
         req.write_text("pytest>=7.0\nmypy\n")
@@ -1159,7 +1159,7 @@ class TestBuildFileParsers:
 
     def test_parse_python_deps_pipfile(self, tmp_path):
         """_parse_python_deps reads Pipfile packages."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_python_deps
+        from sdlc_engine.pipeline.parsers import _parse_python_deps
 
         pipfile = tmp_path / "Pipfile"
         pipfile.write_text('[packages]\nflask = "*"\nsqlalchemy = ">=1.4"\n\n[dev-packages]\npytest = "*"\n')
@@ -1171,7 +1171,7 @@ class TestBuildFileParsers:
 
     def test_parse_req_line_various_formats(self):
         """_parse_req_line handles different requirement line formats."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_req_line
+        from sdlc_engine.pipeline.parsers import _parse_req_line
 
         # Standard
         r = _parse_req_line("flask>=2.0")
@@ -1196,7 +1196,7 @@ class TestBuildFileParsers:
 
     def test_parse_maven_deps_valid_pom(self, tmp_path):
         """_parse_maven_deps reads a pom.xml correctly."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_maven_deps
+        from sdlc_engine.pipeline.parsers import _parse_maven_deps
 
         pom = tmp_path / "pom.xml"
         pom.write_text(
@@ -1225,7 +1225,7 @@ class TestBuildFileParsers:
 
     def test_parse_maven_deps_invalid_pom(self, tmp_path):
         """_parse_maven_deps returns empty list on invalid XML."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_maven_deps
+        from sdlc_engine.pipeline.parsers import _parse_maven_deps
 
         pom = tmp_path / "pom.xml"
         pom.write_text("<invalid xml>>>>")
@@ -1235,7 +1235,7 @@ class TestBuildFileParsers:
 
     def test_parse_npm_deps_package_json(self, tmp_path):
         """_parse_npm_deps reads package.json dependencies."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_npm_deps
+        from sdlc_engine.pipeline.parsers import _parse_npm_deps
 
         pkg = tmp_path / "package.json"
         pkg.write_text(
@@ -1250,7 +1250,7 @@ class TestBuildFileParsers:
 
     def test_parse_npm_deps_invalid_json(self, tmp_path):
         """_parse_npm_deps returns empty list on invalid JSON."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_npm_deps
+        from sdlc_engine.pipeline.parsers import _parse_npm_deps
 
         pkg = tmp_path / "package.json"
         pkg.write_text("not json {{{")
@@ -1260,7 +1260,7 @@ class TestBuildFileParsers:
 
     def test_parse_go_deps_go_mod(self, tmp_path):
         """_parse_go_deps reads go.mod require blocks."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_go_deps
+        from sdlc_engine.pipeline.parsers import _parse_go_deps
 
         go_mod = tmp_path / "go.mod"
         go_mod.write_text(
@@ -1277,7 +1277,7 @@ class TestBuildFileParsers:
 
     def test_parse_cargo_deps_cargo_toml(self, tmp_path):
         """_parse_cargo_deps reads Cargo.toml dependencies."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_cargo_deps
+        from sdlc_engine.pipeline.parsers import _parse_cargo_deps
 
         cargo = tmp_path / "Cargo.toml"
         cargo.write_text(
@@ -1293,7 +1293,7 @@ class TestBuildFileParsers:
 
     def test_parse_gradle_deps_build_gradle(self, tmp_path):
         """_parse_gradle_deps reads build.gradle implementation/api deps."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_gradle_deps
+        from sdlc_engine.pipeline.parsers import _parse_gradle_deps
 
         gradle = tmp_path / "build.gradle"
         gradle.write_text(
@@ -1310,7 +1310,7 @@ class TestBuildFileParsers:
 
     def test_classify_dep_internal_with_local_source(self, tmp_path):
         """_classify_dep returns 'internal' when local source dir exists."""
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep, _dir_has_code
+        from sdlc_engine.pipeline.parsers import _classify_dep, _dir_has_code
 
         _dir_has_code.cache_clear()
 
@@ -1325,7 +1325,7 @@ class TestBuildFileParsers:
 
     def test_classify_dep_unknown_short_name(self, tmp_path):
         """_classify_dep returns 'external_unknown' for short unknown names."""
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep
+        from sdlc_engine.pipeline.parsers import _classify_dep
 
         dep = {"name": "xyz", "version": "*", "source": "requirements"}
         result = _classify_dep(tmp_path, dep, "python-pip")
@@ -1333,7 +1333,7 @@ class TestBuildFileParsers:
 
     def test_classify_dep_java_maven_external_known(self, tmp_path):
         """_classify_dep recognizes org.springframework as external_known for Maven."""
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep
+        from sdlc_engine.pipeline.parsers import _classify_dep
 
         dep = {
             "name": "org.springframework:spring-core",
@@ -1346,7 +1346,7 @@ class TestBuildFileParsers:
 
     def test_classify_dep_npm_express_external_known(self, tmp_path):
         """_classify_dep recognizes 'express' as external_known for npm."""
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep
+        from sdlc_engine.pipeline.parsers import _classify_dep
 
         dep = {"name": "express", "version": "^4.18", "source": "package.json"}
         result = _classify_dep(tmp_path, dep, "npm")
@@ -1354,7 +1354,7 @@ class TestBuildFileParsers:
 
     def test_classify_dep_go_stdlib_external_known(self, tmp_path):
         """_classify_dep: Go module without slash is standard library (external_known)."""
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep
+        from sdlc_engine.pipeline.parsers import _classify_dep
 
         dep = {"name": "fmt", "version": "*", "source": "go.mod"}
         result = _classify_dep(tmp_path, dep, "go")
@@ -1362,7 +1362,7 @@ class TestBuildFileParsers:
 
     def test_classify_dep_rust_serde_external_known(self, tmp_path):
         """_classify_dep: 'serde' is external_known for Cargo."""
-        from langgraph_engine.build_dependency_resolver.parsers import _classify_dep
+        from sdlc_engine.pipeline.parsers import _classify_dep
 
         dep = {"name": "serde", "version": "1.0", "source": "Cargo.toml"}
         result = _classify_dep(tmp_path, dep, "cargo")
@@ -1370,7 +1370,7 @@ class TestBuildFileParsers:
 
     def test_build_question_needs_input(self, tmp_path):
         """_build_question generates proper question dict for needs_input deps."""
-        from langgraph_engine.build_dependency_resolver.parsers import _build_question
+        from sdlc_engine.pipeline.parsers import _build_question
 
         dep = {"name": "mypkg", "version": "1.0"}
         q = _build_question(tmp_path, dep, "python-pip", reason="needs_input")
@@ -1383,7 +1383,7 @@ class TestBuildFileParsers:
 
     def test_build_question_unknown(self, tmp_path):
         """_build_question generates proper question dict for unknown deps."""
-        from langgraph_engine.build_dependency_resolver.parsers import _build_question
+        from sdlc_engine.pipeline.parsers import _build_question
 
         dep = {"name": "strangedep", "version": "*"}
         q = _build_question(tmp_path, dep, "npm", reason="unknown")
@@ -1407,7 +1407,7 @@ class TestResolverPipelineFunctions:
         FIX VERIFIED: resolver.py now imports _parse_raw_deps from .parsers at the top level.
         The NameError is gone; error must be None and total_deps must reflect the parsed deps.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import parse_dependencies
+        from sdlc_engine.pipeline.resolver import parse_dependencies
 
         req = tmp_path / "requirements.txt"
         req.write_text("flask>=2.0\nrequests\n")
@@ -1433,7 +1433,7 @@ class TestResolverPipelineFunctions:
         FIX VERIFIED: resolver.py now imports _parse_raw_deps from .parsers.
         An empty project (no build files) should return error=None, not a NameError.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import parse_dependencies
+        from sdlc_engine.pipeline.resolver import parse_dependencies
 
         result = parse_dependencies(tmp_path)
 
@@ -1448,7 +1448,7 @@ class TestResolverPipelineFunctions:
 
     def test_parse_dependencies_nonexistent_path(self):
         """parse_dependencies on nonexistent path does not raise."""
-        from langgraph_engine.build_dependency_resolver.resolver import parse_dependencies
+        from sdlc_engine.pipeline.resolver import parse_dependencies
 
         result = parse_dependencies("/nonexistent/path/xyz789")
         # Should return a result dict (fail-safe)
@@ -1461,7 +1461,7 @@ class TestResolverPipelineFunctions:
         FIX VERIFIED: resolver.py now imports _import_call_graph_builder from .parsers.
         Empty dep list -> resolved=[], failed=[], error=None.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import resolve_internal_deps
+        from sdlc_engine.pipeline.resolver import resolve_internal_deps
 
         result = resolve_internal_deps(tmp_path, [])
 
@@ -1475,7 +1475,7 @@ class TestResolverPipelineFunctions:
 
     def test_resolve_internal_deps_dep_without_hint_path(self, tmp_path):
         """resolve_internal_deps handles dep with no hint_path gracefully."""
-        from langgraph_engine.build_dependency_resolver.resolver import resolve_internal_deps
+        from sdlc_engine.pipeline.resolver import resolve_internal_deps
 
         # A dep that has no local source and no hint_path
         dep = {"name": "ghost_package", "version": "*"}
@@ -1489,7 +1489,7 @@ class TestResolverPipelineFunctions:
 
     def test_get_unresolved_questions_empty_deps(self, tmp_path):
         """get_unresolved_questions with no unknown deps returns empty list."""
-        from langgraph_engine.build_dependency_resolver.resolver import get_unresolved_questions
+        from sdlc_engine.pipeline.resolver import get_unresolved_questions
 
         deps_result = {
             "build_system": "python-pip",
@@ -1507,7 +1507,7 @@ class TestResolverPipelineFunctions:
         FIX VERIFIED: resolver.py now imports _build_question from .parsers.
         With needs_user_input and external_unknown entries, at least 1 question must be generated.
         """
-        from langgraph_engine.build_dependency_resolver.resolver import get_unresolved_questions
+        from sdlc_engine.pipeline.resolver import get_unresolved_questions
 
         deps_result = {
             "build_system": "python-pip",
@@ -1522,7 +1522,7 @@ class TestResolverPipelineFunctions:
 
     def test_resolve_and_enhance_null_graph(self, tmp_path):
         """resolve_and_enhance with graph=None does not raise (fail-safe)."""
-        from langgraph_engine.build_dependency_resolver.resolver import resolve_and_enhance
+        from sdlc_engine.pipeline.resolver import resolve_and_enhance
 
         result = resolve_and_enhance(tmp_path, None)
 
@@ -1533,7 +1533,7 @@ class TestResolverPipelineFunctions:
 
     def test_resolve_and_enhance_empty_project_live_graph(self, tmp_path):
         """resolve_and_enhance on empty project with a valid graph returns pipeline result."""
-        from langgraph_engine.build_dependency_resolver.resolver import resolve_and_enhance
+        from sdlc_engine.pipeline.resolver import resolve_and_enhance
 
         graph = _make_graph()
         result = resolve_and_enhance(tmp_path, graph)
@@ -1546,7 +1546,7 @@ class TestResolverPipelineFunctions:
 
     def test_detect_build_system_gradle_project(self, tmp_path):
         """detect_build_system detects Gradle projects."""
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         (tmp_path / "build.gradle").write_text("// gradle build")
 
@@ -1556,7 +1556,7 @@ class TestResolverPipelineFunctions:
 
     def test_detect_build_system_go_project(self, tmp_path):
         """detect_build_system detects Go projects."""
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         (tmp_path / "go.mod").write_text("module example.com\n")
 
@@ -1565,7 +1565,7 @@ class TestResolverPipelineFunctions:
 
     def test_detect_build_system_cargo_project(self, tmp_path):
         """detect_build_system detects Rust/Cargo projects."""
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         (tmp_path / "Cargo.toml").write_text('[package]\nname = "myapp"\n')
 
@@ -1574,7 +1574,7 @@ class TestResolverPipelineFunctions:
 
     def test_detect_build_system_pyproject_project(self, tmp_path):
         """detect_build_system detects python-pyproject projects."""
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         (tmp_path / "pyproject.toml").write_text("[project]\nname = 'myapp'\n")
 
@@ -1583,7 +1583,7 @@ class TestResolverPipelineFunctions:
 
     def test_detect_build_system_pipenv_project(self, tmp_path):
         """detect_build_system detects Pipenv projects."""
-        from langgraph_engine.build_dependency_resolver.resolver import detect_build_system
+        from sdlc_engine.pipeline.resolver import detect_build_system
 
         (tmp_path / "Pipfile").write_text('[packages]\nflask = "*"\n')
 
@@ -1592,7 +1592,7 @@ class TestResolverPipelineFunctions:
 
     def test_detect_maven_project_group_from_pom(self, tmp_path):
         """_detect_maven_project_group extracts groupId from pom.xml."""
-        from langgraph_engine.build_dependency_resolver.parsers import _detect_maven_project_group
+        from sdlc_engine.pipeline.parsers import _detect_maven_project_group
 
         pom = tmp_path / "pom.xml"
         pom.write_text(
@@ -1604,21 +1604,21 @@ class TestResolverPipelineFunctions:
 
     def test_detect_maven_project_group_no_pom(self, tmp_path):
         """_detect_maven_project_group returns None when no pom.xml."""
-        from langgraph_engine.build_dependency_resolver.parsers import _detect_maven_project_group
+        from sdlc_engine.pipeline.parsers import _detect_maven_project_group
 
         result = _detect_maven_project_group(tmp_path)
         assert result is None
 
     def test_parse_raw_deps_unknown_build_system(self, tmp_path):
         """_parse_raw_deps returns empty list for unknown build system."""
-        from langgraph_engine.build_dependency_resolver.parsers import _parse_raw_deps
+        from sdlc_engine.pipeline.parsers import _parse_raw_deps
 
         result = _parse_raw_deps(tmp_path, "totally-unknown", [])
         assert result == []
 
     def test_enhance_call_graph_resolve_edges_not_available(self):
         """enhance_call_graph handles graph without resolve_edges method gracefully."""
-        from langgraph_engine.build_dependency_resolver.resolver import enhance_call_graph
+        from sdlc_engine.pipeline.resolver import enhance_call_graph
 
         graph = SimpleNamespace(
             nodes={},
@@ -1636,3 +1636,4 @@ class TestResolverPipelineFunctions:
 
         result = enhance_call_graph(graph, [])
         assert result["error"] is None, f"Should handle missing resolve_edges gracefully: {result['error']}"
+

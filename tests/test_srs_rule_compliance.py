@@ -19,8 +19,8 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-GENERATOR = REPO_ROOT / "langgraph_engine" / "sdlc_pipeline" / "documentation_generator.py"
-MANAGER = REPO_ROOT / "langgraph_engine" / "sdlc_pipeline" / "documentation_manager.py"
+GENERATOR = REPO_ROOT / "sdlc_engine" / "nodes" / "documentation_generator.py"
+MANAGER = REPO_ROOT / "sdlc_engine" / "nodes" / "documentation_manager.py"
 RULES_DIR = Path.home() / ".claude" / "rules"
 
 REQUIRED_SECTIONS = [
@@ -203,7 +203,7 @@ class TestRuleFilePaths:
         assert self.RULE_COPIES, "no rule files found under ~/.claude/rules"
 
     def test_no_rule_names_a_missing_engine_path(self):
-        pattern = re.compile(r"`(langgraph_engine/[A-Za-z0-9_./-]+\.py)`")
+        pattern = re.compile(r"`(sdlc_engine/[A-Za-z0-9_./-]+\.py)`")
         missing = []
         for rule in self.RULE_COPIES:
             for ref in set(pattern.findall(rule.read_text(encoding="utf-8"))):
@@ -217,5 +217,5 @@ class TestRuleFilePaths:
             assert "level3_execution" not in text, "{} still names the pre-v1.20 package".format(rule.name)
 
     def test_the_rename_actually_happened(self):
-        assert not (REPO_ROOT / "langgraph_engine" / "level3_execution").exists()
-        assert (REPO_ROOT / "langgraph_engine" / "sdlc_pipeline").exists()
+        assert not (REPO_ROOT / "langgraph_engine").exists()
+        assert (REPO_ROOT / "sdlc_engine").exists()

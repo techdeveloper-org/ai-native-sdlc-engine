@@ -22,7 +22,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from langgraph_engine.sdlc_pipeline.integration_test_generator import generate_api_test  # noqa: E402
+from sdlc_engine.nodes.integration_test_generator import generate_api_test  # noqa: E402
 
 
 def _wrap_in_class(stub_body: str) -> str:

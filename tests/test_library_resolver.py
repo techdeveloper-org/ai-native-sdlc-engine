@@ -21,7 +21,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from langgraph_engine.library.resolver import (  # noqa: E402
+from sdlc_engine.standards.library_resolver import (  # noqa: E402
     ChainedResourceResolver,
     GitHubAdapter,
     HardFailAdapter,

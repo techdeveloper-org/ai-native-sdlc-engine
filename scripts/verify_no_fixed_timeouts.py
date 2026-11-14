@@ -88,15 +88,15 @@ from typing import Iterable, Iterator, Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-SCAN_SCOPE = ("langgraph_engine", "plugin")
+SCAN_SCOPE = ("sdlc_engine", "plugin")
 
 ENFORCED_PATHS = (
-    "langgraph_engine/sdlc_pipeline/architecture/",
-    "langgraph_engine/sdlc_pipeline/nodes/",
-    "langgraph_engine/sdlc_pipeline/helpers.py",
-    "langgraph_engine/sdlc_pipeline/faithfulness_gate.py",
-    "langgraph_engine/llm_call.py",
-    "langgraph_engine/liveness/",
+    "sdlc_engine/nodes/architecture/",
+    "sdlc_engine/nodes/",
+    "sdlc_engine/nodes/helpers.py",
+    "sdlc_engine/quality/faithfulness_gate.py",
+    "sdlc_engine/llm/llm_call.py",
+    "sdlc_engine/metrics/liveness/",
     "plugin/",
 )
 
@@ -142,7 +142,7 @@ FAILING_VALUE_CLASSES = frozenset({VALUE_FIXED_LITERAL, VALUE_FIXED_DEFAULT, VAL
 MAX_DOCUMENTED_EXCEPTIONS = 1
 
 DOCUMENTED_EXCEPTIONS = {
-    "langgraph_engine/llm_call.py::call::_anthropic_socket_timeout": (
+    "sdlc_engine/llm/llm_call.py::call::_anthropic_socket_timeout": (
         "The one exception ADR-016 permits: a socket/HTTP timeout on a SINGLE "
         "Anthropic API call. Configurable through ANTHROPIC_HTTP_TIMEOUT, "
         "disabled entirely by setting it to 0, and routed through the "

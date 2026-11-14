@@ -35,10 +35,7 @@ setup(
     url="https://github.com/techdeveloper-org/ai-native-sdlc-engine",
     license="MIT",
     # Package configuration
-    packages=find_packages(where="src") + find_packages(where=".", include=["langgraph_engine", "langgraph_engine.*"]),
-    package_dir={
-        "": "src",
-    },
+    packages=find_packages(where=".", include=["sdlc_engine", "sdlc_engine.*"]),
     include_package_data=True,
     # Dependencies
     install_requires=requirements,
@@ -46,8 +43,8 @@ setup(
     # Entry points
     entry_points={
         "console_scripts": [
-            "ai-sdlc-engine=langgraph_engine.run_pipeline:main",
-            "claude-workflow=langgraph_engine.run_pipeline:main",
+            "ai-sdlc-engine=sdlc_engine.adapters.cli.main:main",
+            "claude-workflow=sdlc_engine.adapters.cli.main:main",
             "sdlc=scripts.cli:main",
             "cwe=scripts.cli:main",
         ],

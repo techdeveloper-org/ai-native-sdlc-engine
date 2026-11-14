@@ -21,9 +21,9 @@ if str(_PROJECT_ROOT) not in sys.path:
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
-import utils.import_manager as import_manager_module  # noqa: E402
-from langgraph_engine.library.resolver import _reset_library_root_cache  # noqa: E402
-from utils.import_manager import ImportManager  # noqa: E402
+import sdlc_engine.shared.utils.import_manager as import_manager_module  # noqa: E402
+from sdlc_engine.standards.resolver import _reset_library_root_cache  # noqa: E402
+from sdlc_engine.shared.utils.import_manager import ImportManager  # noqa: E402
 
 
 @pytest.fixture(autouse=True)

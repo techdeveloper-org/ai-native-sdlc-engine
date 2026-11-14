@@ -22,7 +22,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from langgraph_engine.library.resolver import _reset_library_root_cache  # noqa: E402
+from sdlc_engine.standards.resolver import _reset_library_root_cache  # noqa: E402
 
 _SYNC_LIBRARY_PATH = _PROJECT_ROOT / "scripts" / "tools" / "sync-library.py"
 _spec = importlib.util.spec_from_file_location("sync_library", _SYNC_LIBRARY_PATH)

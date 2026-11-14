@@ -40,7 +40,7 @@ def test_verifier_singleton_reused_across_node_calls(monkeypatch):
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "0")
 
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     v1 = RuntimeVerifier.get_instance()
     v2 = RuntimeVerifier.get_instance()
@@ -66,8 +66,8 @@ def test_prompt_gen_contract_passes_with_long_prompt(monkeypatch):
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "0")
 
-    from langgraph_engine.runtime_verification.node_contracts import PROMPT_GEN_CONTRACT
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.node_contracts import PROMPT_GEN_CONTRACT
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
     verifier.register(PROMPT_GEN_CONTRACT)
@@ -88,8 +88,8 @@ def test_prompt_gen_contract_fails_without_user_message(monkeypatch):
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "0")
 
-    from langgraph_engine.runtime_verification.node_contracts import PROMPT_GEN_CONTRACT
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.node_contracts import PROMPT_GEN_CONTRACT
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
     verifier.register(PROMPT_GEN_CONTRACT)
@@ -116,7 +116,7 @@ def test_strict_mode_gate_sets_passed_false_on_violations(monkeypatch):
     monkeypatch.setenv("STRICT_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "0")
 
-    from langgraph_engine.sdlc_pipeline.quality_gate import evaluate_quality_gate
+    from sdlc_engine.nodes.quality_gate import evaluate_quality_gate
 
     # State contains a verification report with violations
     state = {
@@ -162,7 +162,7 @@ def test_non_strict_mode_gate_does_not_block_on_violations(monkeypatch):
     monkeypatch.setenv("STRICT_RUNTIME_VERIFICATION", "0")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "0")
 
-    from langgraph_engine.sdlc_pipeline.quality_gate import evaluate_quality_gate
+    from sdlc_engine.nodes.quality_gate import evaluate_quality_gate
 
     state = {
         "verification_report": {
@@ -202,7 +202,7 @@ def test_verification_gate_disabled_when_env_not_set(monkeypatch):
     monkeypatch.delenv("ENABLE_RUNTIME_VERIFICATION", raising=False)
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "0")
 
-    from langgraph_engine.sdlc_pipeline.quality_gate import evaluate_quality_gate
+    from sdlc_engine.nodes.quality_gate import evaluate_quality_gate
 
     state = {
         "step4_modified_files": [],
@@ -239,7 +239,7 @@ def test_check_level_transition_direct_call(monkeypatch):
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "0")
 
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
 
@@ -261,9 +261,9 @@ def test_verified_nodes_populated_after_node_execution(monkeypatch, mock_create_
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "0")
 
-    from langgraph_engine.runtime_verification.contracts import NodeContract, PreconditionSpec
-    from langgraph_engine.runtime_verification.decorators import verify_node
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.contracts import NodeContract, PreconditionSpec
+    from sdlc_engine.quality.runtime_verification.decorators import verify_node
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
 
@@ -293,9 +293,9 @@ def test_build_report_clean_in_full_mode(monkeypatch, mock_create_span):
     monkeypatch.setenv("ENABLE_RUNTIME_VERIFICATION", "1")
     monkeypatch.setenv("CLAUDE_HOOK_MODE", "0")
 
-    from langgraph_engine.runtime_verification.contracts import NodeContract, PreconditionSpec
-    from langgraph_engine.runtime_verification.decorators import verify_node
-    from langgraph_engine.runtime_verification.verifier import RuntimeVerifier
+    from sdlc_engine.quality.runtime_verification.contracts import NodeContract, PreconditionSpec
+    from sdlc_engine.quality.runtime_verification.decorators import verify_node
+    from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
 
     verifier = RuntimeVerifier.get_instance()
 

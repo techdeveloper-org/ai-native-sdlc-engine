@@ -32,14 +32,9 @@ for _p in [_REPO_ROOT, _SCRIPTS]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-# Stub langgraph_engine as a bare module so the package __init__ is skipped.
+# Stub sdlc_engine as a bare module so the package __init__ is skipped.
 # We load individual sub-modules directly via spec_from_file_location below.
-_LE_ROOT = Path(_REPO_ROOT) / "langgraph_engine"
-
-_le = types.ModuleType("langgraph_engine")
-_le.__path__ = [str(_LE_ROOT)]
-_le.__package__ = "langgraph_engine"
-sys.modules["langgraph_engine"] = _le
+_LE_ROOT = Path(_REPO_ROOT) / "sdlc_engine" / "quality"
 
 
 def _load_module(name, rel_path):
@@ -47,7 +42,7 @@ def _load_module(name, rel_path):
     full_path = _LE_ROOT / rel_path
     spec = importlib.util.spec_from_file_location(name, str(full_path))
     mod = importlib.util.module_from_spec(spec)
-    mod.__package__ = "langgraph_engine"
+    mod.__package__ = "sdlc_engine.quality"
     sys.modules[name] = mod
     spec.loader.exec_module(mod)
     return mod
@@ -55,32 +50,27 @@ def _load_module(name, rel_path):
 
 # Stub checkpoint_manager (provides CheckpointManager)
 _mock_cp_mod = _stub(
-    "langgraph_engine.checkpoint_manager", CheckpointManager=MagicMock(), create_checkpoint_manager=MagicMock()
+    "sdlc_engine.pipeline.checkpoint_manager", CheckpointManager=MagicMock(), create_checkpoint_manager=MagicMock()
 )
 
 # Stub error_logger (provides ErrorLogger)
-_mock_el_mod = _stub("langgraph_engine.error_logger", ErrorLogger=MagicMock(), create_logger=MagicMock())
+_mock_el_mod = _stub("sdlc_engine.shared.logging", ErrorLogger=MagicMock(), create_logger=MagicMock())
 
-# error_logger relocated to engine_logging/ in the subpackage refactor: RecoveryHandler now
-# imports ErrorLogger from langgraph_engine.engine_logging.error_logger, so stub that path
-# (and its parent package) too -- otherwise a real file logger is built instead of a mock.
-_le_engine_logging = types.ModuleType("langgraph_engine.engine_logging")
-_le_engine_logging.__path__ = [str(_LE_ROOT / "engine_logging")]
-sys.modules["langgraph_engine.engine_logging"] = _le_engine_logging
-_stub("langgraph_engine.engine_logging.error_logger", ErrorLogger=MagicMock(), create_logger=MagicMock())
+_le_engine_logging = types.ModuleType("sdlc_engine.shared.logging")
+_le_engine_logging.__path__ = [str(Path(_REPO_ROOT) / "sdlc_engine" / "shared" / "logging")]
+sys.modules["sdlc_engine.shared.logging"] = _le_engine_logging
+_stub("sdlc_engine.shared.logging.error_logger", ErrorLogger=MagicMock(), create_logger=MagicMock())
 
 # Also stub the plain-name fallback used inside recovery_handler
 sys.modules.setdefault("checkpoint_manager", _mock_cp_mod)
 sys.modules.setdefault("error_logger", _mock_el_mod)
 
-# Evict any real copy an earlier test in the same session already imported (it would have bound
-# the real ErrorLogger/CheckpointManager before these stubs existed), so the shim below re-imports
-# quality.recovery_handler with the stubs active. Keeps this suite order-independent.
-for _cached in ("langgraph_engine.recovery_handler", "langgraph_engine.quality.recovery_handler"):
+# Evict any real copy an earlier test in the same session already imported
+for _cached in ("sdlc_engine.quality.recovery_handler",):
     sys.modules.pop(_cached, None)
 
 # Now load recovery_handler directly
-_rh_mod = _load_module("langgraph_engine.recovery_handler", "recovery_handler.py")
+_rh_mod = _load_module("sdlc_engine.quality.recovery_handler", "recovery_handler.py")
 
 # Bind to module-level names for tests
 RecoveryHandler = _rh_mod.RecoveryHandler
@@ -123,7 +113,7 @@ class TestInstallSignalHandlers:
 
         handler = _make_handler(tmp_path)
         # Category C fix: patch signal where install_signal_handlers actually uses it
-        with patch("langgraph_engine.quality.recovery_handler.signal") as mock_signal:
+        with patch("sdlc_engine.quality.recovery_handler.signal") as mock_signal:
             mock_signal.SIGINT = _signal.SIGINT
             mock_signal.SIGTERM = _signal.SIGTERM
             with patch("threading.current_thread") as mock_ct, patch("threading.main_thread") as mock_mt:
@@ -151,7 +141,7 @@ class TestUpdateState:
         handler = _make_handler(tmp_path)
         state = {"session_id": "s1", "user_message": "do something"}
         # Category C fix: patch _register_globals where update_state actually calls it
-        with patch("langgraph_engine.quality.recovery_handler._register_globals") as mock_reg:
+        with patch("sdlc_engine.quality.recovery_handler._register_globals") as mock_reg:
             handler.update_state(step=3, state=state)
             mock_reg.assert_called_once_with(3, state, handler.checkpoint_manager, handler.error_logger)
 
@@ -253,7 +243,7 @@ class TestResumeFromCheckpointPublicApi:
 
     def test_resume_from_checkpoint_creates_handler_and_resumes(self, tmp_path):
         # Category C fix: patch the class where resume_from_checkpoint actually imports it
-        with patch("langgraph_engine.quality.recovery_handler.RecoveryHandler") as MockHandler:
+        with patch("sdlc_engine.quality.recovery_handler.RecoveryHandler") as MockHandler:
             mock_instance = MagicMock()
             mock_instance.resume_session.return_value = True
             MockHandler.return_value = mock_instance
@@ -266,7 +256,7 @@ class TestResumeFromCheckpointPublicApi:
 
     def test_resume_from_checkpoint_passes_checkpoint_id(self, tmp_path):
         # Category C fix: patch the class where resume_from_checkpoint actually imports it
-        with patch("langgraph_engine.quality.recovery_handler.RecoveryHandler") as MockHandler:
+        with patch("sdlc_engine.quality.recovery_handler.RecoveryHandler") as MockHandler:
             mock_instance = MagicMock()
             mock_instance.resume_session.return_value = False
             MockHandler.return_value = mock_instance

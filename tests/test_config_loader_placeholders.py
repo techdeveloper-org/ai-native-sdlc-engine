@@ -27,8 +27,8 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from langgraph_engine.core import config_loader  # noqa: E402
-from langgraph_engine.core.config_loader import _is_placeholder, load_workflow_config  # noqa: E402
+from sdlc_engine.shared.config import config_loader  # noqa: E402
+from sdlc_engine.shared.config.config_loader import _is_placeholder, load_workflow_config  # noqa: E402
 
 
 @pytest.fixture(autouse=True)

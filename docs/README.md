@@ -10,7 +10,7 @@ The repository root carries strictly only the four canonical documentation files
 | [`contributing/`](contributing/) | Contribution guidelines and community standards | 2 |
 | [`guides/`](guides/) | How-to guides, checklists and operational runbooks | 15 |
 | [`phase-0-requirements/`](phase-0-requirements/) | Requirements, PRD v2, sequencing & scorecards | 7 |
-| [`phase-0-reverse-engineering/`](phase-0-reverse-engineering/) | As-built PRD, call graphs and reverse-engineering artefacts | 25 |
+| [`phase-0-reverse-engineering/`](phase-0-reverse-engineering/) | As-built PRD, call graphs and reverse-engineering artefacts | 26 |
 | [`phase-1-architecture/`](phase-1-architecture/) | Phase 1 high-level design and consensus artefacts | 9 |
 | [`phase-2-validation/`](phase-2-validation/) | Cross-validation, v2 HLD and consensus reviews | 13 |
 | [`phase-5-srs/`](phase-5-srs/) | SRS update report | 1 |

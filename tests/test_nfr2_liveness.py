@@ -84,7 +84,7 @@ class TestMechanismsPresent:
 
     def test_mechanism_1_attempt_budget_bounds_by_attempts_not_time(self):
         """An attempt budget is exhausted by counting, with no clock involved."""
-        from langgraph_engine.liveness import AttemptBudget, BudgetExhausted
+        from sdlc_engine.metrics.liveness import AttemptBudget, BudgetExhausted
 
         budget = AttemptBudget(3, "unit")
         assert [budget.consume() for _ in range(3)] == [1, 2, 3]
@@ -95,14 +95,14 @@ class TestMechanismsPresent:
 
     def test_mechanism_1_budget_rejects_an_unsatisfiable_limit(self):
         """A limit below one would forbid the first attempt, so it is refused."""
-        from langgraph_engine.liveness import AttemptBudget
+        from sdlc_engine.metrics.liveness import AttemptBudget
 
         with pytest.raises(ValueError):
             AttemptBudget(0, "unit")
 
     def test_mechanism_2_lease_renewal_defeats_expiry_but_silence_does_not(self):
         """Renewal resets the silence measurement; elapsed time alone never expires a lease."""
-        from langgraph_engine.liveness import Lease, LeaseExpired
+        from sdlc_engine.metrics.liveness import Lease, LeaseExpired
 
         now = {"t": 0.0}
         lease = Lease("unit", interval=10.0, clock=lambda: now["t"], warn_on_degraded=False)
@@ -120,7 +120,7 @@ class TestMechanismsPresent:
 
     def test_mechanism_2_lease_defaults_to_unbounded(self):
         """With no interval configured a lease never expires, however long the silence."""
-        from langgraph_engine.liveness import Lease
+        from sdlc_engine.metrics.liveness import Lease
 
         now = {"t": 0.0}
         lease = Lease("unit", clock=lambda: now["t"], warn_on_degraded=False)
@@ -136,7 +136,7 @@ class TestMechanismsPresent:
         that it is durable. A lease that claimed durability it did not have would
         be worse than one that admits the gap.
         """
-        from langgraph_engine.liveness import Lease, durable_state_available
+        from sdlc_engine.metrics.liveness import Lease, durable_state_available
 
         lease = Lease("unit", warn_on_degraded=False)
         assert lease.durable is durable_state_available()
@@ -144,14 +144,14 @@ class TestMechanismsPresent:
 
     def test_mechanism_2_durability_probe_matches_the_checkpointer_module(self):
         """The probe's import paths are the same two the checkpointer itself tries."""
-        from langgraph_engine import checkpointer
-        from langgraph_engine.liveness import durable_state_available
+        from sdlc_engine import checkpointer
+        from sdlc_engine.metrics.liveness import durable_state_available
 
         assert durable_state_available() is bool(checkpointer._SQLITE_SAVER_AVAILABLE)
 
     def test_mechanism_3_convergence_signals_no_progress_after_patience(self):
         """Repeated identical states converge; a changed state resets the run."""
-        from langgraph_engine.liveness import ConvergenceMonitor
+        from sdlc_engine.metrics.liveness import ConvergenceMonitor
 
         monitor = ConvergenceMonitor(patience=3)
         assert not monitor.observe({"done": 1})
@@ -165,13 +165,13 @@ class TestMechanismsPresent:
 
     def test_mechanism_3_convergence_ignores_dict_ordering(self):
         """Key order is not part of a state's meaning and must not look like progress."""
-        from langgraph_engine.liveness import state_hash
+        from sdlc_engine.metrics.liveness import state_hash
 
         assert state_hash({"a": 1, "b": 2}) == state_hash({"b": 2, "a": 1})
 
     def test_mechanism_4_breaker_exists_per_external_dependency(self):
         """Each named dependency gets its own breaker; one outage cannot fail-fast another."""
-        from langgraph_engine.liveness import EXTERNAL_DEPENDENCIES, get_breaker, reset_registry
+        from sdlc_engine.metrics.liveness import EXTERNAL_DEPENDENCIES, get_breaker, reset_registry
 
         reset_registry()
         breakers = {name: get_breaker(name) for name in EXTERNAL_DEPENDENCIES}
@@ -181,7 +181,7 @@ class TestMechanismsPresent:
 
     def test_mechanism_4_reopen_wait_is_not_fixed(self):
         """Consecutive trips must back off; a constant reopen wait is the anti-pattern."""
-        from langgraph_engine.liveness import CircuitBreaker
+        from sdlc_engine.metrics.liveness import CircuitBreaker
 
         breaker = CircuitBreaker("unit", initial_wait=30.0, max_wait=300.0)
         waits = [breaker.reopen_wait(n) for n in (1, 2, 3, 4)]
@@ -191,7 +191,7 @@ class TestMechanismsPresent:
 
     def test_mechanism_4_min_calls_floor_prevents_a_trip_on_noise(self):
         """Below the floor no failure rate may trip anything, however bad it looks."""
-        from langgraph_engine.liveness import STATE_CLOSED, CircuitBreaker
+        from sdlc_engine.metrics.liveness import STATE_CLOSED, CircuitBreaker
 
         breaker = CircuitBreaker("unit", failure_rate_threshold=0.5, min_calls=10, window_size=20)
         for _ in range(9):
@@ -203,7 +203,7 @@ class TestMechanismsPresent:
 
     def test_mechanism_4_breaker_trips_and_fails_fast_without_calling(self):
         """An OPEN breaker rejects before the dependency is touched."""
-        from langgraph_engine.liveness import BreakerOpen, CircuitBreaker
+        from sdlc_engine.metrics.liveness import BreakerOpen, CircuitBreaker
 
         breaker = CircuitBreaker("unit", failure_rate_threshold=0.5, min_calls=4, window_size=8)
         for _ in range(4):
@@ -215,7 +215,7 @@ class TestMechanismsPresent:
 
     def test_mechanism_4_half_open_probe_success_closes_the_breaker(self):
         """A successful probe after the cooldown returns the breaker to CLOSED."""
-        from langgraph_engine.liveness import STATE_CLOSED, STATE_OPEN, CircuitBreaker
+        from sdlc_engine.metrics.liveness import STATE_CLOSED, STATE_OPEN, CircuitBreaker
 
         now = {"t": 0.0}
         breaker = CircuitBreaker(
@@ -232,7 +232,7 @@ class TestMechanismsPresent:
 
     def test_mechanism_slow_call_rate_trips_without_aborting_any_call(self):
         """ADR-016's own fifth mechanism: degradation is judged by rate, not by cancelling a call."""
-        from langgraph_engine.liveness import STATE_OPEN, CircuitBreaker
+        from sdlc_engine.metrics.liveness import STATE_OPEN, CircuitBreaker
 
         breaker = CircuitBreaker(
             "unit",
@@ -248,7 +248,7 @@ class TestMechanismsPresent:
 
     def test_mechanism_5_full_jitter_samples_the_whole_interval(self):
         """Full jitter draws uniformly from zero to the capped exponential ceiling."""
-        from langgraph_engine.liveness import deterministic_ceiling, full_jitter_delay
+        from sdlc_engine.metrics.liveness import deterministic_ceiling, full_jitter_delay
 
         rng = random.Random(1729)
         ceiling = deterministic_ceiling(3, base=1.0, cap=30.0)
@@ -261,14 +261,14 @@ class TestMechanismsPresent:
 
     def test_mechanism_5_jitter_ceiling_is_capped(self):
         """The exponential ceiling saturates rather than growing without bound."""
-        from langgraph_engine.liveness import deterministic_ceiling
+        from sdlc_engine.metrics.liveness import deterministic_ceiling
 
         assert deterministic_ceiling(0, 2.0, 30.0) == 2.0
         assert deterministic_ceiling(20, 2.0, 30.0) == 30.0
 
     def test_all_five_mechanisms_are_importable_from_one_surface(self):
         """AC 4's checklist, asserted against the package's public surface."""
-        import langgraph_engine.liveness as liveness
+        import sdlc_engine.metrics.liveness as liveness
 
         for name in ("AttemptBudget", "Lease", "ConvergenceMonitor", "CircuitBreaker", "full_jitter_delay"):
             assert hasattr(liveness, name), "ADR-016 mechanism missing: " + name
@@ -279,8 +279,8 @@ class TestMechanismComposition:
 
     def test_breaker_rejection_never_reaches_the_effect_ledger(self, tmp_path):
         """A fail-fast must not leave the PENDING entry the ledger refuses to guess about."""
-        from langgraph_engine.effect_ledger import EffectLedger
-        from langgraph_engine.liveness import BreakerOpen, CircuitBreaker
+        from sdlc_engine.security.effect_ledger import EffectLedger
+        from sdlc_engine.metrics.liveness import BreakerOpen, CircuitBreaker
 
         ledger = EffectLedger("nfr2-compose", base_dir=str(tmp_path))
         key = ledger.effect_key(step=2, effect_name="github_issue")
@@ -295,8 +295,8 @@ class TestMechanismComposition:
 
     def test_retry_driver_defers_error_classification_to_llm_retry(self):
         """The driver consumes the existing classifier rather than growing a second one."""
-        from langgraph_engine.liveness import AttemptBudget, BudgetExhausted, call_with_liveness, reset_registry
-        from langgraph_engine.sdlc_pipeline.llm_retry import is_llm_retryable
+        from sdlc_engine.metrics.liveness import AttemptBudget, BudgetExhausted, call_with_liveness, reset_registry
+        from sdlc_engine.nodes.llm_retry import is_llm_retryable
 
         reset_registry()
         attempts = {"n": 0}
@@ -332,8 +332,8 @@ class TestMechanismComposition:
 
     def test_breaker_trip_is_not_treated_as_rate_limit_evidence(self):
         """model_fallback escalates on positive rate-limit evidence only; a trip is not that."""
-        from langgraph_engine.liveness import BreakerOpen
-        from langgraph_engine.model_fallback import FAILURE_OTHER, classify_failure
+        from sdlc_engine.metrics.liveness import BreakerOpen
+        from sdlc_engine.llm.model_fallback import FAILURE_OTHER, classify_failure
 
         assert classify_failure(BreakerOpen("claude_cli", 30.0)) == FAILURE_OTHER
 
@@ -343,7 +343,7 @@ class TestSupervisedSubprocess:
 
     def test_unbounded_by_default_and_captures_output(self):
         """With no interval configured the child runs to completion."""
-        from langgraph_engine.liveness import run_supervised
+        from sdlc_engine.metrics.liveness import run_supervised
 
         result = run_supervised([sys.executable, "-c", "print('hello')"])
         assert result.returncode == 0
@@ -351,7 +351,7 @@ class TestSupervisedSubprocess:
 
     def test_stdin_is_delivered(self):
         """A prompt written to stdin reaches the child."""
-        from langgraph_engine.liveness import run_supervised
+        from sdlc_engine.metrics.liveness import run_supervised
 
         result = run_supervised(
             [sys.executable, "-c", "import sys; sys.stdout.write(sys.stdin.read().upper())"],
@@ -361,7 +361,7 @@ class TestSupervisedSubprocess:
 
     def test_a_slow_but_talking_child_is_not_killed(self):
         """Duration alone never ends a child; this one outlives its own lease interval."""
-        from langgraph_engine.liveness import run_supervised
+        from sdlc_engine.metrics.liveness import run_supervised
 
         script = "import sys,time\nfor _ in range(8):\n    sys.stdout.write('.');sys.stdout.flush();time.sleep(0.15)\n"
         result = run_supervised([sys.executable, "-u", "-c", script], lease_interval=0.6)
@@ -371,7 +371,7 @@ class TestSupervisedSubprocess:
 
     def test_a_silent_child_is_ended_for_no_progress(self):
         """Silence past the interval is a no-progress verdict, not a timeout."""
-        from langgraph_engine.liveness import NoProgress, run_supervised
+        from sdlc_engine.metrics.liveness import NoProgress, run_supervised
 
         with pytest.raises(NoProgress):
             run_supervised([sys.executable, "-c", "import time; time.sleep(30)"], lease_interval=0.5)
@@ -382,9 +382,9 @@ class TestSupervisedSubprocess:
 # ---------------------------------------------------------------------------
 
 
-PIPELINE_FIXTURE = "langgraph_engine/sdlc_pipeline/nodes/fixture_node.py"
+PIPELINE_FIXTURE = "sdlc_engine/nodes/fixture_node.py"
 
-OUTSIDE_FIXTURE = "langgraph_engine/diagrams/fixture_diagram.py"
+OUTSIDE_FIXTURE = "sdlc_engine/diagrams/fixture_diagram.py"
 
 
 def _run_gate(gate, root):
@@ -494,7 +494,7 @@ class TestGateSpecificity:
             tmp_path,
             PIPELINE_FIXTURE,
             """
-            from langgraph_engine.liveness import env_optional_seconds
+            from sdlc_engine.metrics.liveness import env_optional_seconds
 
 
             def go(call):
@@ -548,7 +548,7 @@ class TestTheOnePermittedTimeout:
 
     def test_the_socket_timeout_is_configurable(self, monkeypatch):
         """ANTHROPIC_HTTP_TIMEOUT overrides the default."""
-        from langgraph_engine.llm_call import DEFAULT_ANTHROPIC_HTTP_TIMEOUT, _anthropic_socket_timeout
+        from sdlc_engine.llm.llm_call import DEFAULT_ANTHROPIC_HTTP_TIMEOUT, _anthropic_socket_timeout
 
         monkeypatch.delenv("ANTHROPIC_HTTP_TIMEOUT", raising=False)
         assert _anthropic_socket_timeout() == DEFAULT_ANTHROPIC_HTTP_TIMEOUT
@@ -557,7 +557,7 @@ class TestTheOnePermittedTimeout:
 
     def test_the_socket_timeout_can_be_disabled_to_unbounded(self, monkeypatch):
         """Zero means no bound at all, which is what "user-overridable" has to permit."""
-        from langgraph_engine.llm_call import _anthropic_socket_timeout
+        from sdlc_engine.llm.llm_call import _anthropic_socket_timeout
 
         monkeypatch.setenv("ANTHROPIC_HTTP_TIMEOUT", "0")
         assert _anthropic_socket_timeout() is None
@@ -566,7 +566,7 @@ class TestTheOnePermittedTimeout:
 
     def test_a_malformed_override_falls_back_rather_than_crashing(self, monkeypatch):
         """A typo in an env var must not take the provider down."""
-        from langgraph_engine.llm_call import DEFAULT_ANTHROPIC_HTTP_TIMEOUT, _anthropic_socket_timeout
+        from sdlc_engine.llm.llm_call import DEFAULT_ANTHROPIC_HTTP_TIMEOUT, _anthropic_socket_timeout
 
         monkeypatch.setenv("ANTHROPIC_HTTP_TIMEOUT", "not-a-number")
         assert _anthropic_socket_timeout() == DEFAULT_ANTHROPIC_HTTP_TIMEOUT
@@ -580,7 +580,7 @@ class TestTheOnePermittedTimeout:
         satisfy none of ADR-016's conditions, and prose in a dict cannot detect
         that regression.
         """
-        source = (REPO_ROOT / "langgraph_engine" / "llm_call.py").read_text(encoding="utf-8")
+        source = (REPO_ROOT / "sdlc_engine" / "llm" / "llm_call.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
         guarded = []
         for node in ast.walk(tree):
@@ -615,7 +615,7 @@ class TestGateOnTheRealTree:
         sites, _unreadable = gate.scan(files, REPO_ROOT)
         exempted = [site for site in sites if site.exception_key() in gate.DOCUMENTED_EXCEPTIONS]
         assert len(exempted) == 1, "the documented exception must correspond to exactly one scanned site"
-        assert exempted[0].path == "langgraph_engine/llm_call.py"
+        assert exempted[0].path == "sdlc_engine/llm/llm_call.py"
 
     def test_the_named_adr_016_sites_no_longer_carry_a_fixed_timeout(self, gate):
         """ADR-016's own enumeration of 6 application sites, re-checked against the tree.
@@ -634,13 +634,13 @@ class TestGateOnTheRealTree:
         file that came back would fail on ``still_present``.
         """
         surviving = (
-            "langgraph_engine/sdlc_pipeline/architecture/prompt_gen_expert_caller.py",
-            "langgraph_engine/sdlc_pipeline/nodes/task_orchestration.py",
+            "sdlc_engine/nodes/architecture/prompt_gen_expert_caller.py",
+            "sdlc_engine/nodes/task_orchestration.py",
         )
         retired = (
-            "langgraph_engine/sdlc_pipeline/architecture/todo_decomposer.py",
-            "langgraph_engine/sdlc_pipeline/architecture/orchestrator_agent_caller.py",
-            "langgraph_engine/sdlc_pipeline/architecture/todo_executor.py",
+            "sdlc_engine/nodes/architecture/todo_decomposer.py",
+            "sdlc_engine/nodes/architecture/orchestrator_agent_caller.py",
+            "sdlc_engine/nodes/architecture/todo_executor.py",
         )
         files = [REPO_ROOT / path for path in surviving]
         sites, unreadable = gate.scan(files, REPO_ROOT)
@@ -665,8 +665,8 @@ class TestGateOnTheRealTree:
             "STEP10_LLM_TIMEOUT",
         }
         roots = (
-            REPO_ROOT / "langgraph_engine" / "sdlc_pipeline" / "architecture",
-            REPO_ROOT / "langgraph_engine" / "sdlc_pipeline" / "nodes",
+            REPO_ROOT / "sdlc_engine" / "nodes" / "architecture",
+            REPO_ROOT / "sdlc_engine" / "nodes",
         )
         offenders = []
         for root in roots:

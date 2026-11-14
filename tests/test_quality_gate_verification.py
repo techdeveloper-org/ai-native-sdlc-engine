@@ -16,7 +16,7 @@ isolated and do not affect each other or the rest of the test suite.
 
 from __future__ import annotations
 
-from langgraph_engine.sdlc_pipeline.quality_gate import _evaluate_verification_gate
+from sdlc_engine.nodes.quality_gate import _evaluate_verification_gate
 
 # ---------------------------------------------------------------------------
 # Test data helpers

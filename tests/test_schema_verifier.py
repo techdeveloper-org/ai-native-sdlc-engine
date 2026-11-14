@@ -7,7 +7,7 @@ Constants under test:
     _MIN_PROMPT_LEN = 200
 """
 
-from langgraph_engine.runtime_verification.schema_verifier import verify_orchestration_prompt
+from sdlc_engine.quality.runtime_verification.schema_verifier import verify_orchestration_prompt
 
 # ---------------------------------------------------------------------------
 # verify_orchestration_prompt -- 4 tests

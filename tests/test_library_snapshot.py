@@ -489,8 +489,8 @@ class TestAC1Standalone:
         real LocalSiblingAdapter can be pointed at it unchanged. Nothing here
         reads the library: it is built, then the path is abandoned.
         """
-        from langgraph_engine.library.resolver import ChainedResourceResolver, HardFailAdapter, LocalSiblingAdapter
-        from langgraph_engine.selection.catalogue import load_catalogue, verify_persona
+        from sdlc_engine.standards.resolver import ChainedResourceResolver, HardFailAdapter, LocalSiblingAdapter
+        from sdlc_engine.selection.catalogue import load_catalogue, verify_persona
 
         library = _make_library(tmp_path / "lib")
         snapshot = tmp_path / "snap"
@@ -510,8 +510,8 @@ class TestAC1Standalone:
         """Deleting the library after the build leaves the snapshot usable."""
         import shutil
 
-        from langgraph_engine.library.resolver import ChainedResourceResolver, HardFailAdapter, LocalSiblingAdapter
-        from langgraph_engine.selection.catalogue import load_catalogue
+        from sdlc_engine.standards.resolver import ChainedResourceResolver, HardFailAdapter, LocalSiblingAdapter
+        from sdlc_engine.selection.catalogue import load_catalogue
 
         library = _make_library(tmp_path / "lib")
         snapshot = tmp_path / "snap"

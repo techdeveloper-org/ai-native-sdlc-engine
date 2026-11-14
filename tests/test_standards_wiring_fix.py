@@ -35,9 +35,9 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from langgraph_engine.library.resolver import _reset_library_root_cache  # noqa: E402
-from langgraph_engine.standards.integration import apply_standards_at_step  # noqa: E402
-from langgraph_engine.standards.library_adapter import (  # noqa: E402
+from sdlc_engine.standards.resolver import _reset_library_root_cache  # noqa: E402
+from sdlc_engine.standards.integration import apply_standards_at_step  # noqa: E402
+from sdlc_engine.standards.library_adapter import (  # noqa: E402
     _LANGUAGE_SKILL_MAP,
     PRIORITY_LIBRARY_LANGUAGE_SKILL,
     LibrarySkillLanguageAdapter,
@@ -72,7 +72,7 @@ def _mock_call_execution_script(captured_calls):
 
 class TestStep0StandardsSelectionPreInjection:
     def test_populates_standards_selection_and_merged_rules(self):
-        from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import step1_task_analysis_node
+        from sdlc_engine.nodes.task_orchestration import step1_task_analysis_node
 
         captured_calls = []
         state = {
@@ -81,7 +81,7 @@ class TestStep0StandardsSelectionPreInjection:
         }
 
         with patch(
-            "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+            "sdlc_engine.nodes.helpers.call_execution_script",
             side_effect=_mock_call_execution_script(captured_calls),
         ):
             result = step1_task_analysis_node(state)
@@ -96,7 +96,7 @@ class TestStep0StandardsSelectionPreInjection:
         assert result.get("standards_count") == selection.get("total_loaded", 0)
 
     def test_standards_count_not_clobbered_when_already_set(self):
-        from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import step1_task_analysis_node
+        from sdlc_engine.nodes.task_orchestration import step1_task_analysis_node
 
         captured_calls = []
         state = {
@@ -106,7 +106,7 @@ class TestStep0StandardsSelectionPreInjection:
         }
 
         with patch(
-            "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+            "sdlc_engine.nodes.helpers.call_execution_script",
             side_effect=_mock_call_execution_script(captured_calls),
         ):
             result = step1_task_analysis_node(state)
@@ -118,18 +118,18 @@ class TestStep0StandardsSelectionPreInjection:
         of step1_task_analysis_node -- PRE-INJECTION D mirrors the existing
         CallGraph/KG-routing pre-injection fail-open try/except pattern.
         """
-        from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import step1_task_analysis_node
+        from sdlc_engine.nodes.task_orchestration import step1_task_analysis_node
 
         captured_calls = []
         state = {"user_message": "anything", "project_root": str(_PROJECT_ROOT)}
 
         with (
             patch(
-                "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+                "sdlc_engine.nodes.helpers.call_execution_script",
                 side_effect=_mock_call_execution_script(captured_calls),
             ),
             patch(
-                "langgraph_engine.standards.selector.select_standards",
+                "sdlc_engine.standards.selector.select_standards",
                 side_effect=RuntimeError("boom"),
             ),
         ):
@@ -142,18 +142,18 @@ class TestStep0StandardsSelectionPreInjection:
 
     def test_select_standards_called_at_most_once(self):
         """No hot-loop re-invocation within a single Step 0 call."""
-        from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import step1_task_analysis_node
+        from sdlc_engine.nodes.task_orchestration import step1_task_analysis_node
 
         captured_calls = []
         state = {"user_message": "anything", "project_root": str(_PROJECT_ROOT)}
 
         with (
             patch(
-                "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+                "sdlc_engine.nodes.helpers.call_execution_script",
                 side_effect=_mock_call_execution_script(captured_calls),
             ),
             patch(
-                "langgraph_engine.standards.selector.select_standards",
+                "sdlc_engine.standards.selector.select_standards",
                 return_value={
                     "project_type": "python",
                     "framework": "unknown",
@@ -281,7 +281,7 @@ class TestStandardsWiringEndToEnd:
         orchestrator does (state.update(result)), must change apply_standards_
         at_step(10, ...)'s checklist output. This is the wiring-closed proof.
         """
-        from langgraph_engine.sdlc_pipeline.nodes.task_orchestration import step1_task_analysis_node
+        from sdlc_engine.nodes.task_orchestration import step1_task_analysis_node
 
         captured_calls = []
         state = {
@@ -309,11 +309,11 @@ class TestStandardsWiringEndToEnd:
 
         with (
             patch(
-                "langgraph_engine.sdlc_pipeline.helpers.call_execution_script",
+                "sdlc_engine.nodes.helpers.call_execution_script",
                 side_effect=_mock_call_execution_script(captured_calls),
             ),
             patch(
-                "langgraph_engine.standards.selector.select_standards",
+                "sdlc_engine.standards.selector.select_standards",
                 return_value=fake_selection,
             ),
         ):
@@ -337,14 +337,14 @@ class TestStandardsWiringEndToEnd:
 class TestLibrarySkillLanguageAdapterUnmapped:
     def test_unmapped_language_returns_empty_with_zero_resolver_calls(self):
         adapter = LibrarySkillLanguageAdapter()
-        with patch("langgraph_engine.standards.library_adapter.build_default_resolver") as mock_build:
+        with patch("sdlc_engine.standards.library_adapter.build_default_resolver") as mock_build:
             result = adapter.load("csharp")
         assert result == []
         mock_build.assert_not_called()
 
     def test_unknown_project_type_returns_empty(self):
         adapter = LibrarySkillLanguageAdapter()
-        with patch("langgraph_engine.standards.library_adapter.build_default_resolver") as mock_build:
+        with patch("sdlc_engine.standards.library_adapter.build_default_resolver") as mock_build:
             result = adapter.load("unknown")
         assert result == []
         mock_build.assert_not_called()
@@ -353,7 +353,7 @@ class TestLibrarySkillLanguageAdapterUnmapped:
 class TestLibrarySkillLanguageAdapterSiblingMissing:
     def test_sibling_missing_returns_empty_without_raising(self):
         adapter = LibrarySkillLanguageAdapter()
-        with patch("langgraph_engine.library.resolver.locate_library_root", return_value=None):
+        with patch("sdlc_engine.standards.library_resolver.locate_library_root", return_value=None):
             result = adapter.load("python")
         assert result == []
 

@@ -68,7 +68,7 @@ def _make_minimal_state(**kwargs) -> Dict[str, Any]:
 class TestImport:
     def test_companion_module_importable(self):
         """implementation_and_review_implementation must be importable without NameError."""
-        from langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation import (
+        from sdlc_engine.nodes.implementation_and_review_implementation import (
             step4_implementation_execution,
             step5_pull_request_review,
         )
@@ -78,7 +78,7 @@ class TestImport:
 
     def test_wrappers_expose_implementations(self):
         """implementation_and_review_wrapper must re-export the implementation functions (no noqa F821)."""
-        from langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_wrapper import (
+        from sdlc_engine.nodes.implementation_and_review_wrapper import (
             step4_implementation_execution,
             step5_pull_request_review,
         )
@@ -89,7 +89,7 @@ class TestImport:
     def test_no_f821_suppressor_in_wrappers(self):
         """Verify the noqa F821 comments were removed from implementation_and_review_wrapper.py."""
         wrapper_path = (
-            _PROJECT_ROOT / "langgraph_engine" / "sdlc_pipeline" / "nodes" / "implementation_and_review_wrapper.py"
+            _PROJECT_ROOT / "sdlc_engine" / "nodes" / "implementation_and_review_wrapper.py"
         )
         content = wrapper_path.read_text(encoding="utf-8", errors="replace")
         assert (
@@ -104,7 +104,7 @@ class TestImport:
 
 class TestStep10Implementation:
     def _fn(self, state=None):
-        from langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation import (
+        from sdlc_engine.nodes.implementation_and_review_implementation import (
             step4_implementation_execution,
         )
 
@@ -112,7 +112,7 @@ class TestStep10Implementation:
 
     def test_returns_dict(self):
         with patch(
-            "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.llm_call",
+            "sdlc_engine.nodes.implementation_and_review_implementation.llm_call",
             return_value=None,
         ):
             result = self._fn()
@@ -120,7 +120,7 @@ class TestStep10Implementation:
 
     def test_required_keys_always_present(self):
         with patch(
-            "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.llm_call",
+            "sdlc_engine.nodes.implementation_and_review_implementation.llm_call",
             return_value=None,
         ):
             result = self._fn()
@@ -134,7 +134,7 @@ class TestStep10Implementation:
         with tempfile.TemporaryDirectory() as tmp:
             state = _make_minimal_state(session_dir=tmp, step1_execution_prompt="")
             with patch(
-                "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.llm_call",
+                "sdlc_engine.nodes.implementation_and_review_implementation.llm_call",
                 return_value=None,
             ):
                 result = self._fn(state)
@@ -150,11 +150,11 @@ class TestStep10Implementation:
             state = _make_minimal_state(session_dir=tmp, step1_execution_prompt="Implement feature X")
             with (
                 patch(
-                    "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.llm_call",
+                    "sdlc_engine.nodes.implementation_and_review_implementation.llm_call",
                     return_value="Done. Modified: src/foo.py",
                 ),
                 patch(
-                    "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation._extract_modified_files",
+                    "sdlc_engine.nodes.implementation_and_review_implementation._extract_modified_files",
                     return_value=["src/foo.py"],
                 ),
             ):
@@ -175,11 +175,11 @@ class TestStep10Implementation:
             state = _make_minimal_state(session_dir=tmp, step1_execution_prompt="do it")
             with (
                 patch(
-                    "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.llm_call",
+                    "sdlc_engine.nodes.implementation_and_review_implementation.llm_call",
                     return_value="ok",
                 ),
                 patch(
-                    "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation._extract_modified_files",
+                    "sdlc_engine.nodes.implementation_and_review_implementation._extract_modified_files",
                     return_value=[],
                 ),
             ):
@@ -188,7 +188,7 @@ class TestStep10Implementation:
 
     def test_execution_time_populated(self):
         with patch(
-            "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.llm_call",
+            "sdlc_engine.nodes.implementation_and_review_implementation.llm_call",
             return_value=None,
         ):
             result = self._fn()
@@ -198,7 +198,7 @@ class TestStep10Implementation:
         """Function must not propagate any exception even when llm_call raises."""
         state = _make_minimal_state(step1_execution_prompt="Implement feature X")
         with patch(
-            "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.llm_call",
+            "sdlc_engine.nodes.implementation_and_review_implementation.llm_call",
             side_effect=RuntimeError("boom"),
         ):
             result = self._fn(state)
@@ -213,7 +213,7 @@ class TestStep10Implementation:
 
 class TestStep11PullRequest:
     def _fn(self, state=None):
-        from langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation import (
+        from sdlc_engine.nodes.implementation_and_review_implementation import (
             step5_pull_request_review,
         )
 
@@ -237,7 +237,7 @@ class TestStep11PullRequest:
     def test_skipped_when_github_unavailable(self):
         """If Level3GitHubWorkflow is None, function returns SKIPPED."""
         with patch(
-            "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.Level3GitHubWorkflow",
+            "sdlc_engine.nodes.implementation_and_review_implementation.Level3GitHubWorkflow",
             None,
         ):
             state = _make_minimal_state(step3_branch_created=True)
@@ -247,7 +247,7 @@ class TestStep11PullRequest:
     def test_skipped_when_no_branch_name(self):
         state = _make_minimal_state(step3_branch_created=True, step3_branch_name="")
         with patch(
-            "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.Level3GitHubWorkflow",
+            "sdlc_engine.nodes.implementation_and_review_implementation.Level3GitHubWorkflow",
             MagicMock(),
         ):
             result = self._fn(state)
@@ -267,7 +267,7 @@ class TestStep11PullRequest:
             step2_issue_id=10,
         )
         with patch(
-            "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.Level3GitHubWorkflow",
+            "sdlc_engine.nodes.implementation_and_review_implementation.Level3GitHubWorkflow",
             mock_wf,
         ):
             result = self._fn(state)
@@ -290,7 +290,7 @@ class TestStep11PullRequest:
             step3_branch_name="feature/test",
         )
         with patch(
-            "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.Level3GitHubWorkflow",
+            "sdlc_engine.nodes.implementation_and_review_implementation.Level3GitHubWorkflow",
             mock_wf,
         ):
             result = self._fn(state)
@@ -305,7 +305,7 @@ class TestStep11PullRequest:
             step3_branch_name="feature/test",
         )
         with patch(
-            "langgraph_engine.sdlc_pipeline.nodes.implementation_and_review_implementation.Level3GitHubWorkflow",
+            "sdlc_engine.nodes.implementation_and_review_implementation.Level3GitHubWorkflow",
             mock_wf,
         ):
             result = self._fn(state)

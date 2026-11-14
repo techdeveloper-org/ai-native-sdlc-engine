@@ -80,24 +80,24 @@ _le_pkg.__path__ = [str(Path(_REPO_ROOT) / "langgraph_engine")]
 _le_pkg.__package__ = "langgraph_engine"
 
 # flow_state stub
-_flow_state = _stub("langgraph_engine.flow_state")
+_flow_state = _stub("sdlc_engine.routing")
 _flow_state.FlowState = dict
 
 # step_logger stub (helpers.py falls back to no-op when attribute missing)
-_stub("langgraph_engine.step_logger")
+_stub("sdlc_engine.shared.logging.step_logger")
 
 # Top-level complexity_calculator stub (empty -> ImportError in helpers -> flag=False)
-_stub("langgraph_engine.complexity_calculator")
+_stub("sdlc_engine.analysis.complexity_calculator")
 
 
 # ---------------------------------------------------------------------------
 # Import each context_sync submodule now that stubs are in place
 # ---------------------------------------------------------------------------
 
-_l1_session = _importlib.import_module("langgraph_engine.context_sync.session_loader")
-_l1_complexity = _importlib.import_module("langgraph_engine.context_sync.complexity_calculator")
-_l1_context = _importlib.import_module("langgraph_engine.context_sync.context_loader")
-_l1_routing = _importlib.import_module("langgraph_engine.context_sync.routing")
+_l1_session = _importlib.import_module("sdlc_engine.context.session_loader")
+_l1_complexity = _importlib.import_module("sdlc_engine.context.complexity_calculator")
+_l1_context = _importlib.import_module("sdlc_engine.context.context_loader")
+_l1_routing = _importlib.import_module("sdlc_engine.context.routing")
 
 # Public function aliases
 node_session_loader = _l1_session.node_session_loader

@@ -25,14 +25,14 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
-from langgraph_engine.dependency_resolver import (
+from sdlc_engine.pipeline.dependency_resolver import (
     build_dependency_graph,
     detect_circular,
     parse_skill_metadata,
     resolve_dependencies,
 )
-from langgraph_engine.skills.manager import SkillManager, get_skill_manager
-from langgraph_engine.version_selector import (
+from sdlc_engine.skills.manager import SkillManager, get_skill_manager
+from sdlc_engine.agents.version_selector import (
     Version,
     build_compatibility_matrix,
     check_compatibility,
@@ -508,7 +508,7 @@ class TestSkillManagerDownloadRetry:
             return {"success": True, "content": sample_skill_content}
 
         with patch.object(skill_manager, "_attempt_download", side_effect=mock_download_side_effect):
-            with patch("langgraph_engine.skill_manager.time.sleep"):
+            with patch("sdlc_engine.agents.manager.time.sleep"):
                 result = skill_manager.provision_skill("python-backend-engineer", force_download=True)
         assert result["success"] is True
 
@@ -523,7 +523,7 @@ class TestSkillManagerDownloadRetry:
             return {"success": False, "content": None, "error": "timeout", "status_code": 0}
 
         with patch.object(skill_manager, "_attempt_download", side_effect=always_fail):
-            with patch("langgraph_engine.skill_manager.time.sleep", side_effect=mock_sleep):
+            with patch("sdlc_engine.agents.manager.time.sleep", side_effect=mock_sleep):
                 result = skill_manager.provision_skill("nonexistent-skill", force_download=True)
 
         # First attempt is immediate (no sleep), subsequent ones have delays
@@ -543,7 +543,7 @@ class TestSkillManagerDownloadRetry:
             return {"success": False, "content": None, "error": "timeout", "status_code": 0}
 
         with patch.object(skill_manager, "_attempt_download", side_effect=counting_download):
-            with patch("langgraph_engine.skill_manager.time.sleep"):
+            with patch("sdlc_engine.agents.manager.time.sleep"):
                 skill_manager.provision_skill("nonexistent-skill", force_download=True)
 
         # Each URL candidate gets MAX_RETRIES+1 attempts (5 total per candidate)
@@ -565,7 +565,7 @@ class TestSkillManagerDownloadRetry:
             return {"success": True, "content": sample_skill_content}
 
         with patch.object(skill_manager, "_attempt_download", side_effect=mock_404_then_success):
-            with patch("langgraph_engine.skill_manager.time.sleep"):
+            with patch("sdlc_engine.agents.manager.time.sleep"):
                 _result = skill_manager.provision_skill("python-backend-engineer", force_download=True)
 
         # 404 URLs should only be attempted once (no retry)
@@ -601,7 +601,7 @@ class TestSkillManagerCache:
             return {"success": False, "content": None, "error": "network down", "status_code": 0}
 
         with patch.object(skill_manager, "_attempt_download", side_effect=always_fail):
-            with patch("langgraph_engine.skill_manager.time.sleep"):
+            with patch("sdlc_engine.agents.manager.time.sleep"):
                 result = skill_manager.provision_skill("python-backend-engineer", force_download=True)
 
         assert result["success"] is True

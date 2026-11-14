@@ -26,7 +26,7 @@ from collections import deque
 
 import pytest
 
-from langgraph_engine.parsers.graph_model import (
+from sdlc_engine.parsers.graph_model import (
     BUILTIN_CALLEE_NAMES,
     CONFIDENCE_AMBIGUOUS,
     CONFIDENCE_HIGH,
@@ -417,8 +417,8 @@ def repo_analysis():
     """Run a full-repo analysis once and share it across the gate checks."""
     from pathlib import Path
 
-    from langgraph_engine.parsers.call_graph_builder_legacy import CallGraphBuilder
-    from langgraph_engine.sdlc_pipeline.call_graph_analyzer import (
+    from sdlc_engine.parsers.call_graph_builder_legacy import CallGraphBuilder
+    from sdlc_engine.nodes.call_graph_analyzer import (
         analyze_impact_before_change,
         get_orchestration_context,
     )
@@ -492,7 +492,7 @@ class TestFullRepoCollisionGate:
         """
         from pathlib import Path
 
-        from langgraph_engine.parsers.call_graph_builder_legacy import CallGraphBuilder
+        from sdlc_engine.parsers.call_graph_builder_legacy import CallGraphBuilder
 
         root = Path(__file__).resolve().parents[1]
         graph = CallGraphBuilder(str(root)).build()

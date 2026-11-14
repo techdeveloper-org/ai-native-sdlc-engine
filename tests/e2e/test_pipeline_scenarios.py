@@ -44,7 +44,7 @@ class TestStaleCallGraphGuard:
             sys.path.insert(0, str(_SCRIPTS_DIR))
 
         try:
-            from langgraph_engine.analysis.call_graph_analyzer import refresh_call_graph_if_stale
+            from sdlc_engine.analysis.call_graph_analyzer import refresh_call_graph_if_stale
         except ImportError:
             pytest.skip("call_graph_analyzer not importable")
 
@@ -56,7 +56,7 @@ class TestStaleCallGraphGuard:
             },
         }
 
-        with patch("langgraph_engine.sdlc_pipeline.call_graph_analyzer.snapshot_call_graph") as mock_snap:
+        with patch("sdlc_engine.analysis.call_graph_analyzer.snapshot_call_graph") as mock_snap:
             mock_snap.return_value = {
                 "nodes": ["fresh_node"],
                 "call_graph_available": True,
@@ -72,7 +72,7 @@ class TestStaleCallGraphGuard:
             sys.path.insert(0, str(_SCRIPTS_DIR))
 
         try:
-            from langgraph_engine.analysis.call_graph_analyzer import refresh_call_graph_if_stale
+            from sdlc_engine.analysis.call_graph_analyzer import refresh_call_graph_if_stale
         except ImportError:
             pytest.skip("call_graph_analyzer not importable")
 
@@ -85,7 +85,7 @@ class TestStaleCallGraphGuard:
             "step4_pre_change_graph": cached,
         }
 
-        with patch("langgraph_engine.sdlc_pipeline.call_graph_analyzer.snapshot_call_graph") as mock_snap:
+        with patch("sdlc_engine.analysis.call_graph_analyzer.snapshot_call_graph") as mock_snap:
             result = refresh_call_graph_if_stale(mock_state, str(tmp_path))
 
         mock_snap.assert_not_called()
@@ -97,7 +97,7 @@ class TestStaleCallGraphGuard:
             sys.path.insert(0, str(_SCRIPTS_DIR))
 
         try:
-            from langgraph_engine.analysis.call_graph_analyzer import refresh_call_graph_if_stale
+            from sdlc_engine.analysis.call_graph_analyzer import refresh_call_graph_if_stale
         except ImportError:
             pytest.skip("call_graph_analyzer not importable")
 
@@ -105,7 +105,7 @@ class TestStaleCallGraphGuard:
             "call_graph_stale": False,
         }
 
-        with patch("langgraph_engine.sdlc_pipeline.call_graph_analyzer.snapshot_call_graph") as mock_snap:
+        with patch("sdlc_engine.analysis.call_graph_analyzer.snapshot_call_graph") as mock_snap:
             mock_snap.return_value = {"call_graph_available": False}
             result = refresh_call_graph_if_stale(empty_state, str(tmp_path))
 
@@ -186,7 +186,7 @@ class TestSecretsValidationBlocksMissingKey:
             sys.path.insert(0, str(_SCRIPTS_DIR))
 
         try:
-            from langgraph_engine.security.secrets_manager import SecretsMissingError, validate_secrets
+            from sdlc_engine.security.secrets_manager import SecretsMissingError, validate_secrets
         except ImportError:
             pytest.skip("secrets_manager not importable")
 
@@ -208,7 +208,7 @@ class TestSecretsValidationBlocksMissingKey:
             sys.path.insert(0, str(_SCRIPTS_DIR))
 
         try:
-            from langgraph_engine.security.secrets_manager import SecretsMissingError, validate_secrets
+            from sdlc_engine.security.secrets_manager import SecretsMissingError, validate_secrets
         except ImportError:
             pytest.skip("secrets_manager not importable")
 
@@ -230,7 +230,7 @@ class TestSecretsValidationBlocksMissingKey:
             sys.path.insert(0, str(_SCRIPTS_DIR))
 
         try:
-            from langgraph_engine.security.secrets_manager import validate_secrets
+            from sdlc_engine.security.secrets_manager import validate_secrets
         except ImportError:
             pytest.skip("secrets_manager not importable")
 

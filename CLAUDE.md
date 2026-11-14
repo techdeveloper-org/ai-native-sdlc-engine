@@ -3,7 +3,7 @@
 **Project:** AI-Native SDLC Engine
 **Version:** 2.1.1
 **Type:** LangGraph Orchestration Pipeline with Call Graph Intelligence + Template Fast-Path
-**Last Updated:** 2026-11-10
+**Last Updated:** 2026-11-14
 
 ---
 
@@ -18,9 +18,9 @@ AI-Native SDLC Engine is a 3-level LangGraph-based orchestration pipeline for au
 | **Languages** | Python |
 | **Frameworks** | LangGraph 0.2.0+, LangChain, FastMCP (mcp package) |
 | **Status** | Active Development |
-| **Primary Location** | langgraph_engine/ |
-| **MCP Servers** | 13 servers -- all in separate repos under [techdeveloper-org](https://github.com/orgs/techdeveloper-org/repositories); 1 also keeps an in-engine copy in `src/mcp/` |
-| **Total Python Files** | 248 (langgraph_engine/); 494 repo-wide |
+| **Primary Location** | sdlc_engine/ |
+| **MCP Servers** | 13 servers -- all in separate repos under [techdeveloper-org](https://github.com/orgs/techdeveloper-org/repositories); 1 in-engine copy in sdlc_engine/mcp/ |
+| **Total Python Files** | ~273 (sdlc_engine/); 501 repo-wide |
 | **Test Files** | 106 (97 unit, 5 integration, 3 e2e, 1 load) |
 | **Call Graph** | 578 classes, 3,985 methods, 4 languages (Python/Java/TS/Kotlin) |
 
@@ -36,10 +36,10 @@ carries a purpose-revealing name; see "Latest Execution Insight" below for the r
 
 ```
 Level 0: Pre-Flight Sanity Guard (3 checks: Unicode, encoding, paths)
-    |     Package: langgraph_engine/preflight_guard/
+    |     Package: sdlc_engine/security/
     |
 Level 1: Session & Context Synchronization (session + parallel [complexity, context] -> merge)
-    |     Package: langgraph_engine/context_sync/
+    |     Package: sdlc_engine/context/
     |     Outputs: combined_complexity_score [1-25] (simple x 0.3 + graph x 0.7)
     |     NOTE: combined_complexity_score is on a 1-25 scale -- do NOT treat as 1-10
     |
@@ -47,7 +47,7 @@ Standards (always-on, loaded from disk -- NOT a numbered level; retired in the r
     |      because it never had pipeline nodes; policies/ is read directly on disk)
     |
 Level 2: SDLC Execution Core (9 active steps: Steps 0-8)
-    |     Package: langgraph_engine/sdlc_pipeline/
+    |     Package: sdlc_engine/nodes/ + sdlc_engine/pipeline/
     |
     |-- Step 0: Pre-Analysis & CallGraph Scan
     |           CallGraph scan -> hot_nodes, danger_zones, complexity_boost -> state
@@ -140,20 +140,25 @@ Level 2: SDLC Execution Core (9 active steps: Steps 0-8)
 |   +-- ide_paths.py                  # Path constants (imported by hook packages)
 |   +-- project_session.py            # Session utilities (imported by hook packages)
 |   +-- policy_tracking_helper.py     # Policy tracking (imported by hook packages)
-+-- langgraph_engine/                 # Core orchestration engine (REPO ROOT -- sibling of scripts/, NOT nested under it)
-|   +-- core/  state/  routing/                         # LazyLoader/ErrorHandler, FlowState, routing
-|   +-- diagrams/ (+drawio/)  parsers/  integrations/   # Strategy/Factory: UML gens, 4 lang parsers, GitHub/Jira/Figma/Jenkins
-|   +-- analysis/ context/ engine_logging/ github/ metrics/ quality/ security/ skills/ standards/   # domain subpackages (v1.20 migration)
-|   +-- build_dependency_resolver/  runtime_verification/   # build-dep parsers; node contracts + verifier
-|   +-- preflight_guard/  context_sync/  sdlc_pipeline/  # the 3 pipeline levels (each has architecture/; sdlc_pipeline also nodes/ + subgraph.py + sonarqube/)
-|   +-- [shared modules]              # orchestrator.py, llm_call, patterns, caching, git, etc.
++-- sdlc_engine/                      # Core orchestration engine (unified package, replaces langgraph_engine/ & src/)
+|   +-- pipeline/  nodes/  routing/   # Orchestrator, StateGraph step implementations, reducers, flow state
+|   +-- analysis/ (parsers/)          # Call graph, complexity, coverage, 4-language AST parsers
+|   +-- quality/ (runtime_verification/) # Quality gates, test generation, review criteria, contracts
+|   +-- agents/  standards/           # Agent/skill catalogue, selection, library adapter, resolver
+|   +-- llm/  context/  session/      # LLM invocation & fallback, context cache & loader, git/backup
+|   +-- security/  sonarqube/         # Pre-flight guard, secrets, audit logger, SonarQube scanner & auto-fixer
+|   +-- integrations/ (github/jira/figma/jenkins/claude/) # Vendor integrations
+|   +-- mcp/ (base/servers/push_gate/) # Unified FastMCP servers, session hooks, push gate
+|   +-- diagrams/ (uml/drawio/)       # Strategy Pattern: DiagramFactory + 13 UML/draw.io generators
+|   +-- metrics/ (liveness/)          # Collector, exporter, tracing, circuit breaker, budget
+|   +-- adapters/ (cli/)              # Pipeline CLI entry points (main, cli_handler, pipeline_invocation)
+|   +-- shared/ (config/decorators/errors/logging/utils/) # Core cross-cutting utilities
 +-- scripts/                          # Pipeline entry point + supporting tools (NOT the engine itself)
 |   +-- 3-level-flow.py               # Main pipeline entry point (filename predates the rename; still the canonical entry point for the 3-level pipeline)
 |   +-- architecture/                 # generate_system_diagram.py (shared utility)
 |   +-- setup/  bin/  tools/          # env setup; Windows .bat launchers; dev utilities (release.py, sync-version.py, etc.)
 |   +-- github_operations/  github_pr_workflow/  helpers/   # GitHub + PR workflow helpers
 +-- policies/03-execution-system/failure-prevention/  # failure-kb.json only (read by hooks/pre_tool_enforcer/policies/failure_kb.py); the historical 00-auto-fix/01-sync/02-standards/testing subtrees do not exist on disk -- standards live only in ~/.claude/rules/ (no repo copy, #320)
-+-- src/mcp/                          # In-engine copy of session-mgr + bridge (session_hooks, base/)
 +-- k8s/                              # Kubernetes manifests (deployment, service, hpa, configmap, secret)
 +-- tests/                            # 45 test files (37 unit, 4 integration, 3 e2e, 1 load)
 +-- docs/                             # ALL documentation, segregated by kind -- see docs/README.md for the index
@@ -189,46 +194,46 @@ unversioned: if that machine is lost, so are they.
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Orchestrator | langgraph_engine/orchestrator.py | Main StateGraph pipeline |
-| Flow State | langgraph_engine/flow_state.py | Backward-compat shim -> re-exports from state/ |
-| State Package | langgraph_engine/state/ | FlowState, StepKeys, reducers, WorkflowContextOptimizer |
-| Core Package | langgraph_engine/core/ | LazyLoader, get_logger, node_error_handler, NodeResult, create_step_node |
-| Routing Package | langgraph_engine/routing/ | All routing functions split by level |
-| Graph Factory | langgraph_engine/orchestrator.py | create_flow_graph(hook_mode): single canonical StateGraph factory (verify_node runtime-verification wrapping applied here) |
-| Diagrams Package | langgraph_engine/diagrams/ | Strategy Pattern: DiagramFactory + 13 generators |
-| Parsers Package | langgraph_engine/parsers/ | Abstract Factory: ParserRegistry + 4 language parsers |
-| SonarQube Package | langgraph_engine/sdlc_pipeline/sonarqube/ | Facade: api_client, lightweight, aggregator, auto_fixer |
-| Integrations Package | langgraph_engine/integrations/ | Abstract Factory + Lifecycle: GitHub/Jira/Figma/Jenkins |
-| Level 0 | langgraph_engine/preflight_guard/ | Pre-Flight Sanity Guard -- auto-fix enforcement (canonical) |
-| Level 1 | langgraph_engine/context_sync/ | Session & Context Synchronization (canonical). Outputs: `complexity_score` [1-10] (simple heuristic), `combined_complexity_score` [1-25] (simple x 0.3 + graph x 0.7 after linear scaling). **Note: `combined_complexity_score` is on a 1-25 scale -- do NOT treat it as 1-10.** |
-| Standards (non-numbered) | ~/.claude/rules/ (the only copy; no repo docs/standards/) + langgraph_engine/standards/ (selector + library_adapter) | Standards policies (.md files, no pipeline nodes) -- always-on, loaded from disk; retired from the level count since it has never had pipeline nodes |
-| Level 2 | langgraph_engine/sdlc_pipeline/subgraph.py | SDLC Execution Core -- 9-step active execution (Steps 0-8) -- ACTIVE (nodes in sdlc_pipeline/nodes/) |
-| Pre-Analysis Node | langgraph_engine/sdlc_pipeline/subgraph.py | orchestration_pre_analysis_node: CallGraph scan at Step 0; template fast-path detection |
+| Orchestrator | sdlc_engine/pipeline/orchestrator.py | Main StateGraph pipeline |
+| Flow State | sdlc_engine/routing/flow_state.py | Flow state definitions and type aliases |
+| State Package | sdlc_engine/routing/ | FlowState, StepKeys, reducers, WorkflowContextOptimizer |
+| Core Package | sdlc_engine/shared/ | LazyLoader, get_logger, node_error_handler, NodeResult, create_step_node |
+| Routing Package | sdlc_engine/routing/ | All routing functions split by level |
+| Graph Factory | sdlc_engine/pipeline/orchestrator.py | create_flow_graph(hook_mode): single canonical StateGraph factory (verify_node runtime-verification wrapping applied here) |
+| Diagrams Package | sdlc_engine/diagrams/ | Strategy Pattern: DiagramFactory + 13 generators |
+| Parsers Package | sdlc_engine/analysis/parsers/ | Abstract Factory: ParserRegistry + 4 language parsers |
+| SonarQube Package | sdlc_engine/sonarqube/ | Facade: api_client, lightweight, aggregator, auto_fixer |
+| Integrations Package | sdlc_engine/integrations/ | Abstract Factory + Lifecycle: GitHub/Jira/Figma/Jenkins |
+| Level 0 | sdlc_engine/security/ | Pre-Flight Sanity Guard -- auto-fix enforcement (canonical) |
+| Level 1 | sdlc_engine/context/ | Session & Context Synchronization (canonical). Outputs: `complexity_score` [1-10] (simple heuristic), `combined_complexity_score` [1-25] (simple x 0.3 + graph x 0.7 after linear scaling). **Note: `combined_complexity_score` is on a 1-25 scale -- do NOT treat it as 1-10.** |
+| Standards (non-numbered) | ~/.claude/rules/ (the only copy; no repo docs/standards/) + sdlc_engine/standards/ (selector + library_adapter) | Standards policies (.md files, no pipeline nodes) -- always-on, loaded from disk; retired from the level count since it has never had pipeline nodes |
+| Level 2 | sdlc_engine/pipeline/subgraph.py | SDLC Execution Core -- 9-step active execution (Steps 0-8) -- ACTIVE (nodes in sdlc_engine/nodes/) |
+| Pre-Analysis Node | sdlc_engine/pipeline/subgraph.py | orchestration_pre_analysis_node: CallGraph scan at Step 0; template fast-path detection |
 | Hooks (live) | hooks/stop-notifier.py | Session maintenance. **The only registered hook since v2.0.0** |
 | Hooks (retained, inactive) | hooks/pre-tool-enforcer.py, post-tool-tracker.py | **NOT registered.** ADR-006 removed the `PreToolUse`/`PostToolUse`/`UserPromptSubmit` registrations in v2.0.0 (commit `2e371f6`, 2026-08-04) and deliberately kept the source. These scripts never run. Do not route an enforcement need to them -- see the note under "Hook status" below |
-| Call Graph Builder | langgraph_engine/call_graph_builder.py | AST-based FQN call stack (compat shim -> parsers/) |
-| Call Graph Analyzer | langgraph_engine/call_graph_analyzer.py | Pipeline impact analysis (Steps 0/4/5) |
-| UML Generators | langgraph_engine/uml_generators.py | Compat shim -> diagrams/DiagramFactory |
-| Doc Manager | langgraph_engine/sdlc_pipeline/documentation_manager.py | Circular SDLC doc cycle (Step 1/7) |
-| Session Bridge | src/mcp/session_hooks.py | MCP direct import bridge |
-| Metrics Aggregator | langgraph_engine/metrics_aggregator.py | Session/step/LLM/tool stats from logs |
-| SonarQube Scanner | langgraph_engine/sonarqube_scanner.py | Legacy entry point -> sonarqube/ package |
-| Quality Gate | langgraph_engine/quality_gate.py | 4-gate merge enforcement |
-| Test Generator | langgraph_engine/test_generator.py | Template-based unit tests (4 languages) |
-| Jira Workflow | langgraph_engine/sdlc_pipeline/jira_lifecycle.py | Dual GitHub+Jira integration (Steps 2/3/5/6) |
-| Figma Workflow | langgraph_engine/sdlc_pipeline/figma_workflow.py | Design-to-code (components, tokens, review) |
+| Call Graph Builder | sdlc_engine/analysis/parsers/call_graph_builder_legacy.py | AST-based FQN call stack |
+| Call Graph Analyzer | sdlc_engine/analysis/call_graph_analyzer.py | Pipeline impact analysis (Steps 0/4/5) |
+| UML Generators | sdlc_engine/diagrams/uml/ | DiagramFactory + 13 UML diagram generators |
+| Doc Manager | sdlc_engine/nodes/documentation_manager.py | Circular SDLC doc cycle (Step 1/7) |
+| Session Bridge | sdlc_engine/mcp/session_hooks.py | MCP direct import bridge |
+| Metrics Aggregator | sdlc_engine/metrics/aggregator.py | Session/step/LLM/tool stats from logs |
+| SonarQube Scanner | sdlc_engine/sonarqube/scanner.py | SonarQube scanner entry point |
+| Quality Gate | sdlc_engine/quality/gate.py | 4-gate merge enforcement |
+| Test Generator | sdlc_engine/quality/test_generator.py | Template-based unit tests (4 languages) |
+| Jira Workflow | sdlc_engine/integrations/jira/lifecycle.py | Dual GitHub+Jira integration (Steps 2/3/5/6) |
+| Figma Workflow | sdlc_engine/nodes/figma_workflow.py | Design-to-code (components, tokens, review) |
 | Health Server | scripts/health_server.py | Stdlib HTTP: GET /health + GET /readiness (daemon thread) |
-| Secrets Manager | langgraph_engine/secrets_manager.py | Startup secrets validation + AWS SM integration + rotation hints |
-| Audit Logger | langgraph_engine/audit_logger.py | Append-only JSON audit log, daily rotation, credential redaction |
-| Metrics Exporter | langgraph_engine/metrics_exporter.py | Prometheus: 9 metrics, start_metrics_server(port) |
-| Structured Logger | langgraph_engine/core/structured_logger.py | JSON log sink (LOG_FORMAT=json), ContextVar session/step injection |
-| Tracing | langgraph_engine/tracing.py | OpenTelemetry OTLP/console, create_span() context manager |
-| Error Tracking | langgraph_engine/error_tracking.py | Sentry capture_exception(), no-op without SENTRY_DSN |
-| Rate Limiter | src/mcp/rate_limiter.py | TokenBucket per client, 100/min tools, 10/min LLM |
-| Input Validator | src/mcp/input_validator.py | Null-byte strip, length limit, prompt injection detection |
+| Secrets Manager | sdlc_engine/security/secrets_manager.py | Startup secrets validation + AWS SM integration + rotation hints |
+| Audit Logger | sdlc_engine/security/audit_logger.py | Append-only JSON audit log, daily rotation, credential redaction |
+| Metrics Exporter | sdlc_engine/metrics/exporter.py | Prometheus: 9 metrics, start_metrics_server(port) |
+| Structured Logger | sdlc_engine/shared/logging/structured_logger.py | JSON log sink (LOG_FORMAT=json), ContextVar session/step injection |
+| Tracing | sdlc_engine/metrics/tracing.py | OpenTelemetry OTLP/console, create_span() context manager |
+| Error Tracking | sdlc_engine/context/error_tracking.py | Sentry capture_exception(), no-op without SENTRY_DSN |
+| Rate Limiter | sdlc_engine/mcp/rate_limiter.py | TokenBucket per client, 100/min tools, 10/min LLM |
+| Input Validator | sdlc_engine/mcp/input_validator.py | Null-byte strip, length limit, prompt injection detection |
 | Secrets Scanner | scripts/secrets_check.py | CI gate: 6 regex patterns, exit 1 on finding |
 | Pin Requirements | scripts/pin_requirements.py | Generates requirements.pinned.txt + requirements.bounds.txt |
-| PromptGen Caller | langgraph_engine/sdlc_pipeline/architecture/prompt_gen_expert_caller.py | Step 1 Phase 1: assembles the orchestration prompt from the master template (no LLM call) |
+| PromptGen Caller | sdlc_engine/nodes/prompt_gen_expert_caller.py | Step 1 Phase 1: assembles the orchestration prompt from the master template (no LLM call) |
 
 ### Hook status -- read before routing any enforcement need to a hook
 
@@ -313,8 +318,8 @@ Step 5 (Pull Request & Automated Review): review_change_impact() -> compare befo
                  Detects breaking changes, orphaned methods, risk assessment
 ```
 
-Key module: `langgraph_engine/call_graph_analyzer.py`
-Data source: `langgraph_engine/call_graph_builder.py`
+Key module: `sdlc_engine/analysis/call_graph_analyzer.py`
+Data source: `sdlc_engine/analysis/parsers/call_graph_builder_legacy.py`
 State fields: `pre_analysis_result`, `step4_pre_change_graph`, `step5_impact_review`
 
 **Stale Graph Guard (v1.6.1):**
@@ -425,7 +430,7 @@ pytest tests/test_secrets_manager.py tests/test_audit_logger.py
 pytest tests/test_call_graph_builder.py tests/test_call_graph_analyzer.py
 
 # With coverage report
-pytest tests/ --cov=langgraph_engine --cov-report=html:docs/coverage
+pytest tests/ --cov=sdlc_engine --cov-report=html:docs/coverage
 ```
 
 ### First-Time Setup
@@ -453,10 +458,10 @@ kubectl apply -f k8s/secret.yaml -f k8s/configmap.yaml \
 ### Adding a New Pipeline Level
 
 ```python
-# 1. Create level package in langgraph_engine/my_level/
-# 2. Add routing in routing/my_level_routes.py
+# 1. Create level package in sdlc_engine/my_level/
+# 2. Add routing in sdlc_engine/routing/my_level_routes.py
 # 3. Wire the level's nodes + edges into create_flow_graph() in
-#    langgraph_engine/orchestrator.py (the single canonical graph factory):
+#    sdlc_engine/pipeline/orchestrator.py (the single canonical graph factory):
 def create_flow_graph(hook_mode: bool = False):
     ...
     graph.add_node("my_level_node", my_level_node)
@@ -485,7 +490,7 @@ See environment variables in `.env.example`:
 
 ---
 
-**Last Updated:** 2026-11-10
+**Last Updated:** 2026-11-14
 
 
 <!-- execution-insight- -->

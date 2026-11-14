@@ -31,17 +31,17 @@ from pathlib import Path
 
 import pytest
 
-from langgraph_engine.parsers import call_graph_builder_legacy as legacy
-from langgraph_engine.parsers.call_graph_builder_legacy import CallGraphBuilder
-from langgraph_engine.parsers.graph_model import CallGraph, make_call_edge, make_method_node
+from sdlc_engine.analysis.parsers import call_graph_builder_legacy as legacy
+from sdlc_engine.analysis.parsers.call_graph_builder_legacy import CallGraphBuilder
+from sdlc_engine.analysis.parsers.graph_model import CallGraph, make_call_edge, make_method_node
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-GRAPH_MODEL_LOGGER = "langgraph_engine.parsers.graph_model"
+GRAPH_MODEL_LOGGER = "sdlc_engine.analysis.parsers.graph_model"
 
 TRUNCATION_MARKERS = ("hit max_paths=", "limit; results truncated")
 
-CANARY_PREFIX = "langgraph_engine/sdlc_pipeline/"
+CANARY_PREFIX = "sdlc_engine/"
 
 # MEASURED 2026-08-01 by docs/phase-5-uml/callgraph_coverage_probe.md section 2,
 # with the file cap lifted: files_analyzed=411, total_classes=480,

@@ -72,15 +72,15 @@ _le_pkg.__path__ = [str(_REPO_ROOT / "langgraph_engine")]
 _le_pkg.__package__ = "langgraph_engine"
 
 # flow_state: FlowState is just dict in tests
-_flow_state_mod = _stub_module("langgraph_engine.flow_state")
+_flow_state_mod = _stub_module("sdlc_engine.routing")
 _flow_state_mod.FlowState = dict  # type: ignore
 
 # step_logger: empty stub -> helpers.py falls back to no-op write_level_log
-_stub_module("langgraph_engine.step_logger")
+_stub_module("sdlc_engine.shared.logging.step_logger")
 
 # Top-level complexity_calculator: empty stub -> ImportError in helpers.py ->
 # _COMPLEXITY_CALCULATOR_AVAILABLE=False (tests patch when needed)
-_stub_module("langgraph_engine.complexity_calculator")
+_stub_module("sdlc_engine.analysis.complexity_calculator")
 
 # utils stub (path_resolver is imported by helpers.py; real file exists in src/)
 # No stub needed -- helpers.py falls back gracefully if import fails.
@@ -91,10 +91,10 @@ _stub_module("langgraph_engine.complexity_calculator")
 # Each submodule is stored separately so patch.object targets the right owner.
 # ---------------------------------------------------------------------------
 
-_l1_session = importlib.import_module("langgraph_engine.context_sync.session_loader")
-_l1_complexity = importlib.import_module("langgraph_engine.context_sync.complexity_calculator")
-_l1_context = importlib.import_module("langgraph_engine.context_sync.context_loader")
-_l1_routing = importlib.import_module("langgraph_engine.context_sync.routing")
+_l1_session = importlib.import_module("sdlc_engine.context.session_loader")
+_l1_complexity = importlib.import_module("sdlc_engine.context.complexity_calculator")
+_l1_context = importlib.import_module("sdlc_engine.context.context_loader")
+_l1_routing = importlib.import_module("sdlc_engine.context.routing")
 
 # Ensure calculate_complexity sentinel exists for tests that patch it
 if not hasattr(_l1_complexity, "calculate_complexity"):

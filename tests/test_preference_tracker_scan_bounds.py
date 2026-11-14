@@ -31,7 +31,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-_MODULE_PATH = _PROJECT_ROOT / "langgraph_engine" / "context_sync" / "architecture" / "preference_tracker.py"
+_MODULE_PATH = _PROJECT_ROOT / "sdlc_engine" / "context" / "architecture" / "preference_tracker.py"
 
 
 def _load_module():

@@ -34,7 +34,7 @@ from pathlib import Path
 import pytest
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
-_SEARCH_ROOTS = ["langgraph_engine", "src", "scripts"]
+_SEARCH_ROOTS = ["sdlc_engine", "scripts"]
 
 # (file_relpath, lineno, module) -- genuinely missing modules, not depth bugs.
 # sonarqube_integration: referenced only in the IntegrationRegistry factory,
@@ -46,8 +46,9 @@ _SEARCH_ROOTS = ["langgraph_engine", "src", "scripts"]
 #   implementation of _llm_call_with_retry defined right there -- the
 #   except branch IS the real, working code path, not a degraded one.
 _KNOWN_MISSING_MODULES = {
-    ("langgraph_engine/integrations/__init__.py", "sonarqube_integration"),
-    ("langgraph_engine/sdlc_pipeline/github_lifecycle.py", "remaining_steps"),
+    ("sdlc_engine/integrations/__init__.py", "sonarqube_integration"),
+    ("sdlc_engine/nodes/github_lifecycle.py", "remaining_steps"),
+    ("sdlc_engine/integrations/github/lifecycle.py", "remaining_steps"),
 }
 
 
