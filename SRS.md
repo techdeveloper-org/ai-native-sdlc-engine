@@ -119,14 +119,14 @@ create_flow_graph(hook_mode=False)  # full run (Steps 0-8)
 **Description:** The always-on, non-numbered Standards mechanism must auto-detect project type (language, framework) and load appropriate coding standards from 63 policy files, read directly from `policies/` on disk (no pipeline nodes involved).
 **Priority:** High
 **Status:** Implemented
-**Key Module:** `langgraph_engine/standards/`
+**Key Module:** `sdlc_engine/standards/`
 
 #### FR-8: Hybrid LLM Inference
 
 **Description:** LLM calls must follow fallback chain: Claude CLI → Anthropic API. Model selection must be complexity-based.
 **Priority:** High
 **Status:** Implemented
-**Key Module:** `langgraph_engine/llm_call.py`
+**Key Module:** `sdlc_engine/llm/llm_call.py`
 
 #### FR-9: Hook System
 
