@@ -10,6 +10,7 @@ Contains:
 """
 
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -20,6 +21,27 @@ from sdlc_engine.shared.logging.error_logger import ErrorLogger
 from .preflight_merge import MAX_PREFLIGHT_ATTEMPTS
 
 _logger = logging.getLogger(__name__)
+
+
+def _atomic_write_text(file_path: Path, content: str, encoding: str = "utf-8") -> None:
+    """Atomically write text content using a temporary sibling file and atomic rename.
+
+    Args:
+        file_path: Target path to write to.
+        content: String content to write.
+        encoding: Text encoding to use.
+    """
+    tmp_file = file_path.with_name(f".{file_path.name}.tmp.{os.getpid()}")
+    try:
+        tmp_file.write_text(content, encoding=encoding)
+        os.replace(tmp_file, file_path)
+    except Exception:
+        if tmp_file.exists():
+            try:
+                tmp_file.unlink()
+            except OSError:
+                pass
+        raise
 
 
 # ============================================================================
@@ -251,8 +273,9 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
     import io
 
     session_id = state.get("session_id")
+    backup_base_dir = state.get("backup_base_dir")
     logger = ErrorLogger(session_id) if session_id else None
-    backup = BackupManager(session_id) if session_id else None
+    backup = BackupManager(session_id, backup_base_dir=backup_base_dir) if session_id else None
 
     fixed_issues = []
     fix_errors = []
@@ -319,16 +342,17 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
             # A file is only rewritten when the AST-based scan confirms a real drive
             # path in a string VALUE.
             _DRIVE_PATH_RE = _re_fix.compile(
-                r"(?<![A-Za-z0-9_\\?])([A-Za-z]):\\((?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*)",
+                r"(?<![A-Za-z0-9_\\?])([A-Za-z]):(?:\\\\|\\)((?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*)",
                 _re_fix.IGNORECASE,
             )
 
             def _fix_drive_path(m):
                 drive = m.group(1)
-                rest = m.group(2)
+                rest = m.group(2).lstrip("\\/")
                 if rest and rest[0] in "ntr0bfva" and (len(rest) == 1 or rest[1] in " \t\r\n:=#"):
                     return m.group(0)
-                return drive + ":/" + rest.replace("\\", "/")
+                cleaned_rest = _re_fix.sub(r"\\+", "/", rest)
+                return f"{drive}:/{cleaned_rest}"
 
             project_root = Path(state.get("project_root", "."))
             fixed_files = []
@@ -337,9 +361,6 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
             _fix_files = list(_iter_project_py_files(project_root, cap=500))
             for py_file in _fix_files:
                 try:
-                    # Step 1: Backup file before modification
-                    backup and backup.backup_file(str(py_file), "Level 0 (Pre-Flight Sanity Guard)", "Before path fix")
-
                     try:
                         content = py_file.read_text(encoding="utf-8-sig")
                     except UnicodeDecodeError:
@@ -349,6 +370,16 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
                     if not _has_drive_path(content):
                         continue
                     if "\\" in content and ":\\" in content:
+                        # Step 1: Backup file before modification (Fail-Closed)
+                        if backup:
+                            backup_ok = backup.backup_file(
+                                str(py_file), "Level 0 (Pre-Flight Sanity Guard)", "Before path fix"
+                            )
+                            if not backup_ok:
+                                _logger.error("Backup failed for %s, skipping modification (fail-closed)", py_file)
+                                fix_errors.append(f"Backup failed for {py_file.name}, auto-fix aborted")
+                                continue
+
                         # Original content to compare
                         original_content = content
 
@@ -358,7 +389,7 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
 
                         # Only write back if content changed
                         if content != original_content:
-                            py_file.write_text(content, encoding="utf-8")
+                            _atomic_write_text(py_file, content, encoding="utf-8")
 
                             # Step 2: Validate file integrity after modification
                             if backup and backup.validate_file_integrity(

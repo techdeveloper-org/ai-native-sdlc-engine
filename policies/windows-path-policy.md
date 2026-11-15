@@ -1,81 +1,86 @@
-# Windows Path Validation Policy
+# Windows Path Validation Policy (Level 0 Pre-Flight Guard)
 
-**Version:** 1.0.0
+**Version:** 2.0.0
 **Priority:** HIGH
 **Status:** ACTIVE
-**Scope:** Windows only (sys.platform == 'win32')
+**Stage:** Level 0 (Pre-Flight Sanity Guard, T = 0)
+**Graph Node:** `preflight_guard_windows` -> `preflight_guard_merge`
+**Scope:** Windows only (`sys.platform == 'win32'`)
 
 ---
 
-## Purpose
+## 1. Purpose & Architectural Invariants
 
-Hardcoded Windows-style paths (`C:\Users\...`, `D:\projects\...`) in Python source files
-cause cross-platform failures and are a code smell. All paths should use forward slashes
-or `pathlib.Path` / `os.path.join` for cross-platform compatibility.
-
----
-
-## Detection
-
-1. Scan all `.py` files in the project directory
-2. Cap scan at **500 files** to prevent timeout
-3. For each file, check for both `"\\"` AND `":\\"` patterns in content
-4. This catches `C:\`, `D:\`, etc. while avoiding false positives on single backslashes
-5. Report problem files in error state
+Hardcoded Windows-style paths (`C:\Users\...`, `D:\projects\...`) in Python source files cause cross-platform execution failures on Linux/macOS and in containerized CI/CD pipelines. This policy mandates:
+1. Pure forward slashes (`/`) or `pathlib.Path` / `os.path.join` across all project Python source files.
+2. Complete absence of drive-letter backslash strings in executable code.
+3. Strict preservation of Python escape sequences (`\n`, `\t`, `\r`, etc.) and docstring examples.
+4. Fail-closed, non-destructive file operations with atomic rollback guarantees.
 
 ---
 
-## Detection Pattern
+## 2. Detection Engine Architecture
 
-```python
-# Matches: "C:\\Users\\", "D:\\projects\\"
-# Avoids: "\\n" (newline), "\\t" (tab) when not preceded by drive letter
-if "\\" in content and ":\\" in content:
-    # File contains Windows-style paths
+The scan inspects up to **500 project Python files** using a dual-pass AST and regex analyzer:
+
+### 2.1 Vendor Directory Exclusion
+The scanner automatically isolates and ignores 13 vendor, virtual environment, and cache directories:
+`.venv`, `venv`, `env`, `node_modules`, `site-packages`, `.git`, `__pycache__`, `dist`, `build`, `.tox`, `.mypy_cache`, `.pytest_cache`, `.eggs`, and `*.egg-info`.
+
+### 2.2 AST-Based Constant Value Inspection
+- Files are parsed into an Abstract Syntax Tree via `ast.parse`.
+- String literal **values** are inspected directly (`iter_string_values()`), resolving escape sequences so that `\n`, `\t`, `\r` can never be mistaken for path separators.
+- **Docstring Bypass:** The first string statement of modules, classes, and functions (`_docstring_nodes()`) is explicitly bypassed, allowing example drive paths in documentation.
+- **Comment Scan:** Comment lines (`#`) are inspected independently for drive paths.
+- **SyntaxError Fallback:** If `ast.parse` encounters a `SyntaxError`, the engine safely falls back to raw-regex scanning on the source lines.
+
+### 2.3 Detection Regular Expression
+```regex
+(?<![A-Za-z0-9_\\?])([A-Za-z]):(?:\\\\|\\)(?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*
 ```
+- **Verbatim Win32 Bypass:** Negative lookbehind `(?<![A-Za-z0-9_\\?])` exempts verbatim namespaces (`\\?\C:\...`).
+- **UNC Exemption:** UNC network shares (`\\server\share`) are excluded as they contain no drive letters.
+- **URL / URI Exemption:** Standard schemes (`file:///C:/`, `https://`) pass cleanly.
 
 ---
 
-## Auto-Fix Strategy
+## 3. Auto-Fix Strategy & Transactional Rollback
 
-1. **Backup** the file before modification (via BackupManager)
-2. Apply regex substitutions to convert backslash paths to forward slashes
-3. **Preserve** escape sequences (`\n`, `\t`, `\r`, `\\\\` for literal backslash)
-4. **Validate** file integrity after modification (syntax check)
-5. If validation fails, **restore** from backup
-6. Generate diff for audit trail
-
----
-
-## Fix Safety Rules
-
-| Rule | Rationale |
-|------|-----------|
-| Always backup before fix | Restore on failure |
-| Validate after fix | Catch broken syntax |
-| Preserve escape sequences | `\n`, `\t` are NOT paths |
-| Generate diff | Audit trail for review |
-| Restore on failure | No data loss |
+When violations are detected, `fix_preflight_guard_issues` executes an atomic 4-step repair:
+1. **Pre-Modification Backup (Fail-Closed):**
+   - Exact byte-for-byte backup via `BackupManager` with microsecond timestamp + UUID suffix.
+   - Backup is created **only** for files confirmed to contain violations (eliminating backup amplification DoS).
+   - If backup creation returns `False` (disk full, permission denied), file modification is immediately aborted.
+2. **Escaped String & Drive Path Normalization:**
+   - Normalizes matched drive paths to forward slashes (`C:/...`).
+   - Handles single (`C:\`) and double (`C:\\`) backslashes cleanly without creating malformed double forward slashes (`C://`).
+   - Lookahead boundary checks preserve multi-argument boundaries on a single line and legitimate escapes (`\n`, `\t`, etc.).
+3. **Atomic File Writeback:**
+   - Writes to a temporary sibling file (`.filename.tmp.PID`) and replaces target via `os.replace` to prevent file truncation on process interruption.
+4. **AST Validation & Audit Trail:**
+   - Validates post-fix syntax via `compile(content, file, "exec")`.
+   - On syntax failure: Immediate non-destructive rollback via `backup.restore_file()`.
+   - On success: Emits unified diff to `sessions/{session_id}/backup/diffs/{step}_{label}_{timestamp}.diff`.
+5. **Encoding:** Reads with `utf-8-sig` (handling BOMs transparently); writes with UTF-8 without BOM.
 
 ---
 
-## Known Limitations
+## 4. Recovery Loop & Bounds
 
-- Regex may over-match strings with embedded backslashes used for non-path purposes
-- Complex escape sequences may require manual review
-- Files with mixed path styles need careful handling
-
----
-
-## Success Criteria
-
-- No `.py` files contain `":\\"` pattern (drive-letter backslash paths)
-- OR: All detected paths successfully converted to forward slashes
+- **Retry Budget:** `MAX_PREFLIGHT_ATTEMPTS = 3` (enforced by `preflight_merge_node`).
+- **Interactive Resolution:** Interactive terminals (`sys.stdin.isatty() == True`) offer `[auto-fix/skip]` choices.
+- **Non-Interactive Hook Default:** Automatically defaults to `auto-fix` when `sys.stdin.isatty() == False`, preventing CLI hangs.
+- **Failure Escalation:** On 3 failed attempts, marks `preflight_fatal_failure = True` and forces continuation to Level 1 with logged warnings.
 
 ---
 
-## State Output
+## 5. FlowState Contract Specification
 
-| Field | Value |
-|-------|-------|
-| `windows_path_check` | "PASS" or "FAIL" |
+| Field | Type | Description |
+|:---|:---|:---|
+| `windows_path_check` | `bool` | `True` if no backslash paths exist or on non-Windows; `False` if detected |
+| `windows_path_check_error` | `Optional[str]` | Truncated error message containing first 2 problem files, e.g. `Backslash paths found: app.py, utils.py` |
+| `preflight_status` | `str` | `"OK"` (all checks passed) or `"FAILED"` (triggering recovery) |
+| `preflight_retry_count` | `int` | Attempt counter (1..3) |
+| `preflight_fixes_applied` | `List[str]` | Applied repair notifications |
+| `preflight_fix_errors` | `List[str]` | Any fix or validation errors encountered |

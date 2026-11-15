@@ -10,6 +10,9 @@ Provides safe backup/restore functionality with:
 
 import difflib
 import json
+import os
+import re
+import threading
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -34,6 +37,7 @@ class BackupManager:
                 Claude logs root resolved by path_resolver.
         """
         self.session_id = session_id
+        self._lock = threading.Lock()
         base = Path(backup_base_dir).expanduser() if backup_base_dir else get_claude_logs_dir()
         self.backup_dir = base / "sessions" / session_id / "backup"
         self.backup_dir.mkdir(parents=True, exist_ok=True)
@@ -63,27 +67,33 @@ class BackupManager:
             return False
 
         try:
-            # Generate collision-proof atomic backup filename using stem and suffix
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-            unique_suffix = uuid.uuid4().hex[:6]
-            safe_name = f"{file_path.stem}_{timestamp}_{unique_suffix}{file_path.suffix}"
-            backup_file = self.backup_dir / f"{step}_{safe_name}"
+            with self._lock:
+                # Sanitize step parameter against path traversal
+                clean_step = re.sub(r"[^A-Za-z0-9_\-]", "_", step)
 
-            # Create backup
-            backup_file.write_bytes(file_path.read_bytes())
+                # Generate collision-proof atomic backup filename using stem and suffix
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                unique_suffix = uuid.uuid4().hex[:6]
+                safe_name = f"{file_path.stem}_{timestamp}_{unique_suffix}{file_path.suffix}"
+                backup_file = self.backup_dir / f"{clean_step}_{safe_name}"
 
-            # Track in metadata
-            entry = {
-                "timestamp": datetime.now().isoformat(),
-                "original_path": str(file_path),
-                "backup_path": str(backup_file),
-                "step": step,
-                "description": description,
-                "file_size": file_path.stat().st_size,
-            }
+                # Create backup atomically via temporary sibling file
+                tmp_backup = backup_file.with_name(f".{backup_file.name}.tmp.{os.getpid()}")
+                tmp_backup.write_bytes(file_path.read_bytes())
+                os.replace(tmp_backup, backup_file)
 
-            self.metadata["backups"].append(entry)
-            self._save_metadata()
+                # Track in metadata
+                entry = {
+                    "timestamp": datetime.now().isoformat(),
+                    "original_path": str(file_path),
+                    "backup_path": str(backup_file),
+                    "step": step,
+                    "description": description,
+                    "file_size": file_path.stat().st_size,
+                }
+
+                self.metadata["backups"].append(entry)
+                self._save_metadata()
 
             print(f"[OK] Backup created: {file_path} -> {backup_file}")
             return True
@@ -106,30 +116,33 @@ class BackupManager:
         file_path = Path(file_path)
 
         try:
-            # Find backup for this file and step
-            backup_entries = [
-                b for b in self.metadata["backups"] if b["original_path"] == str(file_path) and b["step"] == step
-            ]
+            with self._lock:
+                # Find backup for this file and step
+                backup_entries = [
+                    b for b in self.metadata["backups"] if b["original_path"] == str(file_path) and b["step"] == step
+                ]
 
-            if not backup_entries:
-                print(f"[WARN]  No backup found for {file_path} in step {step}")
-                return False
+                if not backup_entries:
+                    print(f"[WARN]  No backup found for {file_path} in step {step}")
+                    return False
 
-            # Use most recent backup
-            latest_backup = max(backup_entries, key=lambda x: x["timestamp"])
-            backup_file = Path(latest_backup["backup_path"])
+                # Use most recent backup
+                latest_backup = max(backup_entries, key=lambda x: x["timestamp"])
+                backup_file = Path(latest_backup["backup_path"])
 
-            if not backup_file.exists():
-                print(f"[FAIL] Backup file not found: {backup_file}")
-                return False
+                if not backup_file.exists():
+                    print(f"[FAIL] Backup file not found: {backup_file}")
+                    return False
 
-            # Restore file
-            file_path.write_bytes(backup_file.read_bytes())
+                # Restore file atomically via temporary sibling file
+                tmp_restore = file_path.with_name(f".{file_path.name}.tmp.{os.getpid()}")
+                tmp_restore.write_bytes(backup_file.read_bytes())
+                os.replace(tmp_restore, file_path)
 
-            # Update metadata
-            latest_backup["restored"] = True
-            latest_backup["restore_timestamp"] = datetime.now().isoformat()
-            self._save_metadata()
+                # Update metadata
+                latest_backup["restored"] = True
+                latest_backup["restore_timestamp"] = datetime.now().isoformat()
+                self._save_metadata()
 
             print(f"[OK] Restored: {file_path} from {backup_file}")
             return True
@@ -312,9 +325,11 @@ class BackupManager:
         return {"session_id": self.session_id, "created": datetime.now().isoformat(), "backups": []}
 
     def _save_metadata(self) -> None:
-        """Save metadata to file."""
+        """Save metadata to file atomically."""
         try:
-            self.metadata_file.write_text(json.dumps(self.metadata, indent=2))
+            tmp_meta = self.metadata_file.with_name(f".{self.metadata_file.name}.tmp.{os.getpid()}")
+            tmp_meta.write_text(json.dumps(self.metadata, indent=2))
+            os.replace(tmp_meta, self.metadata_file)
         except Exception as e:
             print(f"[FAIL] Failed to save backup metadata: {e}")
 

@@ -17,7 +17,11 @@ import pytest
 from sdlc_engine.security.path_scan import has_drive_path
 from sdlc_engine.security.preflight_merge import preflight_guard_merge_node
 from sdlc_engine.security.preflight_nodes import _iter_project_py_files, node_windows_path_check
-from sdlc_engine.security.preflight_recovery import ask_preflight_guard_fix, fix_preflight_guard_issues
+from sdlc_engine.security.preflight_recovery import (
+    _atomic_write_text,
+    ask_preflight_guard_fix,
+    fix_preflight_guard_issues,
+)
 from sdlc_engine.session.backup_manager import BackupManager
 
 SEP = chr(92)
@@ -254,6 +258,26 @@ class TestWindowsPathIntegration:
         fix_preflight_guard_issues(state)
         assert venv_file.read_text(encoding="utf-8") == dirty_content
 
+    def test_integration_escaped_string_no_double_slash(self, isolated_workspace, force_windows_platform):
+        """Integration: Escaped backslashes (C:\\\\Projects) normalize to C:/Projects, never C://."""
+        proj, _ = isolated_workspace
+        target = proj / "escaped.py"
+        double_sep = SEP + SEP
+        escaped_str = f"C:{double_sep}Projects{double_sep}core"
+        target.write_text(f'PATH = "{escaped_str}"\n', encoding="utf-8")
+
+        state = {
+            "session_id": "test_escaped_no_double_slash",
+            "project_root": str(proj),
+            "windows_path_check": False,
+        }
+        res = fix_preflight_guard_issues(state)
+        assert res.get("preflight_ready_to_retry") is True
+
+        fixed_content = target.read_text(encoding="utf-8")
+        assert "C:/Projects/core" in fixed_content
+        assert "C://" not in fixed_content
+
 
 class TestWindowsPathSecurityAndRollback:
     """Security, transactional backup, atomic locking, and rollback invariants."""
@@ -361,6 +385,80 @@ class TestWindowsPathSecurityAndRollback:
         state = {"project_root": str(proj)}
         result = node_windows_path_check(state)
         assert result["windows_path_check"] is True
+
+    def test_security_fail_closed_backup_aborts_modification(
+        self, isolated_workspace, force_windows_platform, monkeypatch
+    ):
+        """Security: Fail-closed invariant - if backup_file returns False, file modification is aborted."""
+        proj, logs = isolated_workspace
+        target = proj / "fail_closed.py"
+        path_str = make_drive_path("data", "closed.py")
+        original_content = f'BAD = r"{path_str}"\n'
+        target.write_text(original_content, encoding="utf-8")
+
+        monkeypatch.setattr(BackupManager, "backup_file", lambda *args, **kwargs: False)
+
+        state = {
+            "session_id": "test_fail_closed",
+            "project_root": str(proj),
+            "backup_base_dir": str(logs),
+            "unicode_check": True,
+            "encoding_check": True,
+            "windows_path_check": False,
+        }
+        res = fix_preflight_guard_issues(state)
+        assert any("Backup failed" in err for err in res.get("preflight_fix_errors", []))
+        assert target.read_text(encoding="utf-8") == original_content
+
+    def test_security_clean_files_not_backed_up(self, isolated_workspace, force_windows_platform):
+        """Security: Clean files do not trigger backup creation, eliminating backup amplification DoS."""
+        proj, logs = isolated_workspace
+        for i in range(5):
+            (proj / f"clean_{i}.py").write_text(f'X_{i} = "clean/path"\n', encoding="utf-8")
+
+        dirty = proj / "dirty.py"
+        path_str = make_drive_path("data", "dirty.py")
+        dirty.write_text(f'DIRTY = r"{path_str}"\n', encoding="utf-8")
+
+        state = {
+            "session_id": "test_clean_no_backup",
+            "project_root": str(proj),
+            "backup_base_dir": str(logs),
+            "unicode_check": True,
+            "encoding_check": True,
+            "windows_path_check": False,
+        }
+        fix_preflight_guard_issues(state)
+
+        bm = BackupManager(session_id="test_clean_no_backup", backup_base_dir=str(logs))
+        backups = [b for b in bm.metadata["backups"] if "dirty.py" in b["original_path"]]
+        assert len(backups) == 1
+        assert len(bm.metadata["backups"]) == 1
+
+    def test_security_step_path_traversal_sanitized(self, isolated_workspace):
+        """Security: Step parameter path traversal attempts are sanitized against directory breakout."""
+        proj, logs = isolated_workspace
+        target = proj / "step_test.py"
+        target.write_text("A = 1\n", encoding="utf-8")
+
+        bm = BackupManager(session_id="test_step_sec", backup_base_dir=str(logs))
+        assert bm.backup_file(str(target), step="../../malicious_step") is True
+
+        backup_entry = bm.metadata["backups"][0]
+        backup_path = Path(backup_entry["backup_path"])
+        assert bm.backup_dir in backup_path.parents
+
+    def test_security_atomic_write_replaces_cleanly(self, isolated_workspace):
+        """Security: Atomic write safely replaces target file without leaving temporary sibling artifacts."""
+        proj, _ = isolated_workspace
+        target = proj / "atomic.txt"
+        target.write_text("old content\n", encoding="utf-8")
+
+        _atomic_write_text(target, "new content\n", encoding="utf-8")
+        assert target.read_text(encoding="utf-8") == "new content\n"
+
+        tmp_files = list(proj.glob(".*.tmp.*"))
+        assert len(tmp_files) == 0
 
 
 class TestWindowsPathPerformanceAndBounds:

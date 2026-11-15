@@ -54,7 +54,7 @@ import ast
 import re
 
 DRIVE_PATH_RE = re.compile(
-    r"(?<![A-Za-z0-9_\\?])([A-Za-z]):\\(?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*",
+    r"(?<![A-Za-z0-9_\\?])([A-Za-z]):(?:\\\\|\\)(?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*",
     re.IGNORECASE,
 )
 
