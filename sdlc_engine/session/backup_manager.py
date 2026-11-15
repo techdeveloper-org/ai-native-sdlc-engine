@@ -10,6 +10,7 @@ Provides safe backup/restore functionality with:
 
 import difflib
 import json
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -62,9 +63,10 @@ class BackupManager:
             return False
 
         try:
-            # Generate backup filename
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            safe_name = file_path.name.replace(".", f"_{timestamp}.")
+            # Generate collision-proof atomic backup filename using stem and suffix
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            unique_suffix = uuid.uuid4().hex[:6]
+            safe_name = f"{file_path.stem}_{timestamp}_{unique_suffix}{file_path.suffix}"
             backup_file = self.backup_dir / f"{step}_{safe_name}"
 
             # Create backup

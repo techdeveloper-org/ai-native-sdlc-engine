@@ -13,9 +13,10 @@ import logging
 import sys
 from pathlib import Path
 
+from sdlc_engine.routing.flow_state import FlowState
 from sdlc_engine.session.backup_manager import BackupManager
 from sdlc_engine.shared.logging.error_logger import ErrorLogger
-from sdlc_engine.routing.flow_state import FlowState
+
 from .preflight_merge import MAX_PREFLIGHT_ATTEMPTS
 
 _logger = logging.getLogger(__name__)
@@ -312,34 +313,39 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
         try:
             import re as _re_fix
 
-            from sdlc_engine.preflight_guard.path_scan import has_drive_path as _has_drive_path
+            from sdlc_engine.security.path_scan import has_drive_path as _has_drive_path
+            from sdlc_engine.security.preflight_nodes import _iter_project_py_files
 
             # A file is only rewritten when the AST-based scan confirms a real drive
-            # path in a string VALUE. The raw-text pattern below cannot make that
-            # distinction on its own: it previously matched an escape sequence, and
-            # rewriting the backslash corrupted the string while removing the match,
-            # so the check passed BECAUSE the source had been damaged.
-            _DRIVE_PATH_RE = _re_fix.compile(r"(?<![A-Za-z0-9_])([A-Za-z]):\\([A-Za-z0-9_][A-Za-z0-9_\-\. \\]+)")
+            # path in a string VALUE.
+            _DRIVE_PATH_RE = _re_fix.compile(
+                r"(?<![A-Za-z0-9_\\?])([A-Za-z]):\\((?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*)",
+                _re_fix.IGNORECASE,
+            )
 
             def _fix_drive_path(m):
                 drive = m.group(1)
-                rest = m.group(2).replace("\\", "/")
-                return drive + ":/" + rest
+                rest = m.group(2)
+                if rest and rest[0] in "ntr0bfva" and (len(rest) == 1 or rest[1] in " \t\r\n:=#"):
+                    return m.group(0)
+                return drive + ":/" + rest.replace("\\", "/")
 
             project_root = Path(state.get("project_root", "."))
             fixed_files = []
             issues = []
 
-            _fix_files = list(project_root.glob("**/*.py"))
-            if len(_fix_files) > 500:
-                _logger.warning("project_root has %d Python files (>500), capping path fix at 500", len(_fix_files))
-                _fix_files = _fix_files[:500]
+            _fix_files = list(_iter_project_py_files(project_root, cap=500))
             for py_file in _fix_files:
                 try:
                     # Step 1: Backup file before modification
                     backup and backup.backup_file(str(py_file), "Level 0 (Pre-Flight Sanity Guard)", "Before path fix")
 
-                    content = py_file.read_text(encoding="utf-8", errors="ignore")
+                    try:
+                        content = py_file.read_text(encoding="utf-8-sig")
+                    except UnicodeDecodeError:
+                        _logger.warning("Non-UTF-8 file skipped from auto-fix: %s", py_file)
+                        continue
+
                     if not _has_drive_path(content):
                         continue
                     if "\\" in content and ":\\" in content:
@@ -421,4 +427,3 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
         "preflight_fix_errors": fix_errors,
         "preflight_ready_to_retry": True,
     }
-

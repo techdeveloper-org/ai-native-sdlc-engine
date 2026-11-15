@@ -14,8 +14,8 @@ import sys
 import time
 from pathlib import Path
 
-from sdlc_engine.shared.logging.error_logger import ErrorLogger
 from sdlc_engine.routing.flow_state import FlowState
+from sdlc_engine.shared.logging.error_logger import ErrorLogger
 from sdlc_engine.shared.logging.step_logger import write_level_log
 
 _logger = logging.getLogger(__name__)
@@ -272,15 +272,14 @@ def node_windows_path_check(state: FlowState) -> dict:
             return updates
 
         # Detection reads string literal VALUES, so a Python escape sequence can
-        # never be mistaken for a path separator. See path_scan for the incident
-        # that motivated this.
-        from sdlc_engine.preflight_guard.path_scan import has_drive_path
+        # never be mistaken for a path separator.
+        from sdlc_engine.security.path_scan import has_drive_path
 
         _path_files = list(_iter_project_py_files(project_root))
         issues = []
         for py_file in _path_files:
             try:
-                content = py_file.read_text(encoding="utf-8", errors="ignore")
+                content = py_file.read_text(encoding="utf-8-sig", errors="replace")
                 if has_drive_path(content):
                     issues.append(str(py_file.relative_to(project_root)))
             except OSError as exc:
@@ -320,4 +319,3 @@ def node_windows_path_check(state: FlowState) -> dict:
         )
         write_level_log(state, "level-minus1", "windows-path-check", "FAILED", time.time() - _step_start, None, str(e))
         return updates
-

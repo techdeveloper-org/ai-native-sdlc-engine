@@ -53,7 +53,10 @@ never a false negative on a real path.
 import ast
 import re
 
-DRIVE_PATH_RE = re.compile(r"(?<![A-Za-z0-9_])([A-Za-z]):\\(?:[A-Za-z0-9_][A-Za-z0-9_\-\. \\]+)")
+DRIVE_PATH_RE = re.compile(
+    r"(?<![A-Za-z0-9_\\?])([A-Za-z]):\\(?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*",
+    re.IGNORECASE,
+)
 
 
 _DOCSTRING_OWNERS = (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
