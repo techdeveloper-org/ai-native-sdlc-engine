@@ -645,6 +645,89 @@ ai-native-sdlc-engine/
 
 ---
 
+## Acknowledgments & Open Source Ecosystem Credits
+
+> *"If I have seen further it is by standing on the shoulders of Giants."* — Isaac Newton
+
+The **AI-Native SDLC Engine** is built with immense gratitude for the global open-source software community. This project would not be possible without the remarkable tools, libraries, protocols, and foundational models built by selfless maintainers, research laboratories, and open-source engineers worldwide.
+
+---
+
+### 1. The techdeveloper Open-Source MCP Tool Ecosystem
+
+We extend our sincere thanks to **[Piyush Makhija (@techdeveloper-org)](https://github.com/techdeveloper-org)** and the techdeveloper community for authoring, open-sourcing, and maintaining the suite of specialized **Model Context Protocol (MCP)** servers and knowledge libraries that power the engine's external tool integration and agent orchestration:
+
+| Open-Source MCP Server & Repository | Core Mission & Role in SDLC Engine | Creator & Maintainer |
+|:---|:---|:---|
+| [`techdeveloper-org/mcp-git-ops`](https://github.com/techdeveloper-org/mcp-git-ops) | Low-level deterministic Git operations (commits, branch sandboxing, atomic diffs, stash, logs) | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-github-api`](https://github.com/techdeveloper-org/mcp-github-api) | GitHub v3 automation for Issue-First workflows, PR review gates, label transitions, and releases | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-jira-api`](https://github.com/techdeveloper-org/mcp-jira-api) | Enterprise agile project management, sprint planning, JQL search, and issue transitions | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-jenkins-ci`](https://github.com/techdeveloper-org/mcp-jenkins-ci) | CI/CD build automation, console log stream inspection, and pipeline health checks | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-figma`](https://github.com/techdeveloper-org/mcp-figma) | Figma design token extraction, layout inspection, and design-to-code alignment | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-uml-diagram`](https://github.com/techdeveloper-org/mcp-uml-diagram) | Automated generation of 13+ UML diagram types directly from codebase ASTs | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-drawio-diagram`](https://github.com/techdeveloper-org/mcp-drawio-diagram) | Visual XML `.drawio` diagram generation and shareable diagram URL conversion | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-token-optimizer`](https://github.com/techdeveloper-org/mcp-token-optimizer) | Dynamic token budgeting, AST symbol lookup jumps, and context deduplication | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-standards-loader`](https://github.com/techdeveloper-org/mcp-standards-loader) | Automated tech stack detection and dynamic coding standards loader (`~/.claude/rules/`) | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-policy-enforcement`](https://github.com/techdeveloper-org/mcp-policy-enforcement) | Autonomous 47-policy compliance monitoring and pipeline health verification | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-pre-tool-gate`](https://github.com/techdeveloper-org/mcp-pre-tool-gate) | Pre-execution safety validation, command sanitization, and failure KB screening | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-post-tool-tracker`](https://github.com/techdeveloper-org/mcp-post-tool-tracker) | Post-execution milestone tracking, telemetry logging, and commit readiness checks | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-session-mgr`](https://github.com/techdeveloper-org/mcp-session-mgr) | Multi-terminal isolated session persistence, conversation tagging, and SQLite ledgers | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-vector-db`](https://github.com/techdeveloper-org/mcp-vector-db) | Semantic RAG indexing, call-trace embedding storage, and similarity search | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-llm-router`](https://github.com/techdeveloper-org/mcp-llm-router) | Complexity-based model tier classification and dynamic multi-provider routing | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-llm-provider`](https://github.com/techdeveloper-org/mcp-llm-provider) | Unified generation gateway across Gemini, Claude, OpenAI, and Ollama | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-anthropic-provider`](https://github.com/techdeveloper-org/mcp-anthropic-provider) | Direct Anthropic Claude SDK integration with token usage and cost accounting | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-openai-provider`](https://github.com/techdeveloper-org/mcp-openai-provider) | Direct OpenAI API integration with model discovery and token cost estimation | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-ollama-provider`](https://github.com/techdeveloper-org/mcp-ollama-provider) | Local GPU inference integration for open-weights models (Llama, Qwen, DeepSeek) | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-server-ga4`](https://github.com/techdeveloper-org/mcp-server-ga4) | Google Analytics 4 telemetry, traffic metrics, and conversion event monitoring | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-gsc`](https://github.com/techdeveloper-org/mcp-gsc) | Google Search Console indexing checks, search analytics, and sitemap auditing | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/mcp-gtm`](https://github.com/techdeveloper-org/mcp-gtm) | Google Tag Manager workspace management, trigger validation, and container release | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/claude-global-library`](https://github.com/techdeveloper-org/claude-global-library) | Universal SDLC library containing ~1,035 specialized skills, ~529 agents, and 102 domain KGs | [Piyush Makhija](https://github.com/techdeveloper-org) |
+| [`techdeveloper-org/claude-visual-learner`](https://github.com/techdeveloper-org/claude-visual-learner) | Multi-modal video transcription, learning report extraction, and code pattern discovery | [Piyush Makhija](https://github.com/techdeveloper-org) |
+
+---
+
+### 2. Foundational Open-Source Frameworks, Libraries & Creators
+
+Heartfelt thanks to the creators, maintainers, and foundations behind the foundational software libraries upon which this framework is constructed:
+
+| Open-Source Project | Original Creators & Core Maintainers | How It Powers AI-Native SDLC Engine |
+|:---|:---|:---|
+| **[LangGraph](https://github.com/langchain-ai/langgraph)** | Harrison Chase & [LangChain, Inc.](https://langchain.com) | The core cyclic state-machine engine orchestrating our 10-stage execution pipeline and human-in-the-loop nodes. |
+| **[Model Context Protocol (MCP)](https://modelcontextprotocol.io/)** | [Anthropic Team](https://anthropic.com) | The open protocol standard enabling client-server decoupling for tools, resources, and external integrations. |
+| **[NetworkX](https://networkx.org/)** | Aric Hagberg, Dan Schult, Pieter Swart & [NetworkX Developers](https://github.com/networkx/networkx) | Multi-language in-memory AST call-graph construction, PageRank, cycle detection, and blast radius calculation. |
+| **[Lizard](https://github.com/terryyin/lizard)** | Terry Yin & [Lizard Community](https://github.com/terryyin/lizard/graphs/contributors) | Polyglot cyclomatic and cognitive complexity analysis across Python, Java, JavaScript, TypeScript, Go, and C++. |
+| **[GitPython](https://github.com/gitpython-developers/GitPython)** | Sebastian Thiel & [GitPython Developers](https://github.com/gitpython-developers/GitPython) | Low-level programmatic Git plumbing, branch checkout isolation, and commit hash verification. |
+| **[PyGithub](https://github.com/PyGithub/PyGithub)** | Vincent Jacques & [PyGithub Community](https://github.com/PyGithub/PyGithub) | Programmatic GitHub v3 REST API wrapper powering our Issue-First policy and automated PR reviews. |
+| **[SonarQube Community](https://www.sonarsource.com/products/sonarqube/)** | Olivier Gaudin, Freddy Mallet & [SonarSource](https://www.sonarsource.com) | Static analysis rules, code smell taxonomy, and zero-debt quality gate standards governing auto-healing. |
+| **[TruffleHog](https://github.com/trufflesecurity/trufflehog)** | Dustin Sisney & [Truffle Security](https://trufflesecurity.com) | Deep cryptographic entropy calculation and high-confidence secret leak detection in pre-commit gates. |
+| **[Gitleaks](https://github.com/gitleaks/gitleaks)** | Zachary Rice & [Gitleaks Contributors](https://github.com/gitleaks/gitleaks) | Ultra-fast regex secret scanning patterns protecting staging areas against accidental token commits. |
+| **[Prometheus](https://prometheus.io/)** | Matt Proud, Julius Volz & [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) | Production metrics exposition format, histograms, and counter endpoints on `:9090/metrics`. |
+| **[OpenTelemetry](https://opentelemetry.io/)** | [CNCF OpenTelemetry Project](https://github.com/open-telemetry) | Vendor-neutral distributed tracing standards, span instrumentation, and lifecycle observability. |
+| **[Pydantic](https://docs.pydantic.dev/)** | Samuel Colvin & [Pydantic Community](https://github.com/pydantic/pydantic) | Strict runtime data validation, TypedDict schemas, and FastMCP model serialization. |
+| **[Rich](https://github.com/Textualize/rich)** | Will McGugan & [Textualize](https://textualize.io) | High-resolution terminal formatting, beautiful colored progress bars, tracebacks, and live checkpoint tables. |
+| **[Loguru](https://github.com/Delgan/loguru)** | Delgan & [Loguru Contributors](https://github.com/Delgan/loguru) | Elegant, zero-configuration structured logging with automatic daily log file rotation and filtering. |
+| **[Mermaid.js](https://mermaid.js.org/)** | Knut Sveidqvist & [Mermaid Community](https://github.com/mermaid-js/mermaid) | Markdown-native diagram generation powering our architecture diagrams, sequence flows, and living docs. |
+| **[PyTest](https://docs.pytest.org/)** | Holger Krekel & [pytest-dev Team](https://github.com/pytest-dev/pytest) | Parameterized unit testing, mock fixtures, and automated test execution across Python modules. |
+| **[Ruff](https://astral.sh/ruff)** | Charlie Marsh & [Astral Software](https://astral.sh) | Blazing-fast Python linter and code formatter ensuring clean AST standards on every git commit. |
+| **[Ollama](https://ollama.com/)** | Jeffrey Morgan & [Ollama Community](https://github.com/ollama/ollama) | Fast, local open-weights LLM inference engine supporting Llama 3, Qwen 2.5 Coder, and DeepSeek-R1. |
+| **[SQLite](https://www.sqlite.org/)** | D. Richard Hipp & [SQLite Development Team](https://www.sqlite.org/crew.html) | Zero-configuration, battle-tested embedded relational database powering session checkpoint state persistence. |
+| **[psutil](https://github.com/giampaolo/psutil)** | Giampaolo Rodola & [psutil Contributors](https://github.com/giampaolo/psutil) | Cross-platform process and system monitoring utilities for CPU, memory, and thread utilization tracking. |
+| **[Watchdog](https://github.com/gorakhargosh/watchdog)** | Yesudeep Mangalapilly & [Gorakhargosh Team](https://github.com/gorakhargosh/watchdog) | Filesystem event monitoring library enabling real-time hot-reloading of coding standards and rules. |
+
+---
+
+### 3. Frontier AI Research & Model Providers
+
+We also acknowledge and express gratitude to the pioneering research teams pushing the boundaries of autonomous software engineering:
+- **[Google DeepMind & Gemini Team](https://ai.google.dev/)** — For groundbreaking multi-modal reasoning models (`gemini-2.5-pro`, `gemini-2.5-flash`), extensive context windows, and the Antigravity agent platform.
+- **[Anthropic PBC](https://anthropic.com/)** — For the Claude 3.5 & 3.7 families (Haiku, Sonnet, Opus), extended reasoning capabilities, and open-sourcing the Model Context Protocol (MCP).
+- **[OpenAI](https://openai.com/)** — For GPT-4o, o-series reasoning models (`o1`, `o3-mini`), and foundational research in AI code generation.
+- **The Open-Weights Community** — Including Meta AI (Llama 3), Alibaba Cloud (Qwen 2.5 Coder), and DeepSeek AI for democratizing high-performance local coding models.
+
+---
+
+---
+
 ## License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
