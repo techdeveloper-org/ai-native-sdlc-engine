@@ -27,7 +27,7 @@ if requirements_file.exists():
 setup(
     name="ai-native-sdlc-engine",
     version=VERSION,
-    description="3-Level LangGraph orchestration pipeline for Claude Code workflows",
+    description="Universal AI-Native SDLC Framework for Autonomous Zero-Debt Engineering",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="TechDeveloper",
@@ -43,10 +43,11 @@ setup(
     # Entry points
     entry_points={
         "console_scripts": [
+            "sdlc=sdlc_engine.adapters.cli.cli_handler:main",
+            "ai-sdlc=sdlc_engine.adapters.cli.cli_handler:main",
             "ai-sdlc-engine=sdlc_engine.adapters.cli.main:main",
             "claude-workflow=sdlc_engine.adapters.cli.main:main",
-            "sdlc=scripts.cli:main",
-            "cwe=scripts.cli:main",
+            "cwe=sdlc_engine.adapters.cli.cli_handler:main",
         ],
     },
     # Classifiers
@@ -62,7 +63,7 @@ setup(
         "Topic :: Software Development :: Quality Assurance",
         "Topic :: Software Development :: Build Tools",
     ],
-    keywords="claude ai workflow langgraph orchestration pipeline automation sdlc",
+    keywords="ai sdlc automation langgraph orchestration gemini openai claude ollama quality",
     project_urls={
         "Documentation": "https://github.com/techdeveloper-org/ai-native-sdlc-engine",
         "Source": "https://github.com/techdeveloper-org/ai-native-sdlc-engine",

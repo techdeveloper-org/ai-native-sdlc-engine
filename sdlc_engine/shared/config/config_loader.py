@@ -20,16 +20,35 @@ import json
 import os
 from pathlib import Path
 
-_DEFAULT_CONFIG_PATH = Path.home() / ".claude" / "workflow-config.json"
+
+def _resolve_default_config_path() -> Path:
+    """Resolve the default workflow configuration file across universal and legacy locations.
+
+    Returns:
+        Path: Resolved configuration file path.
+    """
+    env_path = os.environ.get("SDLC_CONFIG_FILE") or os.environ.get("CLAUDE_CONFIG_FILE")
+    if env_path:
+        return Path(env_path)
+    sdlc_cfg = Path.home() / ".sdlc" / "config.json"
+    if sdlc_cfg.exists():
+        return sdlc_cfg
+    repo_cfg = Path.cwd() / "sdlc-config.json"
+    if repo_cfg.exists():
+        return repo_cfg
+    return Path.home() / ".claude" / "workflow-config.json"
+
+
+_DEFAULT_CONFIG_PATH = _resolve_default_config_path()
 
 # Nested JSON key  ->  env var name  (kept for os.environ injection fallback)
 _MAPPING: dict[str, str] = {
-    "pipeline.hook_mode": "CLAUDE_HOOK_MODE",
-    "pipeline.debug": "CLAUDE_DEBUG",
+    "pipeline.hook_mode": "SDLC_HOOK_MODE",
+    "pipeline.debug": "SDLC_DEBUG",
     "pipeline.llm_provider": "LLM_PROVIDER",
     "github.token": "GITHUB_TOKEN",
     "github.default_label": "GITHUB_DEFAULT_LABEL",
-    "github.owner": "CLAUDE_GITHUB_OWNER",
+    "github.owner": "SDLC_GITHUB_OWNER",
     "jira.enabled": "ENABLE_JIRA",
     "jira.url": "JIRA_URL",
     "jira.user": "JIRA_USER",
@@ -52,6 +71,25 @@ _MAPPING: dict[str, str] = {
     "anthropic.model_fast": "ANTHROPIC_MODEL_FAST",
     "anthropic.model_balanced": "ANTHROPIC_MODEL_BALANCED",
     "anthropic.model_deep": "ANTHROPIC_MODEL_DEEP",
+    "gemini.api_key": "GEMINI_API_KEY",
+    "gemini.model_fast": "GEMINI_MODEL_FAST",
+    "gemini.model_balanced": "GEMINI_MODEL_BALANCED",
+    "gemini.model_deep": "GEMINI_MODEL_DEEP",
+    "openai.api_key": "OPENAI_API_KEY",
+    "openai.model_fast": "OPENAI_MODEL_FAST",
+    "openai.model_balanced": "OPENAI_MODEL_BALANCED",
+    "openai.model_deep": "OPENAI_MODEL_DEEP",
+    "ollama.host": "OLLAMA_HOST",
+    "ollama.model_fast": "OLLAMA_MODEL_FAST",
+    "ollama.model_balanced": "OLLAMA_MODEL_BALANCED",
+    "ollama.model_deep": "OLLAMA_MODEL_DEEP",
+}
+
+# Legacy companion keys that are kept in sync for backward compatibility
+_LEGACY_SYNCS: dict[str, str] = {
+    "SDLC_HOOK_MODE": "CLAUDE_HOOK_MODE",
+    "SDLC_DEBUG": "CLAUDE_DEBUG",
+    "SDLC_GITHUB_OWNER": "CLAUDE_GITHUB_OWNER",
 }
 
 _CONFIG_CACHE: dict | None = None
@@ -167,6 +205,11 @@ def load_workflow_config(path: Path | None = None) -> dict[str, str]:
             continue
         os.environ[env_key] = value
         injected[env_key] = value
+
+        # Sync legacy companion env var if defined
+        legacy_key = _LEGACY_SYNCS.get(env_key)
+        if legacy_key and legacy_key not in os.environ:
+            os.environ[legacy_key] = value
 
     # Said out loud, because a value silently ignored is indistinguishable from a
     # value that was never read -- and the reader is someone wondering why their

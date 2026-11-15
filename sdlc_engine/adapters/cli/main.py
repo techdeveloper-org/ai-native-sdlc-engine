@@ -27,10 +27,11 @@ from datetime import datetime
 from pathlib import Path
 
 # ============================================================================
-# RECURSION GUARD - Prevent infinite loop when claude CLI calls trigger hooks
+# RECURSION GUARD - Prevent infinite loop when AI CLI calls trigger hooks
 # ============================================================================
-if os.environ.get("CLAUDE_WORKFLOW_RUNNING") == "1":
+if os.environ.get("SDLC_WORKFLOW_RUNNING") == "1" or os.environ.get("CLAUDE_WORKFLOW_RUNNING") == "1":
     sys.exit(0)
+os.environ["SDLC_WORKFLOW_RUNNING"] = "1"
 os.environ["CLAUDE_WORKFLOW_RUNNING"] = "1"
 
 # ============================================================================
@@ -224,32 +225,29 @@ def _get_project_root() -> str:
     """Determine project root directory.
 
     Priority:
-    1. CLAUDE_CWD env var (set by hook event JSON parsing)
+    1. SDLC_CWD or CLAUDE_CWD env var (set by hook event JSON parsing)
     2. Current working directory (actual project the user is in)
     """
     # Hook event provides cwd - use it if available
-    cwd_from_hook = os.environ.get("CLAUDE_CWD", "").strip()
+    cwd_from_hook = os.environ.get("SDLC_CWD", "").strip() or os.environ.get("CLAUDE_CWD", "").strip()
     if cwd_from_hook and Path(cwd_from_hook).exists():
         return cwd_from_hook
 
-    # Fallback to actual cwd (where Claude CLI was started)
+    # Fallback to actual cwd
     return str(Path.cwd())
 
 
 def _capture_user_message() -> str:
-    """Capture user message from stdin hook event.
+    """Capture user message from stdin event or CLI args.
 
-    Hook passes JSON event via stdin: {"prompt":"...", "cwd":"...",
-    "session_id":"...", ...}. The prompt is returned, while cwd and session_id
-    are published to the environment: session_id is the only identifier that is
-    stable across every hook in one conversation, so binding it here makes the
-    pipeline and all hooks agree on one session.
+    Supports JSON events (Claude, Gemini, Antigravity, GitHub Actions) and raw prompts.
+    Extracts prompt/message, sets cwd, and binds session.
     """
     import sys
 
     user_message = ""
 
-    # Try reading from stdin (hook pipes JSON event here)
+    # Try reading from stdin (hook/runner pipes JSON event here)
     if not sys.stdin.isatty():
         try:
             raw_input = sys.stdin.read().strip()
@@ -257,11 +255,16 @@ def _capture_user_message() -> str:
                 # Try parsing as JSON (hook event format)
                 try:
                     event = json.loads(raw_input)
-                    # Extract actual user prompt
-                    user_message = event.get("prompt", "").strip()
+                    # Extract prompt or message
+                    user_message = (
+                        event.get("prompt", "")
+                        or event.get("message", "")
+                        or event.get("task", "")
+                    ).strip()
                     # Extract cwd so _get_project_root() uses correct project
                     cwd = event.get("cwd", "").strip()
                     if cwd:
+                        os.environ["SDLC_CWD"] = cwd
                         os.environ["CLAUDE_CWD"] = cwd
                     _bind_hook_session(event)
                     if user_message:
@@ -275,7 +278,7 @@ def _capture_user_message() -> str:
             pass
 
     # Fallback to environment variable
-    user_message = os.environ.get("CLAUDE_USER_MESSAGE", "").strip()
+    user_message = os.environ.get("SDLC_USER_MESSAGE", "").strip() or os.environ.get("CLAUDE_USER_MESSAGE", "").strip()
     return user_message
 
 
@@ -390,7 +393,7 @@ def run_langgraph_engine(session_id: str = "", project_root: str = "", user_mess
     # Create and invoke graph
     # hook_mode=True: Skip Steps 8-14 (GitHub workflow) for fast hook execution
     # This reduces hook time from ~170s to ~60s (only analysis + prompt generation)
-    hook_mode = os.environ.get("CLAUDE_HOOK_MODE", "1") == "1"
+    hook_mode = os.environ.get("SDLC_HOOK_MODE", os.environ.get("CLAUDE_HOOK_MODE", "1")) == "1"
     graph = create_flow_graph(hook_mode=hook_mode)
 
     if DEBUG:
@@ -427,8 +430,10 @@ def _validate_environment() -> None:
             file=sys.stderr,
         )
 
-    # Check ~/.claude/memory/ directory exists
-    memory_dir = Path.home() / ".claude" / "memory"
+    # Check ~/.sdlc/memory/ or ~/.claude/memory/ directory exists
+    memory_dir = Path.home() / ".sdlc" / "memory"
+    if not memory_dir.exists():
+        memory_dir = Path.home() / ".claude" / "memory"
     if not memory_dir.exists():
         print(
             f"[WARN] Memory directory not found: {memory_dir}. " "Session memory features may not work.",
@@ -497,12 +502,14 @@ def main():
                 print("[DEBUG]   -> user_message=...", file=sys.stderr)
             elif arg.startswith("--orchestration-template="):
                 tmpl_path = arg.split("=", 1)[1]
+                os.environ["SDLC_ORCHESTRATION_TEMPLATE"] = tmpl_path
                 os.environ["CLAUDE_ORCHESTRATION_TEMPLATE"] = tmpl_path
                 print(f"[DEBUG]   -> orchestration_template={tmpl_path}", file=sys.stderr)
             elif arg in ("--summary", "-s"):
                 DEBUG = True
                 print("[DEBUG]   -> DEBUG=True", file=sys.stderr)
             elif arg == "--dry-run":
+                os.environ["SDLC_DRY_RUN"] = "1"
                 os.environ["CLAUDE_DRY_RUN"] = "1"
                 print("[DEBUG]   -> dry-run mode enabled", file=sys.stderr)
             elif arg in ("--help", "-h"):

@@ -53,23 +53,30 @@ def cmd_run(args):
     """Run the pipeline on a task.
 
     Delegates to 3-level-flow.py with proper environment setup.
-    The existing script accepts --message=MSG for the task text.
+    The script accepts --message=MSG for the task text.
     """
     task = args.task or (" ".join(args.task_words) if args.task_words else "")
     if not task:
-        print('Error: No task provided. Usage: cwe run "fix the bug"')
+        print('Error: No task provided. Usage: sdlc run "fix the bug"')
         sys.exit(1)
 
     mode = "0" if args.mode == "full" else "1"
 
     env = os.environ.copy()
+    env["SDLC_HOOK_MODE"] = mode
     env["CLAUDE_HOOK_MODE"] = mode
     if args.debug:
+        env["SDLC_DEBUG"] = "1"
         env["CLAUDE_DEBUG"] = "1"
     if args.dry_run:
+        env["SDLC_DRY_RUN"] = "1"
         env["CLAUDE_DRY_RUN"] = "1"
 
     flow_script = Path(__file__).resolve().parent / "3-level-flow.py"
+    if not flow_script.exists():
+        flow_script = Path(__file__).resolve().parents[2] / "scripts" / "3-level-flow.py"
+    if not flow_script.exists():
+        flow_script = Path(__file__).resolve().parent / "main.py"
     if not flow_script.exists():
         print(f"Error: Pipeline script not found at {flow_script}")
         print("Ensure you are running from the ai-native-sdlc-engine directory.")
@@ -92,7 +99,9 @@ def cmd_status(args):
 
     Reads the latest session and flow-trace to show state.
     """
-    logs_dir = Path.home() / ".claude" / "logs" / "sessions"
+    logs_dir = Path.home() / ".sdlc" / "logs" / "sessions"
+    if not logs_dir.exists():
+        logs_dir = Path.home() / ".claude" / "logs" / "sessions"
     if not logs_dir.exists():
         print("No pipeline sessions found.")
         return
@@ -168,8 +177,17 @@ def cmd_health(args):
     except (FileNotFoundError, subprocess.TimeoutExpired):
         checks.append(("GitHub CLI (gh)", "not installed", False))
 
-    # LLM provider: claude CLI
+    # LLM providers: Gemini, Anthropic, OpenAI, Claude CLI, Ollama
     import shutil
+
+    gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY", "")
+    checks.append(("LLM: Gemini API", "configured" if gemini_key else "not set (optional)", bool(gemini_key)))
+
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    checks.append(("LLM: Anthropic API", "configured" if anthropic_key else "not set (optional)", bool(anthropic_key)))
+
+    openai_key = os.environ.get("OPENAI_API_KEY", "")
+    checks.append(("LLM: OpenAI API", "configured" if openai_key else "not set (optional)", bool(openai_key)))
 
     claude_path = shutil.which("claude")
     if claude_path:
@@ -177,10 +195,12 @@ def cmd_health(args):
     else:
         checks.append(("LLM: claude_cli", "not on PATH (optional)", False))
 
+    has_any_llm = bool(gemini_key or anthropic_key or openai_key or claude_path)
+    checks.append(("LLM: Universal Engine Ready", "ready" if has_any_llm else "no LLM provider configured", has_any_llm))
+
     # Environment variables
     for var, required in [
         ("GITHUB_TOKEN", True),
-        ("ANTHROPIC_API_KEY", True),
         ("JIRA_URL", False),
         ("JENKINS_URL", False),
     ]:
@@ -215,7 +235,7 @@ def cmd_health(args):
 
     print(f"\n  {passed} passed, {failed} issues")
     if failed > 0:
-        print("  Run 'cwe setup' to fix configuration issues.")
+        print("  Run 'sdlc setup' to fix configuration issues.")
 
 
 def cmd_version(args):
@@ -238,7 +258,9 @@ def cmd_doctor(args):
     issues = []
 
     # Check settings.json for MCP registrations
-    settings_file = Path.home() / ".claude" / "settings.json"
+    settings_file = Path.home() / ".sdlc" / "settings.json"
+    if not settings_file.exists():
+        settings_file = Path.home() / ".claude" / "settings.json"
     if settings_file.exists():
         try:
             settings = json.loads(settings_file.read_text(encoding="utf-8"))
@@ -247,15 +269,17 @@ def cmd_doctor(args):
             print(f"  MCP servers registered: {registered}")
             if registered < 12:
                 issues.append(
-                    f"Only {registered} MCP servers registered (expected 12+). " "Run 'cwe setup' to register all."
+                    f"Only {registered} MCP servers registered (expected 12+). " "Run 'sdlc setup' to register all."
                 )
         except Exception as exc:
             issues.append(f"Cannot read settings.json: {exc}")
     else:
-        issues.append("{} not found. Run 'cwe setup'.".format(display_path("settings.json")))
+        issues.append("{} not found. Run 'sdlc setup'.".format(display_path("settings.json")))
 
     # Check for stale sessions (older than 7 days)
-    sessions_dir = Path.home() / ".claude" / "logs" / "sessions"
+    sessions_dir = Path.home() / ".sdlc" / "logs" / "sessions"
+    if not sessions_dir.exists():
+        sessions_dir = Path.home() / ".claude" / "logs" / "sessions"
     if sessions_dir.exists():
         import time
 
@@ -312,9 +336,9 @@ def cmd_setup(args):
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
-        prog="cwe",
+        prog="sdlc",
         description="AI-Native SDLC Engine - Full SDLC Automation",
-        epilog="Run 'cwe <command> --help' for command-specific help.",
+        epilog="Run 'sdlc <command> --help' for command-specific help.",
     )
     parser.add_argument("--version", "-v", action="store_true", help="Show version")
 

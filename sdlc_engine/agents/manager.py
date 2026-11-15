@@ -42,14 +42,20 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 try:
-    import sys as _sys
-
-    _sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "src"))
-    from utils.path_resolver import get_skills_dir
+    from sdlc_engine.shared.utils.path_resolver import get_skills_dir
 
     _SKILLS_ROOT_DEFAULT = get_skills_dir()
 except ImportError:
-    _SKILLS_ROOT_DEFAULT = Path.home() / ".claude" / "skills"
+    try:
+        import sys as _sys
+
+        _sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "src"))
+        from utils.path_resolver import get_skills_dir
+
+        _SKILLS_ROOT_DEFAULT = get_skills_dir()
+    except ImportError:
+        _home = Path.home() / ".sdlc" if (Path.home() / ".sdlc").exists() else Path.home() / ".claude"
+        _SKILLS_ROOT_DEFAULT = _home / "skills"
 
 from sdlc_engine.pipeline.dependency_resolver import (
     build_dependency_graph,

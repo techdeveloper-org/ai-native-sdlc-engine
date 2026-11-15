@@ -19,16 +19,23 @@ from typing import Dict, Optional
 logger = logging.getLogger(__name__)
 
 try:
-    import sys as _sys
-
-    _sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "src"))
-    from utils.path_resolver import get_agents_dir, get_skills_dir
+    from sdlc_engine.shared.utils.path_resolver import get_agents_dir, get_skills_dir
 
     _SKILLS_DIR = get_skills_dir()
     _AGENTS_DIR = get_agents_dir()
 except ImportError:
-    _SKILLS_DIR = Path.home() / ".claude" / "skills"
-    _AGENTS_DIR = Path.home() / ".claude" / "agents"
+    try:
+        import sys as _sys
+
+        _sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "src"))
+        from utils.path_resolver import get_agents_dir, get_skills_dir
+
+        _SKILLS_DIR = get_skills_dir()
+        _AGENTS_DIR = get_agents_dir()
+    except ImportError:
+        _home = Path.home() / ".sdlc" if (Path.home() / ".sdlc").exists() else Path.home() / ".claude"
+        _SKILLS_DIR = _home / "skills"
+        _AGENTS_DIR = _home / "agents"
 
 # Optional performance modules (gracefully degraded if unavailable)
 try:

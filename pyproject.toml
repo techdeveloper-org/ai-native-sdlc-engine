@@ -5,12 +5,12 @@ build-backend = "hatchling.build"
 [project]
 name = "ai-native-sdlc-engine"
 dynamic = ["version"]
-description = "LangGraph-based 3-level orchestration pipeline for automating Claude Code development workflows with call graph intelligence, template fast-path, and multi-provider LLM inference."
+description = "Universal AI-Native SDLC Framework: LangGraph-based zero-debt software engineering orchestration supporting Gemini, Claude, OpenAI, and Ollama across any platform, IDE, or CI/CD."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
 authors = [{ name = "Piyush Makhija" }]
-keywords = ["langgraph", "claude", "orchestration", "workflow", "llm", "github-automation", "call-graph", "mcp"]
+keywords = ["langgraph", "ai-sdlc", "orchestration", "workflow", "llm", "gemini", "claude", "openai", "zero-debt"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -45,6 +45,11 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/techdeveloper-org/ai-native-sdlc-engine"
 Repository = "https://github.com/techdeveloper-org/ai-native-sdlc-engine"
+
+[project.scripts]
+sdlc = "sdlc_engine.adapters.cli.cli_handler:main"
+ai-sdlc = "sdlc_engine.adapters.cli.cli_handler:main"
+cwe = "sdlc_engine.adapters.cli.cli_handler:main"
 
 [tool.hatch.version]
 path = "sdlc_engine/__init__.py"

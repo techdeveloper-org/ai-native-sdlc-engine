@@ -86,6 +86,23 @@ def _env_path(var_name, default):
     return default
 
 
+def _env_path_priority(var_names, default):
+    """Get path from first matching environment variable, or use default.
+
+    Args:
+        var_names: List of environment variable names to evaluate in order.
+        default: Default Path object if none of the env vars are set.
+
+    Returns:
+        Path: Path object from the first populated env var, or default.
+    """
+    for var in var_names:
+        val = os.environ.get(var)
+        if val:
+            return Path(val)
+    return default
+
+
 class PathResolver:
     """Resolve data storage paths for AI-Native SDLC Engine with a three-tier priority chain.
 
@@ -109,15 +126,24 @@ class PathResolver:
         """Initialize PathResolver and resolve the operating mode and base_dir."""
         self.project_root = Path(__file__).parent.parent.parent
 
-        # ---- Claude Home (base for all Claude paths) ----
-        self.claude_home = _env_path("CLAUDE_HOME", Path.home() / ".claude")
-        self.global_memory = self.claude_home / "memory"
+        # ---- Framework Home (Universal: SDLC_HOME > CLAUDE_HOME > ~/.sdlc > ~/.claude) ----
+        claude_default = Path.home() / ".claude"
+        sdlc_default = Path.home() / ".sdlc"
+        fallback_home = sdlc_default if (sdlc_default.exists() or not claude_default.exists()) else claude_default
+        self.sdlc_home = _env_path_priority(["SDLC_HOME", "CLAUDE_HOME"], fallback_home)
+        self.claude_home = self.sdlc_home
+        self.engine_home = self.sdlc_home
+        self.global_memory = self.sdlc_home / "memory"
 
         # ---- Logs root (overridable for monitoring repo) ----
-        self.logs_root = _env_path("CLAUDE_LOGS_DIR", self.claude_home / "logs")
+        self.logs_root = _env_path_priority(["SDLC_LOGS_DIR", "CLAUDE_LOGS_DIR"], self.sdlc_home / "logs")
 
         # Priority 0: Environment variable (set by IDE)
-        env_data_dir = os.environ.get("AI_NATIVE_SDLC_ENGINE_DATA_DIR") or os.environ.get("CLAUDE_WORKFLOW_ENGINE_DATA_DIR")
+        env_data_dir = (
+            os.environ.get("SDLC_DATA_DIR")
+            or os.environ.get("AI_NATIVE_SDLC_ENGINE_DATA_DIR")
+            or os.environ.get("CLAUDE_WORKFLOW_ENGINE_DATA_DIR")
+        )
         if env_data_dir:
             self.base_dir = Path(env_data_dir)
             self.mode = "IDE"
@@ -229,20 +255,42 @@ class PathResolver:
     def get_skills_dir(self):
         """Get skills directory.
 
-        Override: CLAUDE_SKILLS_DIR env var.
-        Default: {CLAUDE_HOME}/skills/
+        Override: SDLC_SKILLS_DIR or CLAUDE_SKILLS_DIR env var.
+        Default: {SDLC_HOME}/skills/
         """
-        return _env_path("CLAUDE_SKILLS_DIR", self.claude_home / "skills")
+        return _env_path_priority(["SDLC_SKILLS_DIR", "CLAUDE_SKILLS_DIR"], self.sdlc_home / "skills")
 
     def get_agents_dir(self):
         """Get agents directory.
 
-        Override: CLAUDE_AGENTS_DIR env var.
-        Default: {CLAUDE_HOME}/agents/
+        Override: SDLC_AGENTS_DIR or CLAUDE_AGENTS_DIR env var.
+        Default: {SDLC_HOME}/agents/
         """
-        return _env_path("CLAUDE_AGENTS_DIR", self.claude_home / "agents")
+        return _env_path_priority(["SDLC_AGENTS_DIR", "CLAUDE_AGENTS_DIR"], self.sdlc_home / "agents")
 
-    # ---- Claude directories ----
+    # ---- Universal SDLC / Engine directories ----
+
+    def get_sdlc_home(self):
+        """Get the SDLC engine home directory (~/.sdlc/, ~/.claude/, or SDLC_HOME)."""
+        return self.sdlc_home
+
+    def get_engine_home(self):
+        """Get the universal framework home directory."""
+        return self.engine_home
+
+    def get_sdlc_logs_dir(self):
+        """Get the SDLC logs root directory."""
+        return self.logs_root
+
+    def get_sdlc_memory_dir(self):
+        """Get the SDLC memory directory."""
+        return self.sdlc_home / "memory"
+
+    def get_sdlc_sessions_dir(self):
+        """Get the SDLC sessions directory."""
+        return self.sdlc_home / "sessions"
+
+    # ---- Claude directories (Backward Compatibility) ----
 
     def get_claude_home(self):
         """Get Claude home directory (~/.claude/ or CLAUDE_HOME)."""
@@ -255,53 +303,51 @@ class PathResolver:
         trees hang off. It is distinct from get_logs_dir(), which returns the
         DATA directory's logs subtree and follows the data-dir priority chain.
 
-        Override: CLAUDE_LOGS_DIR env var.
-        Default: {CLAUDE_HOME}/logs/
+        Override: SDLC_LOGS_DIR or CLAUDE_LOGS_DIR env var.
+        Default: {SDLC_HOME}/logs/
         """
         return self.logs_root
 
     def get_claude_memory_dir(self):
         """Get the Claude memory directory.
 
-        Override: none (derived from CLAUDE_HOME).
-        Default: {CLAUDE_HOME}/memory/
+        Override: none (derived from SDLC_HOME).
+        Default: {SDLC_HOME}/memory/
         """
         return self.claude_home / "memory"
 
     def get_claude_sessions_dir(self):
         """Get the Claude sessions directory.
 
-        Override: none (derived from CLAUDE_HOME).
-        Default: {CLAUDE_HOME}/sessions/
+        Override: none (derived from SDLC_HOME).
+        Default: {SDLC_HOME}/sessions/
         """
         return self.claude_home / "sessions"
 
     def display_path(self, *parts):
-        """Render a path under the Claude home in its portable display spelling.
+        """Render a path under the engine home in its portable display spelling.
 
         Help text, printed diagnostics, generated documentation and diagram
-        captions need to NAME a Claude-home path without CONSTRUCTING one. They
+        captions need to NAME an engine home path without CONSTRUCTING one. They
         are still executable string literals, so spelling the path inline makes
         them drift the day the layout moves, but interpolating a resolved
         absolute path would embed one machine's home directory into messages and
         into generated files that are published.
 
-        This returns the tilde-rooted spelling whenever the Claude home sits at
-        its default location under the user's home, which keeps that text
-        byte-identical to what it was when hardcoded, and the absolute path only
-        when CLAUDE_HOME has been pointed somewhere else, where the tilde form
-        would be a lie. Either way the spelling is defined in exactly one place.
+        This returns the tilde-rooted spelling whenever the home sits at
+        its default location under the user's home, and the absolute path only
+        when SDLC_HOME or CLAUDE_HOME has been pointed somewhere else.
 
         Args:
-            *parts: Path components to append below the Claude home.
+            *parts: Path components to append below the home directory.
 
         Returns:
             str: Display path using forward slashes on every platform.
         """
         try:
-            base = "~/" + self.claude_home.relative_to(Path.home()).as_posix()
+            base = "~/" + self.sdlc_home.relative_to(Path.home()).as_posix()
         except ValueError:
-            base = self.claude_home.as_posix()
+            base = self.sdlc_home.as_posix()
         if not parts:
             return base
         tail = "/".join(str(part).strip("/") for part in parts if str(part).strip("/"))
@@ -310,26 +356,26 @@ class PathResolver:
     def get_scripts_dir(self):
         """Get scripts directory (hooks live here).
 
-        Override: CLAUDE_SCRIPTS_DIR env var.
-        Default: {CLAUDE_HOME}/scripts/
+        Override: SDLC_SCRIPTS_DIR or CLAUDE_SCRIPTS_DIR env var.
+        Default: {SDLC_HOME}/scripts/
         """
-        return _env_path("CLAUDE_SCRIPTS_DIR", self.claude_home / "scripts")
+        return _env_path_priority(["SDLC_SCRIPTS_DIR", "CLAUDE_SCRIPTS_DIR"], self.sdlc_home / "scripts")
 
     def get_policies_dir(self):
         """Get policies directory.
 
-        Override: CLAUDE_POLICIES_DIR env var.
-        Default: {CLAUDE_HOME}/policies/
+        Override: SDLC_POLICIES_DIR or CLAUDE_POLICIES_DIR env var.
+        Default: {SDLC_HOME}/policies/
         """
-        return _env_path("CLAUDE_POLICIES_DIR", self.claude_home / "policies")
+        return _env_path_priority(["SDLC_POLICIES_DIR", "CLAUDE_POLICIES_DIR"], self.sdlc_home / "policies")
 
     def get_settings_file(self):
         """Get settings.json file path.
 
-        Override: CLAUDE_SETTINGS_FILE env var.
-        Default: {CLAUDE_HOME}/settings.json
+        Override: SDLC_SETTINGS_FILE or CLAUDE_SETTINGS_FILE env var.
+        Default: {SDLC_HOME}/settings.json
         """
-        return _env_path("CLAUDE_SETTINGS_FILE", self.claude_home / "settings.json")
+        return _env_path_priority(["SDLC_SETTINGS_FILE", "CLAUDE_SETTINGS_FILE"], self.sdlc_home / "settings.json")
 
     # ---- Mode info ----
 
@@ -567,3 +613,48 @@ def get_skills_dir():
 def get_agents_dir():
     """Return agents directory."""
     return path_resolver.get_agents_dir()
+
+
+def get_sdlc_home():
+    """Return the SDLC engine home directory.
+
+    Returns:
+        Path: Absolute path to the SDLC engine home directory.
+    """
+    return path_resolver.get_sdlc_home()
+
+
+def get_engine_home():
+    """Return the framework engine home directory.
+
+    Returns:
+        Path: Absolute path to the framework home directory.
+    """
+    return path_resolver.get_engine_home()
+
+
+def get_sdlc_logs_dir():
+    """Return the SDLC engine logs root directory.
+
+    Returns:
+        Path: Absolute path to the SDLC logs root.
+    """
+    return path_resolver.get_sdlc_logs_dir()
+
+
+def get_sdlc_memory_dir():
+    """Return the SDLC engine memory directory.
+
+    Returns:
+        Path: Absolute path to the SDLC memory directory.
+    """
+    return path_resolver.get_sdlc_memory_dir()
+
+
+def get_sdlc_sessions_dir():
+    """Return the SDLC engine sessions directory.
+
+    Returns:
+        Path: Absolute path to the SDLC sessions directory.
+    """
+    return path_resolver.get_sdlc_sessions_dir()

@@ -7,12 +7,15 @@ Design Patterns:
   - Singleton: Each provider instantiated once, reused across all calls
   - Factory: get_providers() builds the chain from configuration
 
-Providers (2 options):
-  1. claude_cli  - Claude Code CLI (uses your Anthropic subscription)
+Providers:
+  1. gemini      - Google Gemini API (needs GEMINI_API_KEY or GOOGLE_API_KEY)
   2. anthropic   - Anthropic API direct (needs ANTHROPIC_API_KEY)
+  3. openai      - OpenAI API direct (needs OPENAI_API_KEY)
+  4. claude_cli  - Claude Code CLI (uses your Anthropic subscription)
+  5. ollama      - Local Ollama daemon (zero-cost, runs on OLLAMA_HOST)
 
 Configuration (env vars):
-  LLM_PROVIDER=auto            # auto | claude_cli | anthropic
+  LLM_PROVIDER=auto            # auto | gemini | anthropic | openai | claude_cli | ollama
   LLM_FALLBACK=anthropic       # Fallback provider (comma-separated for chain)
   ANTHROPIC_API_KEY=sk-ant-...
   ANTHROPIC_MODEL_FAST=claude-haiku-4-5-20251001
@@ -351,6 +354,364 @@ class AnthropicProvider(LLMProvider):
 
 
 # =============================================================================
+# IMPLEMENTATION: GeminiProvider (Google Gemini / Vertex AI)
+# =============================================================================
+
+
+class GeminiProvider(LLMProvider):
+    """Google Gemini API provider (supports Gemini Flash, Pro, and custom endpoints)."""
+
+    MODEL_MAP = {
+        "fast": "gemini-2.5-flash",
+        "balanced": "gemini-2.5-flash",
+        "deep": "gemini-2.5-pro",
+        "fast_classification": "gemini-2.5-flash",
+        "complex_reasoning": "gemini-2.5-pro",
+        "synthesis": "gemini-2.5-flash",
+        "planning": "gemini-2.5-pro",
+        "code_review": "gemini-2.5-flash",
+    }
+
+    def __init__(self):
+        """Read the Gemini API key and model configuration from environment."""
+        self._api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY", "")
+        self._model_fast = os.getenv("GEMINI_MODEL_FAST", self.MODEL_MAP["fast"])
+        self._model_balanced = os.getenv("GEMINI_MODEL_BALANCED", self.MODEL_MAP["balanced"])
+        self._model_deep = os.getenv("GEMINI_MODEL_DEEP", self.MODEL_MAP["deep"])
+        self._available = bool(self._api_key)
+        self._client = None
+
+    def _get_client(self):
+        """Lazy-init the Google GenAI SDK client."""
+        if self._client is None and self._api_key:
+            try:
+                from google import genai
+
+                self._client = genai.Client(api_key=self._api_key)
+            except Exception:
+                self._client = None
+        return self._client
+
+    @property
+    def name(self) -> str:
+        """Provider name used in logs and get_active_providers()."""
+        return "gemini"
+
+    def is_available(self) -> bool:
+        """Return True when GEMINI_API_KEY or GOOGLE_API_KEY is present."""
+        return self._available
+
+    def call(self, prompt, model="fast", temperature=0.3, timeout=None, json_mode=False):
+        """Send prompt to Gemini API and return response text.
+
+        Args:
+            prompt: Prompt text to send.
+            model: Tier key selecting model.
+            temperature: Sampling temperature.
+            timeout: Socket timeout bound.
+            json_mode: If True, request JSON output.
+
+        Returns:
+            The response text, or None on failure.
+        """
+        if not self._available:
+            return None
+
+        if model in ("deep", "complex_reasoning", "planning"):
+            api_model = self._model_deep
+        elif model in ("balanced", "synthesis", "code_review"):
+            api_model = self._model_balanced
+        else:
+            api_model = self._model_fast
+
+        actual_prompt = prompt
+        if json_mode:
+            actual_prompt = prompt + "\n\nIMPORTANT: Return ONLY valid JSON. No explanation or markdown."
+
+        try:
+            breaker = get_breaker("gemini_api")
+            client = self._get_client()
+            if client is not None:
+
+                def _invoke_sdk():
+                    from google.genai import types
+
+                    config = types.GenerateContentConfig(
+                        temperature=temperature,
+                        response_mime_type="application/json" if json_mode else None,
+                    )
+                    res = client.models.generate_content(
+                        model=api_model,
+                        contents=actual_prompt,
+                        config=config,
+                    )
+                    return res.text.strip() if res.text else None
+
+                return breaker.call(_invoke_sdk)
+            else:
+                import json as _json
+                import urllib.request as _urllib_req
+
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{api_model}:generateContent?key={self._api_key}"
+                body = {
+                    "contents": [{"parts": [{"text": actual_prompt}]}],
+                    "generationConfig": {"temperature": temperature},
+                }
+                if json_mode:
+                    body["generationConfig"]["responseMimeType"] = "application/json"
+                req_data = _json.dumps(body).encode("utf-8")
+                req = _urllib_req.Request(url, data=req_data, headers={"Content-Type": "application/json"})
+
+                def _invoke_rest():
+                    with _urllib_req.urlopen(req, timeout=timeout or 60.0) as resp:
+                        resp_data = _json.loads(resp.read().decode("utf-8"))
+                        candidates = resp_data.get("candidates", [])
+                        if candidates:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            if parts:
+                                return parts[0].get("text", "").strip()
+                    return None
+
+                return breaker.call(_invoke_rest)
+        except Exception as exc:
+            _log.debug("GeminiProvider call failed: %s", exc)
+        return None
+
+
+# =============================================================================
+# IMPLEMENTATION: OpenAIProvider (OpenAI API / ChatGPT)
+# =============================================================================
+
+
+class OpenAIProvider(LLMProvider):
+    """OpenAI API provider (supports GPT-4o, o1, o3, and custom endpoints)."""
+
+    MODEL_MAP = {
+        "fast": "gpt-4o-mini",
+        "balanced": "gpt-4o",
+        "deep": "o3-mini",
+        "fast_classification": "gpt-4o-mini",
+        "complex_reasoning": "o3-mini",
+        "synthesis": "gpt-4o",
+        "planning": "o3-mini",
+        "code_review": "gpt-4o",
+    }
+
+    def __init__(self):
+        """Read OpenAI API key, base URL, and model configuration from environment."""
+        self._api_key = os.getenv("OPENAI_API_KEY", "")
+        self._base_url = os.getenv("OPENAI_BASE_URL", None)
+        self._model_fast = os.getenv("OPENAI_MODEL_FAST", self.MODEL_MAP["fast"])
+        self._model_balanced = os.getenv("OPENAI_MODEL_BALANCED", self.MODEL_MAP["balanced"])
+        self._model_deep = os.getenv("OPENAI_MODEL_DEEP", self.MODEL_MAP["deep"])
+        self._available = bool(self._api_key)
+        self._client = None
+
+    def _get_client(self):
+        """Lazy-init the OpenAI SDK client."""
+        if self._client is None and self._api_key:
+            try:
+                import openai
+
+                kwargs = {"api_key": self._api_key}
+                if self._base_url:
+                    kwargs["base_url"] = self._base_url
+                self._client = openai.OpenAI(**kwargs)
+            except Exception:
+                self._client = None
+        return self._client
+
+    @property
+    def name(self) -> str:
+        """Provider name used in logs and get_active_providers()."""
+        return "openai"
+
+    def is_available(self) -> bool:
+        """Return True when OPENAI_API_KEY is present."""
+        return self._available
+
+    def call(self, prompt, model="fast", temperature=0.3, timeout=None, json_mode=False):
+        """Send prompt to OpenAI API and return response text.
+
+        Args:
+            prompt: Prompt text to send.
+            model: Tier key selecting model.
+            temperature: Sampling temperature.
+            timeout: Socket timeout bound.
+            json_mode: If True, request JSON output.
+
+        Returns:
+            The response text, or None on failure.
+        """
+        if not self._available:
+            return None
+
+        if model in ("deep", "complex_reasoning", "planning"):
+            api_model = self._model_deep
+        elif model in ("balanced", "synthesis", "code_review"):
+            api_model = self._model_balanced
+        else:
+            api_model = self._model_fast
+
+        actual_prompt = prompt
+        if json_mode:
+            actual_prompt = prompt + "\n\nIMPORTANT: Return ONLY valid JSON. No explanation or markdown."
+
+        try:
+            breaker = get_breaker("openai_api")
+            client = self._get_client()
+            if client is not None:
+
+                def _invoke_sdk():
+                    kwargs = {
+                        "model": api_model,
+                        "messages": [{"role": "user", "content": actual_prompt}],
+                    }
+                    if not api_model.startswith("o1") and not api_model.startswith("o3"):
+                        kwargs["temperature"] = temperature
+                    if json_mode:
+                        kwargs["response_format"] = {"type": "json_object"}
+                    if timeout:
+                        kwargs["timeout"] = timeout
+                    res = client.chat.completions.create(**kwargs)
+                    return res.choices[0].message.content.strip() if res.choices else None
+
+                return breaker.call(_invoke_sdk)
+            else:
+                import json as _json
+                import urllib.request as _urllib_req
+
+                base = (self._base_url or "https://api.openai.com/v1").rstrip("/")
+                url = f"{base}/chat/completions"
+                body = {
+                    "model": api_model,
+                    "messages": [{"role": "user", "content": actual_prompt}],
+                }
+                if not api_model.startswith("o1") and not api_model.startswith("o3"):
+                    body["temperature"] = temperature
+                if json_mode:
+                    body["response_format"] = {"type": "json_object"}
+                req_data = _json.dumps(body).encode("utf-8")
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self._api_key}",
+                }
+                req = _urllib_req.Request(url, data=req_data, headers=headers)
+
+                def _invoke_rest():
+                    with _urllib_req.urlopen(req, timeout=timeout or 60.0) as resp:
+                        resp_data = _json.loads(resp.read().decode("utf-8"))
+                        choices = resp_data.get("choices", [])
+                        if choices:
+                            return choices[0].get("message", {}).get("content", "").strip()
+                    return None
+
+                return breaker.call(_invoke_rest)
+        except Exception as exc:
+            _log.debug("OpenAIProvider call failed: %s", exc)
+        return None
+
+
+# =============================================================================
+# IMPLEMENTATION: OllamaProvider (Local Open-Source Models)
+# =============================================================================
+
+
+class OllamaProvider(LLMProvider):
+    """Local Ollama model provider for zero-cost and privacy-preserving execution."""
+
+    MODEL_MAP = {
+        "fast": "llama3.2",
+        "balanced": "qwen2.5-coder",
+        "deep": "deepseek-r1",
+        "fast_classification": "llama3.2",
+        "complex_reasoning": "deepseek-r1",
+        "synthesis": "qwen2.5-coder",
+        "planning": "deepseek-r1",
+        "code_review": "qwen2.5-coder",
+    }
+
+    def __init__(self):
+        """Read Ollama host and model configuration from environment."""
+        self._host = (os.getenv("OLLAMA_HOST") or "http://localhost:11434").rstrip("/")
+        self._model_fast = os.getenv("OLLAMA_MODEL_FAST", self.MODEL_MAP["fast"])
+        self._model_balanced = os.getenv("OLLAMA_MODEL_BALANCED", self.MODEL_MAP["balanced"])
+        self._model_deep = os.getenv("OLLAMA_MODEL_DEEP", self.MODEL_MAP["deep"])
+        self._available = self._check_availability()
+
+    def _check_availability(self) -> bool:
+        """Check if local Ollama daemon is reachable."""
+        try:
+            import urllib.request as _urllib_req
+
+            req = _urllib_req.Request(f"{self._host}/api/tags", headers={"User-Agent": "SDLC-Engine"})
+            with _urllib_req.urlopen(req, timeout=1.5) as resp:
+                return resp.status == 200
+        except Exception:
+            return False
+
+    @property
+    def name(self) -> str:
+        """Provider name used in logs and get_active_providers()."""
+        return "ollama"
+
+    def is_available(self) -> bool:
+        """Return True when Ollama server is reachable."""
+        return self._available
+
+    def call(self, prompt, model="fast", temperature=0.3, timeout=None, json_mode=False):
+        """Send prompt to Ollama daemon and return response text.
+
+        Args:
+            prompt: Prompt text to send.
+            model: Tier key selecting model.
+            temperature: Sampling temperature.
+            timeout: Socket timeout bound.
+            json_mode: If True, request JSON output.
+
+        Returns:
+            The response text, or None on failure.
+        """
+        if not self._available:
+            return None
+
+        if model in ("deep", "complex_reasoning", "planning"):
+            api_model = self._model_deep
+        elif model in ("balanced", "synthesis", "code_review"):
+            api_model = self._model_balanced
+        else:
+            api_model = self._model_fast
+
+        try:
+            import json as _json
+            import urllib.request as _urllib_req
+
+            breaker = get_breaker("ollama_api")
+            body = {
+                "model": api_model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {"temperature": temperature},
+            }
+            if json_mode:
+                body["format"] = "json"
+            req_data = _json.dumps(body).encode("utf-8")
+            req = _urllib_req.Request(
+                f"{self._host}/api/generate", data=req_data, headers={"Content-Type": "application/json"}
+            )
+
+            def _invoke_ollama():
+                with _urllib_req.urlopen(req, timeout=timeout or 60.0) as resp:
+                    resp_data = _json.loads(resp.read().decode("utf-8"))
+                    return resp_data.get("response", "").strip() or None
+
+            return breaker.call(_invoke_ollama)
+        except Exception as exc:
+            _log.debug("OllamaProvider call failed: %s", exc)
+        return None
+
+
+# =============================================================================
 # PROVIDER CHAIN (Chain of Responsibility + Factory)
 # =============================================================================
 
@@ -368,8 +729,11 @@ DEFAULT_TEMPERATURES = {
 
 # Provider registry (Singleton instances)
 _PROVIDER_REGISTRY = {
-    "claude_cli": ClaudeCLIProvider,
+    "gemini": GeminiProvider,
     "anthropic": AnthropicProvider,
+    "openai": OpenAIProvider,
+    "claude_cli": ClaudeCLIProvider,
+    "ollama": OllamaProvider,
 }
 
 _provider_chain: List[LLMProvider] = []
@@ -380,14 +744,12 @@ def _build_provider_chain() -> List[LLMProvider]:
 
     Configuration via env vars:
       LLM_PROVIDER=auto       -> try all available providers (default)
+      LLM_PROVIDER=gemini     -> Gemini API first, then LLM_FALLBACK chain
       LLM_PROVIDER=anthropic  -> Anthropic API first, then LLM_FALLBACK chain
+      LLM_PROVIDER=openai     -> OpenAI API first, then LLM_FALLBACK chain
       LLM_PROVIDER=claude_cli -> Claude CLI first, then LLM_FALLBACK chain
-      LLM_FALLBACK=anthropic  -> explicit fallback chain (comma-separated)
-
-    Default fallback strategy:
-      - auto mode             -> try all providers: claude_cli -> anthropic
-      - Specific provider set -> use that provider; apply LLM_FALLBACK if set
-      - LLM_FALLBACK set      -> use user's explicit fallback (overrides default)
+      LLM_PROVIDER=ollama     -> Ollama local first, then LLM_FALLBACK chain
+      LLM_FALLBACK=...        -> explicit fallback chain (comma-separated)
 
     Returns:
         List of instantiated, available providers in priority order.
@@ -396,12 +758,11 @@ def _build_provider_chain() -> List[LLMProvider]:
     fallback_str = os.getenv("LLM_FALLBACK", "").strip()
 
     if primary == "auto":
-        # Auto mode: try Claude CLI -> Anthropic API
-        order = ["claude_cli", "anthropic"]
+        # Auto mode: try configured providers in priority order
+        order = ["gemini", "anthropic", "openai", "claude_cli", "ollama"]
     else:
         order = [primary]
         if fallback_str:
-            # User explicitly defined fallbacks -- respect their choice
             order.extend(f.strip() for f in fallback_str.split(",") if f.strip())
 
     chain = []
