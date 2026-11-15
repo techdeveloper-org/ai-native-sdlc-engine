@@ -10,6 +10,7 @@ Contains:
 """
 
 import logging
+import os
 import sys
 import time
 from pathlib import Path
@@ -38,20 +39,33 @@ _VENDOR_DIR_NAMES = {
 
 
 def _iter_project_py_files(project_root: Path, cap: int = 500):
-    """Yield up to `cap` project-owned .py files, skipping vendor/dependency dirs.
+    """Yield up to `cap` project-owned .py files with in-place vendor directory pruning.
 
-    Excludes .venv, node_modules, site-packages, .git, __pycache__ and
-    similar directories so the cap is never consumed by third-party code
-    and vendor files never trip the project's own encoding/path checks.
+    Prunes vendor directories directly in os.walk dirnames to prevent descending
+    into vendor subtrees, eliminating thousands of unnecessary filesystem I/O calls.
+
+    Args:
+        project_root: Root path of the project.
+        cap: Maximum number of files to yield.
+
+    Yields:
+        Path: Project Python files.
     """
     count = 0
-    for py_file in project_root.glob("**/*.py"):
-        if any(part in _VENDOR_DIR_NAMES or part.endswith(".egg-info") for part in py_file.parts):
-            continue
-        yield py_file
-        count += 1
-        if count >= cap:
-            return
+    resolved_root = project_root.resolve()
+    for root, dirnames, filenames in os.walk(project_root):
+        dirnames[:] = [d for d in dirnames if d not in _VENDOR_DIR_NAMES and not d.endswith(".egg-info")]
+        for f in filenames:
+            if f.endswith(".py"):
+                file_path = Path(root) / f
+                try:
+                    if file_path.resolve().is_relative_to(resolved_root):
+                        yield file_path
+                        count += 1
+                        if count >= cap:
+                            return
+                except (ValueError, RuntimeError):
+                    continue
 
 
 # ============================================================================
@@ -285,6 +299,7 @@ def node_windows_path_check(state: FlowState) -> dict:
             except OSError as exc:
                 _logger.debug("level-1: drive-detect read skipped: %s", exc)
 
+        updates["windows_path_violating_files"] = issues
         if issues:
             updates["windows_path_check"] = False
             updates["windows_path_check_error"] = f"Backslash paths found: {', '.join(issues[:2])}"

@@ -145,8 +145,21 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
         session_id = state.get("session_id")
         logger = ErrorLogger(session_id) if session_id else None
 
-        print("\n[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] [ERROR] FATAL: MAX ATTEMPTS REACHED (3/3)")
-        print("[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] Continuing to Level 1 despite unresolved checks...")
+        _logger.error(
+            "[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] FATAL: MAX ATTEMPTS REACHED (%d/%d)",
+            attempt,
+            MAX_PREFLIGHT_ATTEMPTS,
+        )
+        _logger.warning(
+            "[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] Continuing to Level 1 despite unresolved checks..."
+        )
+        if sys.stdout.isatty():
+            sys.stdout.write(
+                f"\n[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] [ERROR] FATAL: MAX ATTEMPTS REACHED ({attempt}/{MAX_PREFLIGHT_ATTEMPTS})\n"
+            )
+            sys.stdout.write(
+                "[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] Continuing to Level 1 despite unresolved checks...\n"
+            )
 
         # Log FATAL_FAILURE state
         logger and logger.log_error(
@@ -218,27 +231,22 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
     message += "  1. auto-fix   -> Attempt repair + retry\n"
     message += "  2. skip       -> Continue anyway (NOT RECOMMENDED)\n"
 
-    # Print message to stdout so it reaches user through hook
-    print(message)
-
     # Get user choice - with fallback for hook environment
-    user_choice = "auto-fix"  # Default
-    try:
-        # Try to get input only if stdin is a TTY (interactive terminal)
-        if sys.stdin.isatty():
+    user_choice = "auto-fix"
+    if sys.stdin.isatty() and sys.stdout.isatty():
+        sys.stdout.write(message + "\n")
+        try:
             user_choice = input("\nYour choice [auto-fix/skip]: ").strip().lower()
-        else:
-            # Hook context: stdin not available, auto-default to auto-fix
-            print("\n[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] Running in hook context (non-interactive)")
-            print("[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] Automatically attempting auto-fix...")
+        except (EOFError, KeyboardInterrupt):
+            _logger.info("Terminal input interrupted, falling back to auto-fix")
             user_choice = "auto-fix"
-    except (EOFError, KeyboardInterrupt):
-        # stdin closed or interrupted, use default
-        print("\n[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] No input available, using auto-fix")
-        user_choice = "auto-fix"
-    except Exception as e:
-        # Any other error, use default
-        print(f"\n[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] Could not read input ({e}), using auto-fix")
+        except Exception as e:
+            _logger.warning("Could not read input from terminal (%s), falling back to auto-fix", e)
+            user_choice = "auto-fix"
+    else:
+        _logger.info(
+            "[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] Running in non-interactive / hook context; auto-defaulting to auto-fix"
+        )
         user_choice = "auto-fix"
 
     # Validate choice
@@ -358,7 +366,11 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
             fixed_files = []
             issues = []
 
-            _fix_files = list(_iter_project_py_files(project_root, cap=500))
+            violating_files = state.get("windows_path_violating_files")
+            if violating_files is not None and isinstance(violating_files, list):
+                _fix_files = [Path(f) for f in violating_files if Path(f).exists()]
+            else:
+                _fix_files = list(_iter_project_py_files(project_root, cap=500))
             for py_file in _fix_files:
                 try:
                     try:

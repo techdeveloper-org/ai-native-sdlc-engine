@@ -52,28 +52,28 @@ never a false negative on a real path.
 
 import ast
 import re
+from typing import List, Optional, Set
 
 DRIVE_PATH_RE = re.compile(
     r"(?<![A-Za-z0-9_\\?])([A-Za-z]):(?:\\\\|\\)(?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*",
     re.IGNORECASE,
 )
 
-
 _DOCSTRING_OWNERS = (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
 
 
-def _docstring_nodes(tree):
+def _docstring_nodes(tree: ast.AST) -> Set[int]:
     """Collect the constant nodes that serve as docstrings.
 
-    A docstring is the first statement of a module, class or function body. It
-    is documentation rather than code, so a drive path inside one is an example
-    being explained, not a path the program will use.
+    A docstring is the first statement of a module, class or function body.
+    It is documentation rather than code, so a drive path inside one is an
+    example being explained, not a path the program will execute.
 
     Args:
         tree: Parsed module AST.
 
     Returns:
-        set: ``id()`` of each docstring constant node.
+        Set[int]: Python id() of each docstring constant node.
     """
     found = set()
     for node in ast.walk(tree):
@@ -89,40 +89,43 @@ def _docstring_nodes(tree):
     return found
 
 
-def iter_string_values(source):
+def iter_string_values(source: str) -> Optional[List[str]]:
     """Yield the value of every non-docstring string constant in a source text.
 
-    Docstrings are excluded because the check exists to find paths the program
-    USES, and a path inside a docstring is an example being described. That
-    distinction is the same enclosing-node classification the home-directory
-    rule requires, applied to a different surface.
+    Executes a single-pass AST walk combining docstring detection and string
+    constant extraction without double traversal.
 
     Args:
         source: Python source text.
 
     Returns:
-        list: String values, or None when the source does not parse.
+        Optional[List[str]]: String values, or None when source fails to parse.
     """
     try:
         tree = ast.parse(source)
     except (SyntaxError, ValueError):
         return None
-    docstrings = _docstring_nodes(tree)
+
+    docstrings = set()
     values = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.Constant) and isinstance(node.value, str):
-            if id(node) in docstrings:
-                continue
-            values.append(node.value)
+        if isinstance(node, _DOCSTRING_OWNERS):
+            body = getattr(node, "body", None)
+            if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant):
+                if isinstance(body[0].value.value, str):
+                    docstrings.add(id(body[0].value))
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if id(node) not in docstrings:
+                values.append(node.value)
     return values
 
 
-def has_drive_path(source):
+def has_drive_path(source: str) -> bool:
     """Report whether a Python source text hardcodes a Windows drive path.
 
-    String literals are examined by value so that an escape sequence can never
-    be mistaken for a path separator. Comment text is examined as written, since
-    comments carry no escape processing.
+    Inspects string literal values directly via a single-pass AST visitor with
+    early-exit semantics. The moment a drive path is matched, the walk halts
+    immediately.
 
     Args:
         source: Python source text.
@@ -130,12 +133,22 @@ def has_drive_path(source):
     Returns:
         bool: True when at least one drive path is present.
     """
-    values = iter_string_values(source)
-    if values is None:
-        return bool(DRIVE_PATH_RE.search(source))
-    for value in values:
-        if DRIVE_PATH_RE.search(value):
+    try:
+        tree = ast.parse(source)
+        docstrings = set()
+        for node in ast.walk(tree):
+            if isinstance(node, _DOCSTRING_OWNERS):
+                body = getattr(node, "body", None)
+                if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant):
+                    if isinstance(body[0].value.value, str):
+                        docstrings.add(id(body[0].value))
+            elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+                if id(node) not in docstrings and DRIVE_PATH_RE.search(node.value):
+                    return True
+    except (SyntaxError, ValueError):
+        if DRIVE_PATH_RE.search(source):
             return True
+
     for line in source.splitlines():
         stripped = line.lstrip()
         if stripped.startswith("#") and DRIVE_PATH_RE.search(stripped):

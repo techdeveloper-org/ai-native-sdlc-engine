@@ -28,7 +28,7 @@ Usage
     try:
         run_step(7)
     except StepExecutionError as exc:
-        print(exc.step_number, exc.context)
+        logger.error("Step %d failed with context: %s", exc.step_number, exc.context)
         raise
 """
 
@@ -181,3 +181,83 @@ class StepExecutionError(WorkflowEngineError):
         cls = type(self).__name__
         ctx_part = f", context={self.context!r}" if self.context else ""
         return f"{cls}({str(self)!r}, step_number={self.step_number!r}{ctx_part})"
+
+
+# ---------------------------------------------------------------------------
+# Pre-Flight and Security Policy Exceptions
+# ---------------------------------------------------------------------------
+
+
+class PreflightError(WorkflowEngineError):
+    """Base exception for all Level 0 (Pre-Flight Sanity Guard) operations.
+
+    Args:
+        message: Human-readable description of the pre-flight failure.
+        step: Pipeline step where the check failed.
+        context: Extra diagnostic values.
+    """
+
+
+class PreflightCheckError(PreflightError):
+    """Raised when a pre-flight sanity check fails non-recoverably.
+
+    Args:
+        message: Description of the failed check.
+        step: Pre-flight check step name.
+        context: Context containing check parameters and violating files.
+    """
+
+
+class IntegrityValidationError(PreflightError):
+    """Raised when a file fails post-modification integrity or AST syntax validation.
+
+    Args:
+        message: Description of the integrity validation failure.
+        step: Step in which modification and validation occurred.
+        context: Context containing file path, syntax error, or validation details.
+    """
+
+
+class PathNormalizationError(PreflightError):
+    """Raised when path normalization or drive letter resolution encounters an invalid path.
+
+    Args:
+        message: Description of the path normalization error.
+        step: Step where path normalization was attempted.
+        context: Context containing path string and target encoding.
+    """
+
+
+# ---------------------------------------------------------------------------
+# Backup and Transactional Rollback Exceptions
+# ---------------------------------------------------------------------------
+
+
+class BackupError(WorkflowEngineError):
+    """Base exception for file backup, snapshot, and rollback subsystem failures.
+
+    Args:
+        message: Description of the backup subsystem failure.
+        step: Step name or label where backup/restore was attempted.
+        context: Extra diagnostic values such as file path and session ID.
+    """
+
+
+class BackupCreationError(BackupError):
+    """Raised when file backup snapshot creation fails due to I/O, permissions, or disk limits.
+
+    Args:
+        message: Description of why backup creation failed.
+        step: Step in which backup was attempted.
+        context: Context containing original file path and target backup path.
+    """
+
+
+class RestoreError(BackupError):
+    """Raised when file restoration from a backup snapshot fails or backup artifact is missing.
+
+    Args:
+        message: Description of why file restoration failed.
+        step: Step in which restoration was attempted.
+        context: Context containing original path, backup path, and error reason.
+    """
