@@ -278,6 +278,35 @@ class TestWindowsPathIntegration:
         assert "C:/Projects/core" in fixed_content
         assert "C://" not in fixed_content
 
+    def test_integration_autofix_chained_with_external_project_root(self, isolated_workspace, force_windows_platform):
+        """Positive: Verifies end-to-end chaining of node_windows_path_check and fix_preflight_guard_issues
+        when project_root is an external directory differing from os.getcwd()."""
+        proj, logs = isolated_workspace
+        sub_dir = proj / "subpkg"
+        sub_dir.mkdir(parents=True)
+        target = sub_dir / "service.py"
+        target.write_text(f'REPO = "{make_drive_path("opt", "repo")}"\n', encoding="utf-8")
+
+        state = {
+            "session_id": "test_chain_ext",
+            "project_root": str(proj),
+            "backup_base_dir": str(logs),
+        }
+
+        check_res = node_windows_path_check(state)
+        state.update(check_res)
+
+        assert state["windows_path_check"] is False
+        assert any("service.py" in f for f in state["windows_path_violating_files"])
+
+        fix_res = fix_preflight_guard_issues(state)
+        assert fix_res["preflight_ready_to_retry"] is True
+        assert any("Fixed backslash paths" in msg for msg in fix_res.get("preflight_fixes_applied", []))
+
+        fixed_content = target.read_text(encoding="utf-8")
+        assert "C:/opt/repo" in fixed_content
+        assert SEP not in fixed_content
+
 
 class TestWindowsPathSecurityAndRollback:
     """Security, transactional backup, atomic locking, and rollback invariants."""

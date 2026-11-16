@@ -91,6 +91,9 @@ class FlowState(TypedDict, total=False):
     # Encoding scan results
     encoding_nonascii_files: List[str]  # files with non-ASCII content
 
+    # Windows path scan results
+    windows_path_violating_files: List[str]  # files containing hardcoded Windows backslash paths
+
     # ===========================================================================
     # LEVEL 1: SYNC SYSTEM (3 PARALLEL TASKS: session + complexity + context)
     # ===========================================================================

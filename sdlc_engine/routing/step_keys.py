@@ -82,6 +82,8 @@ class StepKeys:
     UNICODE_CHECK = "unicode_check"
     ENCODING_CHECK = "encoding_check"
     WINDOWS_PATH_CHECK = "windows_path_check"
+    WINDOWS_PATH_CHECK_ERROR = "windows_path_check_error"
+    WINDOWS_PATH_VIOLATING_FILES = "windows_path_violating_files"
     FAILURE_KB_LOADED = "failure_kb_loaded"
     FAILURE_KB_SUGGESTIONS = "failure_kb_suggestions"
 

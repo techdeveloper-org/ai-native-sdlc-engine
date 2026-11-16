@@ -80,6 +80,7 @@ When violations are detected, `fix_preflight_guard_issues` executes an atomic 4-
 |:---|:---|:---|
 | `windows_path_check` | `bool` | `True` if no backslash paths exist or on non-Windows; `False` if detected |
 | `windows_path_check_error` | `Optional[str]` | Truncated error message containing first 2 problem files, e.g. `Backslash paths found: app.py, utils.py` |
+| `windows_path_violating_files` | `List[str]` | Relative paths of all project files confirmed to contain Windows drive paths |
 | `preflight_status` | `str` | `"OK"` (all checks passed) or `"FAILED"` (triggering recovery) |
 | `preflight_retry_count` | `int` | Attempt counter (1..3) |
 | `preflight_fixes_applied` | `List[str]` | Applied repair notifications |

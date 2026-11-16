@@ -44,6 +44,22 @@ def _atomic_write_text(file_path: Path, content: str, encoding: str = "utf-8") -
         raise
 
 
+def _safe_rel_path(file_path: Path, root: Path) -> str:
+    """Safely return relative path string, falling back to name on ValueError.
+
+    Args:
+        file_path: Target path to format.
+        root: Root directory to make path relative to.
+
+    Returns:
+        String representing relative path or file name.
+    """
+    try:
+        return str(file_path.relative_to(root))
+    except ValueError:
+        return file_path.name
+
+
 # ============================================================================
 # FAILURE PREVENTION KB
 # ============================================================================
@@ -368,7 +384,12 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
 
             violating_files = state.get("windows_path_violating_files")
             if violating_files is not None and isinstance(violating_files, list):
-                _fix_files = [Path(f) for f in violating_files if Path(f).exists()]
+                _fix_files = []
+                for f in violating_files:
+                    p = Path(f)
+                    target_p = p if p.is_absolute() else (project_root / p)
+                    if target_p.exists():
+                        _fix_files.append(target_p)
             else:
                 _fix_files = list(_iter_project_py_files(project_root, cap=500))
             for py_file in _fix_files:
@@ -407,7 +428,7 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
                             if backup and backup.validate_file_integrity(
                                 str(py_file), "Level 0 (Pre-Flight Sanity Guard)"
                             ):
-                                fixed_files.append(str(py_file.relative_to(project_root)))
+                                fixed_files.append(_safe_rel_path(py_file, project_root))
                                 logger and logger.log_validation_result(
                                     "Level 0 (Pre-Flight Sanity Guard)", f"Path fix: {py_file.name}", True
                                 )
@@ -434,7 +455,7 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
                                 )
                         else:
                             # File had backslashes but they were all escape sequences
-                            issues.append(str(py_file.relative_to(project_root)))
+                            issues.append(_safe_rel_path(py_file, project_root))
                 except Exception as e:
                     # Restore file on any error
                     backup and backup.restore_file(str(py_file), "Level 0 (Pre-Flight Sanity Guard)")
