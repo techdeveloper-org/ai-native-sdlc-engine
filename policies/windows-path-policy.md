@@ -36,9 +36,10 @@ The scanner automatically isolates and ignores 13 vendor, virtual environment, a
 
 ### 2.3 Detection Regular Expression
 ```regex
-(?<![A-Za-z0-9_\\?])([A-Za-z]):(?:\\\\|\\)(?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*
+(?<![A-Za-z0-9_\\?])([A-Za-z]):(?:\\\\|\\)(?:[A-Za-z0-9_\-\.\\/()+@#$~{}[\]]| (?![ \-\/]|[A-Za-z]:[\\/]))*
 ```
 - **Verbatim Win32 Bypass:** Negative lookbehind `(?<![A-Za-z0-9_\\?])` exempts verbatim namespaces (`\\?\C:\...`).
+- **Path Special Character Support:** Character class includes `()+@#$~{}[\]` supporting real-world Windows directories (e.g. `Program Files (x86)`).
 - **UNC Exemption:** UNC network shares (`\\server\share`) are excluded as they contain no drive letters.
 - **URL / URI Exemption:** Standard schemes (`file:///C:/`, `https://`) pass cleanly.
 
@@ -56,7 +57,7 @@ When violations are detected, `fix_preflight_guard_issues` executes an atomic 4-
    - Handles single (`C:\`) and double (`C:\\`) backslashes cleanly without creating malformed double forward slashes (`C://`).
    - Lookahead boundary checks preserve multi-argument boundaries on a single line and legitimate escapes (`\n`, `\t`, etc.).
 3. **Atomic File Writeback:**
-   - Writes to a temporary sibling file (`.filename.tmp.PID`) and replaces target via `os.replace` to prevent file truncation on process interruption.
+   - Writes to a temporary sibling file (`.filename.tmp.PID_TID_UUID`) and replaces target via `os.replace` to prevent file truncation on process interruption and Windows sharing violations (`WinError 32`).
 4. **AST Validation & Audit Trail:**
    - Validates post-fix syntax via `compile(content, file, "exec")`.
    - On syntax failure: Immediate non-destructive rollback via `backup.restore_file()`.
@@ -80,8 +81,11 @@ When violations are detected, `fix_preflight_guard_issues` executes an atomic 4-
 |:---|:---|:---|
 | `windows_path_check` | `bool` | `True` if no backslash paths exist or on non-Windows; `False` if detected |
 | `windows_path_check_error` | `Optional[str]` | Truncated error message containing first 2 problem files, e.g. `Backslash paths found: app.py, utils.py` |
-| `windows_path_violating_files` | `List[str]` | Relative paths of all project files confirmed to contain Windows drive paths |
+| `windows_path_violating_files` | `List[str]` | Relative paths of all project files confirmed to contain Windows drive paths (POSIX forward slashes) |
 | `preflight_status` | `str` | `"OK"` (all checks passed) or `"FAILED"` (triggering recovery) |
+| `preflight_guard_errors` | `List[str]` | Cumulative list of errors encountered across pre-flight guard checks and recovery |
+| `auto_fix_complete` | `bool` | `True` when preflight checks pass or auto-fix succeeds with zero errors; `False` otherwise |
+| `auto_fix_applied` | `List[str]` | Cumulative list of auto-fixes applied |
 | `preflight_retry_count` | `int` | Attempt counter (1..3) |
-| `preflight_fixes_applied` | `List[str]` | Applied repair notifications |
+| `preflight_fixes_applied` | `List[str]` | Applied repair notifications from current recovery run |
 | `preflight_fix_errors` | `List[str]` | Any fix or validation errors encountered |

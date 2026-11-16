@@ -56,7 +56,7 @@ def _iter_project_py_files(project_root: Path, cap: int = 500):
     for root, dirnames, filenames in os.walk(project_root):
         dirnames[:] = [d for d in dirnames if d not in _VENDOR_DIR_NAMES and not d.endswith(".egg-info")]
         for f in filenames:
-            if f.endswith(".py"):
+            if f.lower().endswith(".py"):
                 file_path = Path(root) / f
                 try:
                     if file_path.resolve().is_relative_to(resolved_root):
@@ -89,7 +89,8 @@ def node_unicode_fix(state: FlowState) -> dict:
     # Nodes should NOT return it - let LangGraph manage it
     _step_start = time.time()
     session_id = state.get("session_id")
-    logger = ErrorLogger(session_id) if session_id else None
+    log_base_dir = state.get("log_dir")
+    logger = ErrorLogger(session_id, log_base_dir=log_base_dir) if session_id else None
 
     _logger.debug("[L0 UNICODE FIX] state['project_root'] at entry: '%s'", state.get("project_root", "MISSING"))
     updates = {}
@@ -176,7 +177,8 @@ def node_encoding_validation(state: FlowState) -> dict:
     """
     _step_start = time.time()
     session_id = state.get("session_id")
-    logger = ErrorLogger(session_id) if session_id else None
+    log_base_dir = state.get("log_dir")
+    logger = ErrorLogger(session_id, log_base_dir=log_base_dir) if session_id else None
     updates = {}
     try:
         if sys.platform != "win32":
@@ -206,7 +208,11 @@ def node_encoding_validation(state: FlowState) -> dict:
                 # Check if content is pure ASCII
                 content.decode("ascii")
             except (UnicodeDecodeError, Exception):
-                non_ascii_files.append(str(py_file.relative_to(project_root)))
+                try:
+                    rel = py_file.resolve().relative_to(project_root.resolve()).as_posix()
+                except (ValueError, RuntimeError):
+                    rel = py_file.name
+                non_ascii_files.append(rel)
 
         # Store full file list in state for downstream visibility
         updates["encoding_nonascii_files"] = non_ascii_files
@@ -265,7 +271,8 @@ def node_windows_path_check(state: FlowState) -> dict:
     """
     _step_start = time.time()
     session_id = state.get("session_id")
-    logger = ErrorLogger(session_id) if session_id else None
+    log_base_dir = state.get("log_dir")
+    logger = ErrorLogger(session_id, log_base_dir=log_base_dir) if session_id else None
     updates = {}
     try:
         if sys.platform != "win32":
@@ -295,7 +302,11 @@ def node_windows_path_check(state: FlowState) -> dict:
             try:
                 content = py_file.read_text(encoding="utf-8-sig", errors="replace")
                 if has_drive_path(content):
-                    issues.append(str(py_file.relative_to(project_root)))
+                    try:
+                        rel = py_file.resolve().relative_to(project_root.resolve()).as_posix()
+                    except (ValueError, RuntimeError):
+                        rel = py_file.name
+                    issues.append(rel)
             except OSError as exc:
                 _logger.debug("level-1: drive-detect read skipped: %s", exc)
 

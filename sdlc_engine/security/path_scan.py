@@ -55,7 +55,7 @@ import re
 from typing import List, Optional, Set
 
 DRIVE_PATH_RE = re.compile(
-    r"(?<![A-Za-z0-9_\\?])([A-Za-z]):(?:\\\\|\\)(?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*",
+    r"(?<![A-Za-z0-9_\\?])([A-Za-z]):(?:\\\\|\\)(?:[A-Za-z0-9_\-\.\\/()+@#$~{}[\]]| (?![ \-\/]|[A-Za-z]:[\\/]))*",
     re.IGNORECASE,
 )
 

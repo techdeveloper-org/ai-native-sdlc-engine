@@ -73,6 +73,7 @@ class FlowState(TypedDict, total=False):
     windows_path_check_error: Optional[str]
 
     auto_fix_applied: List[str]  # List of auto-fixes that were applied
+    auto_fix_complete: bool  # True when preflight checks pass or auto-fix succeeds
 
     # Failure Prevention KB
     failure_kb_loaded: Optional[bool]  # True if KB was parsed successfully

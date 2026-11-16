@@ -88,7 +88,7 @@ class TestWindowsPathDetection:
     def test_unit_docstring_examples_ignored(self):
         """Positive: Example drive paths inside docstrings are bypassed via AST classification."""
         path_str = make_drive_path("path", "example")
-        source = f'"""Example docstring explaining {path_str} usage."""\nVALUE = 42\n'
+        source = f'r"""Example docstring explaining {path_str} usage."""\nVALUE = 42\n'
         assert has_drive_path(source) is False
 
     def test_unit_uri_and_url_schemes_not_flagged(self):
@@ -99,13 +99,13 @@ class TestWindowsPathDetection:
     def test_unit_hardcoded_c_drive_flagged(self):
         """Negative: Assignment containing hardcoded C: drive path is flagged."""
         path_str = make_drive_path("Users", "techd", "repo")
-        source = f'REPO_PATH = "{path_str}"\n'
+        source = f'REPO_PATH = r"{path_str}"\n'
         assert has_drive_path(source) is True
 
     def test_unit_hardcoded_d_drive_flagged(self):
         """Negative: Assignment containing hardcoded D: drive path is flagged."""
         path_str = make_drive_path("data", "records.csv", drive="D")
-        source = f'DATA_FILE = "{path_str}"\n'
+        source = f'DATA_FILE = r"{path_str}"\n'
         assert has_drive_path(source) is True
 
     def test_unit_raw_string_drive_flagged(self):
@@ -117,13 +117,13 @@ class TestWindowsPathDetection:
     def test_unit_lowercase_drive_letter_flagged(self):
         """Negative: Lowercase drive letter prefix is detected and flagged."""
         path_str = make_drive_path("windows", "system32", drive="c")
-        source = f'SYS_DIR = "{path_str}"\n'
+        source = f'SYS_DIR = r"{path_str}"\n'
         assert has_drive_path(source) is True
 
     def test_unit_drive_root_only_flagged(self):
         """Negative: Root drive paths without subdirectories are detected and flagged."""
         path_str = make_drive_path(drive="C")
-        source = f'ROOT_DIR = "{path_str}"\n'
+        source = f'ROOT_DIR = r"{path_str}"\n'
         assert has_drive_path(source) is True
 
     def test_unit_single_char_segment_flagged(self):
@@ -140,7 +140,7 @@ class TestWindowsPathDetection:
     def test_unit_unparseable_source_fallback(self):
         """Edge-Case: SyntaxError source safely falls back to raw regex matching."""
         path_str = make_drive_path("corrupt", "path")
-        source = f'def broken(:\n    P = "{path_str}"\n'
+        source = f'def broken(:\n    P = r"{path_str}"\n'
         assert has_drive_path(source) is True
 
     def test_unit_empty_file_handled(self):
@@ -149,18 +149,18 @@ class TestWindowsPathDetection:
 
     def test_unit_mixed_slashes_detected(self):
         """Edge-Case: Mixed backslash and forward slash path is detected."""
-        source = 'P = "C:' + SEP + "projects/core" + SEP + 'utils/file.py"\n'
+        source = 'P = r"C:' + SEP + "projects/core" + SEP + 'utils/file.py"\n'
         assert has_drive_path(source) is True
 
     def test_unit_path_with_spaces_and_hyphens(self):
         """Edge-Case: Paths with spaces and hyphens are detected."""
         path_str = make_drive_path("Program Files", "my-app", "bin")
-        source = f'BIN = "{path_str}"\n'
+        source = f'BIN = r"{path_str}"\n'
         assert has_drive_path(source) is True
 
     def test_unit_verbatim_path_ignored(self):
         """Edge-Case: Verbatim extended path prefix \\\\?\\ is not flagged for corruption."""
-        source = 'VERBATIM = "' + chr(92) + chr(92) + "?" + chr(92) + "C:" + chr(92) + 'data"\n'
+        source = 'VERBATIM = r"' + chr(92) + chr(92) + "?" + chr(92) + "C:" + chr(92) + 'data"\n'
         assert has_drive_path(source) is False
 
 
@@ -203,7 +203,7 @@ class TestWindowsPathIntegration:
         proj, logs = isolated_workspace
         target = proj / "multi.py"
         target.write_text(
-            'CMD = "copy C:' + SEP + "data" + SEP + "a.txt D:" + SEP + "backup" + SEP + 'b.txt"\n',
+            'CMD = r"copy C:' + SEP + "data" + SEP + "a.txt D:" + SEP + "backup" + SEP + 'b.txt"\n',
             encoding="utf-8",
         )
         state = {
@@ -285,7 +285,7 @@ class TestWindowsPathIntegration:
         sub_dir = proj / "subpkg"
         sub_dir.mkdir(parents=True)
         target = sub_dir / "service.py"
-        target.write_text(f'REPO = "{make_drive_path("opt", "repo")}"\n', encoding="utf-8")
+        target.write_text(f'REPO = r"{make_drive_path("opt", "repo")}"\n', encoding="utf-8")
 
         state = {
             "session_id": "test_chain_ext",
@@ -306,6 +306,74 @@ class TestWindowsPathIntegration:
         fixed_content = target.read_text(encoding="utf-8")
         assert "C:/opt/repo" in fixed_content
         assert SEP not in fixed_content
+
+    def test_integration_autofix_path_with_parentheses_x86(self, isolated_workspace, force_windows_platform):
+        """Edge-Case: Paths containing parentheses such as Program Files (x86) normalize fully without truncation."""
+        proj, logs = isolated_workspace
+        target = proj / "x86_app.py"
+        target.write_text(
+            f'BIN_PATH = r"{make_drive_path("Program Files (x86)", "VendorApp", "bin", "tool.exe")}"\n',
+            encoding="utf-8",
+        )
+        state = {
+            "session_id": "test_x86",
+            "project_root": str(proj),
+            "windows_path_check": False,
+        }
+        fix_res = fix_preflight_guard_issues(state)
+        assert fix_res["auto_fix_complete"] is True
+        content = target.read_text(encoding="utf-8")
+        assert "C:/Program Files (x86)/VendorApp/bin/tool.exe" in content
+        assert SEP not in content
+
+    def test_integration_autofix_single_char_directory(self, isolated_workspace, force_windows_platform):
+        """Edge-Case: Single character directory paths (e.g. C:\\a\\file.py) are normalized without skipping."""
+        proj, logs = isolated_workspace
+        target = proj / "single_dir.py"
+        target.write_text(
+            f'A_PATH = r"{make_drive_path("a", "nested", "file.py")}"\n',
+            encoding="utf-8",
+        )
+        state = {
+            "session_id": "test_single_dir",
+            "project_root": str(proj),
+            "windows_path_check": False,
+        }
+        fix_res = fix_preflight_guard_issues(state)
+        assert fix_res["auto_fix_complete"] is True
+        content = target.read_text(encoding="utf-8")
+        assert "C:/a/nested/file.py" in content
+        assert SEP not in content
+
+    def test_iter_project_py_files_uppercase_extension(self, isolated_workspace):
+        """Edge-Case: Project files with uppercase .PY extension are discovered by scanner."""
+        proj, _ = isolated_workspace
+        (proj / "CAPS.PY").write_text("X = 1\n", encoding="utf-8")
+        (proj / "Mixed.Py").write_text("Y = 2\n", encoding="utf-8")
+        files = list(_iter_project_py_files(proj, cap=500))
+        names = {f.name for f in files}
+        assert "CAPS.PY" in names
+        assert "Mixed.Py" in names
+
+    def test_integration_runtime_verifier_preflight_to_level1_transition(self, isolated_workspace, force_windows_platform):
+        """Invariant: Successful preflight merge satisfies RuntimeVerifier transition precondition."""
+        from sdlc_engine.quality.runtime_verification.verifier import RuntimeVerifier
+
+        state = {
+            "unicode_check": True,
+            "encoding_check": True,
+            "windows_path_check": True,
+            "project_root": str(isolated_workspace[0]),
+        }
+        updates = preflight_guard_merge_node(state)
+        state.update(updates)
+
+        assert state["preflight_status"] == "OK"
+        assert state["auto_fix_complete"] is True
+
+        verifier = RuntimeVerifier.get_instance()
+        violations = verifier.check_level_transition("preflight_guard", "level1", state)
+        assert violations == []
 
 
 class TestWindowsPathSecurityAndRollback:
@@ -389,7 +457,7 @@ class TestWindowsPathSecurityAndRollback:
         """Edge-Case: Read-only file write error is caught safely with NTFS teardown finalizer."""
         proj, logs = isolated_workspace
         target = proj / "readonly.py"
-        target.write_text(f'P = "{make_drive_path("protected", "data.csv")}"\n', encoding="utf-8")
+        target.write_text(f'P = r"{make_drive_path("protected", "data.csv")}"\n', encoding="utf-8")
 
         os.chmod(target, stat.S_IREAD)
         try:

@@ -48,7 +48,8 @@ def preflight_guard_merge_node(state: FlowState) -> dict:
     """
     _step_start = time.time()
     session_id = state.get("session_id")
-    logger = ErrorLogger(session_id) if session_id else None
+    log_base_dir = state.get("log_base_dir") or state.get("backup_base_dir")
+    logger = ErrorLogger(session_id, log_base_dir=log_base_dir) if session_id else None
 
     _logger.debug("[L0 MERGE] state['project_root'] at entry: '%s'", state.get("project_root", "MISSING"))
 
@@ -61,10 +62,12 @@ def preflight_guard_merge_node(state: FlowState) -> dict:
     # All checks must pass for Level 0 (Pre-Flight Sanity Guard) to be OK
     if unicode_ok and encoding_ok and windows_path_ok:
         updates["preflight_status"] = "OK"
+        updates["auto_fix_complete"] = True
         logger and logger.log_validation_result("Level 0 (Pre-Flight Sanity Guard)", "All checks passed", True)
     else:
         # Any check failed - need recovery
         updates["preflight_status"] = "FAILED"
+        updates["auto_fix_complete"] = False
 
         # Return only NEW errors for this merge pass.
         # The FlowState 'errors' field uses a _merge_lists reducer that appends
@@ -97,11 +100,16 @@ def preflight_guard_merge_node(state: FlowState) -> dict:
 
         if new_errors:
             updates["errors"] = new_errors
+            updates["preflight_guard_errors"] = new_errors
+
+    existing_durations = dict(state.get("level_durations", {}))
+    existing_durations["preflight_guard"] = round((time.time() - _step_start) * 1000, 1)
+    updates["level_durations"] = existing_durations
 
     _logger.debug("[L0 MERGE] Returning: %s", list(updates.keys()))
     write_level_log(
         state,
-        "level0-preflight-guard",
+        "level-minus1",
         "merge",
         updates.get("preflight_status", "FAILED"),
         time.time() - _step_start,

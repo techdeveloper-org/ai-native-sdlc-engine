@@ -190,3 +190,56 @@ def test_restore_nonexistent_backup(temp_workspace):
 
     manager = BackupManager("session_empty", backup_base_dir=str(backup_base))
     assert manager.restore_file(str(sample_file), "NoStep") is False
+
+
+def test_file_transaction_integrity_failure_rollback_fails_raises_restore_error(temp_workspace, monkeypatch):
+    """Verify RestoreError is raised when rollback returns False upon file integrity validation failure."""
+    work_dir, backup_base = temp_workspace
+    sample_file = work_dir / "integrity_fail.py"
+    sample_file.write_text("VALID = True\n", encoding="utf-8")
+
+    manager = BackupManager("session_integrity_rollback_fail", backup_base_dir=str(backup_base))
+    step_name = "Step_IntegrityRollbackFail"
+
+    monkeypatch.setattr(manager, "validate_file_integrity", lambda *args, **kwargs: False)
+    monkeypatch.setattr(manager, "restore_file", lambda *args, **kwargs: False)
+
+    with pytest.raises(RestoreError, match="rollback returned False"):
+        with manager.transaction(str(sample_file), step_name):
+            sample_file.write_text("MUTATED = False\n", encoding="utf-8")
+
+
+def test_concurrent_thread_temp_isolation(temp_workspace):
+    """Verify concurrent backups across multiple threads succeed without temp file sharing conflicts."""
+    import concurrent.futures
+
+    work_dir, backup_base = temp_workspace
+    manager = BackupManager("session_threaded", backup_base_dir=str(backup_base))
+
+    def make_and_backup(i: int):
+        f = work_dir / f"file_{i}.py"
+        f.write_text(f"VAL = {i}\n", encoding="utf-8")
+        return manager.backup_file(str(f), f"Step_{i}")
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        results = list(executor.map(make_and_backup, range(10)))
+
+    assert all(results)
+    assert len(manager.metadata["backups"]) == 10
+
+
+def test_atomic_index_rebuild_no_race_condition(temp_workspace):
+    """Verify _rebuild_index constructs a new dictionary and swaps it atomically."""
+    work_dir, backup_base = temp_workspace
+    sample_file = work_dir / "rebuild.py"
+    sample_file.write_text("DATA = 1\n", encoding="utf-8")
+
+    manager = BackupManager("session_rebuild", backup_base_dir=str(backup_base))
+    manager.backup_file(str(sample_file), "Step1")
+
+    initial_index_id = id(manager._index)
+    manager._rebuild_index()
+
+    assert id(manager._index) != initial_index_id
+    key = manager._canonical_key(str(sample_file), "Step1")
+    assert key in manager._index

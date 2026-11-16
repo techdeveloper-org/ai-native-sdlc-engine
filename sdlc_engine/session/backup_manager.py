@@ -109,11 +109,17 @@ class FileTransaction:
 
         if not self.backup_manager.validate_file_integrity(self.file_path, self.step):
             try:
-                self.backup_manager.restore_file(self.file_path, self.step)
+                restored = self.backup_manager.restore_file(self.file_path, self.step)
+                if not restored:
+                    raise RestoreError(
+                        f"File integrity failed and rollback returned False for {self.file_path}"
+                    )
             except Exception as restore_exc:
-                raise IntegrityValidationError(
-                    f"File integrity failed and rollback failed for {self.file_path}: {restore_exc}"
-                )
+                if not isinstance(restore_exc, RestoreError):
+                    raise RestoreError(
+                        f"File integrity failed and rollback failed for {self.file_path}: {restore_exc}"
+                    ) from restore_exc
+                raise
             raise IntegrityValidationError(
                 f"File integrity validation failed post-transaction for {self.file_path}"
             )
@@ -166,20 +172,21 @@ class BackupManager:
 
     def _rebuild_index(self) -> None:
         """Rebuild composite (path, step) index pointing to the latest backup entry."""
-        self._index.clear()
+        new_index: Dict[Tuple[str, str], Dict[str, Any]] = {}
         for entry in sorted(
             self.metadata.get("backups", []),
             key=lambda x: x.get("timestamp", ""),
         ):
             key = self._canonical_key(entry["original_path"], entry["step"])
-            self._index[key] = entry
+            new_index[key] = entry
+        self._index = new_index
 
     def _ensure_metadata_sync(self) -> None:
         """Ensure memory state is synchronized with on-disk metadata mtime."""
         if self.metadata_file.exists():
             try:
                 current_mtime = self.metadata_file.stat().st_mtime
-                if current_mtime > self._metadata_mtime:
+                if current_mtime != self._metadata_mtime:
                     self.metadata = self._load_metadata()
                     self._rebuild_index()
             except OSError as err:
@@ -223,15 +230,24 @@ class BackupManager:
 
         try:
             with self._lock:
+                self._ensure_metadata_sync()
                 clean_step = re.sub(r"[^A-Za-z0-9_\-]", "_", step)
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
                 unique_suffix = uuid.uuid4().hex[:6]
                 safe_name = f"{target_path.stem}_{timestamp}_{unique_suffix}{target_path.suffix}"
                 backup_file = self.backup_dir / f"{clean_step}_{safe_name}"
 
-                tmp_backup = backup_file.with_name(f".{backup_file.name}.tmp.{os.getpid()}")
-                tmp_backup.write_bytes(target_path.read_bytes())
-                os.replace(tmp_backup, backup_file)
+                tmp_token = f"{os.getpid()}_{threading.get_ident()}_{uuid.uuid4().hex[:8]}"
+                tmp_backup = backup_file.with_name(f".{backup_file.name}.tmp.{tmp_token}")
+                try:
+                    tmp_backup.write_bytes(target_path.read_bytes())
+                    os.replace(tmp_backup, backup_file)
+                finally:
+                    if tmp_backup.exists():
+                        try:
+                            tmp_backup.unlink()
+                        except OSError:
+                            pass
 
                 entry = {
                     "timestamp": datetime.now().isoformat(),
@@ -306,9 +322,17 @@ class BackupManager:
                     )
                     return False
 
-                tmp_restore = target_path.with_name(f".{target_path.name}.tmp.{os.getpid()}")
-                tmp_restore.write_bytes(backup_file.read_bytes())
-                os.replace(tmp_restore, target_path)
+                tmp_token = f"{os.getpid()}_{threading.get_ident()}_{uuid.uuid4().hex[:8]}"
+                tmp_restore = target_path.with_name(f".{target_path.name}.tmp.{tmp_token}")
+                try:
+                    tmp_restore.write_bytes(backup_file.read_bytes())
+                    os.replace(tmp_restore, target_path)
+                finally:
+                    if tmp_restore.exists():
+                        try:
+                            tmp_restore.unlink()
+                        except OSError:
+                            pass
 
                 latest_backup["restored"] = True
                 latest_backup["restore_timestamp"] = datetime.now().isoformat()
@@ -551,15 +575,22 @@ class BackupManager:
 
     def _save_metadata(self) -> None:
         """Save metadata to file atomically."""
+        tmp_token = f"{os.getpid()}_{threading.get_ident()}_{uuid.uuid4().hex[:8]}"
+        tmp_meta = self.metadata_file.with_name(
+            f".{self.metadata_file.name}.tmp.{tmp_token}"
+        )
         try:
-            tmp_meta = self.metadata_file.with_name(
-                f".{self.metadata_file.name}.tmp.{os.getpid()}"
-            )
             tmp_meta.write_text(json.dumps(self.metadata, indent=2), encoding="utf-8")
             os.replace(tmp_meta, self.metadata_file)
             self._metadata_mtime = self.metadata_file.stat().st_mtime
         except Exception as e:
             logger.error("Failed to save backup metadata: %s", e, exc_info=True)
+        finally:
+            if tmp_meta.exists():
+                try:
+                    tmp_meta.unlink()
+                except OSError:
+                    pass
 
 
 def create_backup_manager(session_id: str) -> BackupManager:

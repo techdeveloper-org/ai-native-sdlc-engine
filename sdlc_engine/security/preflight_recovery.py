@@ -12,6 +12,8 @@ Contains:
 import logging
 import os
 import sys
+import threading
+import uuid
 from pathlib import Path
 
 from sdlc_engine.routing.flow_state import FlowState
@@ -31,7 +33,8 @@ def _atomic_write_text(file_path: Path, content: str, encoding: str = "utf-8") -
         content: String content to write.
         encoding: Text encoding to use.
     """
-    tmp_file = file_path.with_name(f".{file_path.name}.tmp.{os.getpid()}")
+    token = f"{os.getpid()}_{threading.get_ident()}_{uuid.uuid4().hex[:8]}"
+    tmp_file = file_path.with_name(f".{file_path.name}.tmp.{token}")
     try:
         tmp_file.write_text(content, encoding=encoding)
         os.replace(tmp_file, file_path)
@@ -45,18 +48,18 @@ def _atomic_write_text(file_path: Path, content: str, encoding: str = "utf-8") -
 
 
 def _safe_rel_path(file_path: Path, root: Path) -> str:
-    """Safely return relative path string, falling back to name on ValueError.
+    """Safely return POSIX relative path string, falling back to name on ValueError.
 
     Args:
         file_path: Target path to format.
         root: Root directory to make path relative to.
 
     Returns:
-        String representing relative path or file name.
+        String representing POSIX relative path or file name.
     """
     try:
-        return str(file_path.relative_to(root))
-    except ValueError:
+        return file_path.resolve().relative_to(root.resolve()).as_posix()
+    except (ValueError, RuntimeError):
         return file_path.name
 
 
@@ -159,7 +162,8 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
     # Check if we've exceeded max attempts
     if attempt > MAX_PREFLIGHT_ATTEMPTS:
         session_id = state.get("session_id")
-        logger = ErrorLogger(session_id) if session_id else None
+        log_base_dir = state.get("log_base_dir") or state.get("backup_base_dir")
+        logger = ErrorLogger(session_id, log_base_dir=log_base_dir) if session_id else None
 
         _logger.error(
             "[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] FATAL: MAX ATTEMPTS REACHED (%d/%d)",
@@ -192,6 +196,7 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
             "preflight_retry_count": attempt,
             "preflight_max_attempts_reached": True,
             "preflight_fatal_failure": True,
+            "auto_fix_complete": False,
         }
 
     # Build list of specific failures
@@ -275,6 +280,7 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
         "preflight_failed_checks": failed_checks,
         "failure_kb_loaded": kb_loaded,
         "failure_kb_suggestions": kb_suggestions,
+        "auto_fix_complete": False,
     }
 
 
@@ -298,7 +304,8 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
 
     session_id = state.get("session_id")
     backup_base_dir = state.get("backup_base_dir")
-    logger = ErrorLogger(session_id) if session_id else None
+    log_base_dir = state.get("log_base_dir") or backup_base_dir
+    logger = ErrorLogger(session_id, log_base_dir=log_base_dir) if session_id else None
     backup = BackupManager(session_id, backup_base_dir=backup_base_dir) if session_id else None
 
     fixed_issues = []
@@ -366,14 +373,15 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
             # A file is only rewritten when the AST-based scan confirms a real drive
             # path in a string VALUE.
             _DRIVE_PATH_RE = _re_fix.compile(
-                r"(?<![A-Za-z0-9_\\?])([A-Za-z]):(?:\\\\|\\)((?:[A-Za-z0-9_\-\.\\/]| (?![ \-\/]|[A-Za-z]:[\\/]))*)",
+                r"(?<![A-Za-z0-9_\\?])([A-Za-z]):(\\\\|\\)((?:[A-Za-z0-9_\-\.\\/()+@#$~{}[\]]| (?![ \-\/]|[A-Za-z]:[\\/]))*)",
                 _re_fix.IGNORECASE,
             )
 
             def _fix_drive_path(m):
                 drive = m.group(1)
-                rest = m.group(2).lstrip("\\/")
-                if rest and rest[0] in "ntr0bfva" and (len(rest) == 1 or rest[1] in " \t\r\n:=#"):
+                sep = m.group(2)
+                rest = m.group(3).lstrip("\\/")
+                if sep == "\\" and rest and rest[0] in "ntr0bfv" and (len(rest) == 1 or rest[1] in " \t\r\n:=#"):
                     return m.group(0)
                 cleaned_rest = _re_fix.sub(r"\\+", "/", rest)
                 return f"{drive}:/{cleaned_rest}"
@@ -490,4 +498,6 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
         "preflight_fixes_applied": fixed_issues,
         "preflight_fix_errors": fix_errors,
         "preflight_ready_to_retry": True,
+        "auto_fix_complete": len(fix_errors) == 0,
+        "auto_fix_applied": list(state.get("auto_fix_applied", [])) + fixed_issues,
     }

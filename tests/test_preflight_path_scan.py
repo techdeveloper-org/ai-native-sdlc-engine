@@ -83,19 +83,19 @@ class TestScannerClassifiesByEnclosingNode:
     """A path in a docstring is an example; in code it is a defect."""
 
     def test_a_drive_path_in_a_module_docstring_is_not_flagged(self):
-        source = '"""Explains ' + drive_path("path", "repo") + ' quoting."""\nx = 1\n'
+        source = 'r"""Explains ' + drive_path("path", "repo") + ' quoting."""\nx = 1\n'
         assert has_drive_path(source) is False
 
     def test_a_drive_path_in_a_function_docstring_is_not_flagged(self):
-        body = '    """Explains ' + drive_path("path", "repo") + ' quoting."""\n    return 1\n'
+        body = '    r"""Explains ' + drive_path("path", "repo") + ' quoting."""\n    return 1\n'
         assert has_drive_path("def f():\n" + body) is False
 
     def test_the_same_path_in_an_assignment_is_still_flagged(self):
         """The paired half: exclusion must be positional, not blanket."""
-        assert has_drive_path('P = "' + drive_path("path", "repo") + '"\n') is True
+        assert has_drive_path('P = r"' + drive_path("path", "repo") + '"\n') is True
 
     def test_a_string_after_the_docstring_is_still_flagged(self):
-        source = 'def f():\n    """Doc."""\n    return "' + drive_path("path", "repo") + '"\n'
+        source = 'def f():\n    """Doc."""\n    return r"' + drive_path("path", "repo") + '"\n'
         assert has_drive_path(source) is True
 
 
