@@ -48,19 +48,26 @@ def _atomic_write_text(file_path: Path, content: str, encoding: str = "utf-8") -
 
 
 def _safe_rel_path(file_path: Path, root: Path) -> str:
-    """Safely return POSIX relative path string, falling back to name on ValueError.
+    """Safely return POSIX relative path string without flattening to filename.
+
+    Attempts standard relative path resolution against root. If root resolution
+    fails across different drive roots or disjoint paths, attempts unresolved
+    relative computation before falling back to full POSIX path.
 
     Args:
         file_path: Target path to format.
         root: Root directory to make path relative to.
 
     Returns:
-        String representing POSIX relative path or file name.
+        str: POSIX formatted path relative to root, or full POSIX path on failure.
     """
     try:
         return file_path.resolve().relative_to(root.resolve()).as_posix()
     except (ValueError, RuntimeError):
-        return file_path.name
+        try:
+            return file_path.relative_to(root).as_posix()
+        except (ValueError, RuntimeError):
+            return file_path.as_posix()
 
 
 # ============================================================================
@@ -79,43 +86,42 @@ def _load_failure_kb(project_root_str="."):
     try:
         import re
 
-        # Try new level-based location first, fall back to legacy path
-        kb_path = (
+        candidate_paths = [
             Path(__file__).parent.parent
             / "sdlc_pipeline"
             / "policies"
             / "failure-prevention"
-            / "common-failures-prevention.md"
-        )
-        if not kb_path.is_file():
-            kb_path = (
-                Path(project_root_str)
-                / "policies"
-                / "03-execution-system"
-                / "failure-prevention"
-                / "common-failures-prevention.md"
-            )
-        if not kb_path.is_file():
+            / "common-failures-prevention.md",
+            Path(project_root_str) / "policies" / "common-failures-prevention.md",
+            Path(project_root_str)
+            / "policies"
+            / "03-execution-system"
+            / "failure-prevention"
+            / "common-failures-prevention.md",
+        ]
+        kb_path = None
+        for p in candidate_paths:
+            if p.is_file():
+                kb_path = p
+                break
+        if not kb_path:
             return []
 
         content = kb_path.read_text(encoding="utf-8", errors="replace")
 
         entries = []
-        # Parse markdown sections: look for Signature/Prevention pairs
-        # Pattern: **Signature:** ... **Prevention Strategy:** ...
         sig_pattern = re.compile(
-            r"\*\*Signature[:\s]*\*\*\s*(.+?)(?:\n|\r)",
-            re.IGNORECASE,
+            r"(?:\*\*Signature[:\s]*\*\*|^\s*Signature[:\s]*)\s*\"?([^\n\r\"]+)\"?",
+            re.MULTILINE | re.IGNORECASE,
         )
         prev_pattern = re.compile(
-            r"\*\*Prevention\s*(?:Strategy)?[:\s]*\*\*\s*(.+?)(?:\n|\r)",
-            re.IGNORECASE,
+            r"(?:\*\*Prevention\s*(?:Strategy)?[:\s]*\*\*|^\s*Prevention\s*(?:Strategy)?[:\s]*)\s*(.+?)(?:\n|\r)",
+            re.MULTILINE | re.IGNORECASE,
         )
 
         signatures = sig_pattern.findall(content)
         preventions = prev_pattern.findall(content)
 
-        # Pair up signatures with their prevention strategies
         for i, sig in enumerate(signatures):
             prevention = preventions[i].strip() if i < len(preventions) else ""
             entries.append(
@@ -156,10 +162,8 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
     Returns:
         Updated state with user choice and attempt tracking
     """
-    # Track attempt count FIRST
     attempt = state.get("preflight_retry_count", 0) + 1
 
-    # Check if we've exceeded max attempts
     if attempt > MAX_PREFLIGHT_ATTEMPTS:
         session_id = state.get("session_id")
         log_base_dir = state.get("log_base_dir") or state.get("backup_base_dir")
@@ -181,7 +185,6 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
                 "[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] Continuing to Level 1 despite unresolved checks...\n"
             )
 
-        # Log FATAL_FAILURE state
         logger and logger.log_error(
             "Level 0 (Pre-Flight Sanity Guard)",
             f"Max {MAX_PREFLIGHT_ATTEMPTS} retry attempts exceeded",
@@ -199,7 +202,6 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
             "auto_fix_complete": False,
         }
 
-    # Build list of specific failures
     failed_checks = []
     if not state.get("unicode_check"):
         failed_checks.append("  [FAIL] Unicode UTF-8 encoding: " + state.get("unicode_check_error", "Failed"))
@@ -216,7 +218,6 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
     else:
         failed_checks.append("  [PASS] Windows path handling: PASS")
 
-    # Failure Prevention KB lookup (best-effort, never blocks)
     kb_suggestions = []
     kb_loaded = False
     try:
@@ -228,14 +229,12 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
                 if "PASS" in check_msg:
                     continue
                 for entry in kb_entries:
-                    # Match KB signature keywords against failure message
                     sig_words = entry["signature"].lower().split()
                     if any(w in check_msg.lower() for w in sig_words if len(w) > 3):
                         kb_suggestions.append(entry)
     except Exception as exc:
         _logger.debug("recovery: KB suggestion matching failed (fail-open): %s", exc)
 
-    # Show message to user (including KB suggestions if available)
     message = f"\n[LEVEL 0 (PRE-FLIGHT SANITY GUARD)] VALIDATION CHECKS ({attempt}/{MAX_PREFLIGHT_ATTEMPTS}):\n"
     message += "\n".join(failed_checks)
 
@@ -252,7 +251,6 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
     message += "  1. auto-fix   -> Attempt repair + retry\n"
     message += "  2. skip       -> Continue anyway (NOT RECOMMENDED)\n"
 
-    # Get user choice - with fallback for hook environment
     user_choice = "auto-fix"
     if sys.stdin.isatty() and sys.stdout.isatty():
         sys.stdout.write(message + "\n")
@@ -270,9 +268,8 @@ def ask_preflight_guard_fix(state: FlowState) -> dict:
         )
         user_choice = "auto-fix"
 
-    # Validate choice
     if user_choice not in ["auto-fix", "skip"]:
-        user_choice = "auto-fix"  # Default to auto-fix
+        user_choice = "auto-fix"
 
     return {
         "preflight_user_choice": user_choice,
@@ -311,7 +308,6 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
     fixed_issues = []
     fix_errors = []
 
-    # Fix 1: Unicode UTF-8 encoding
     if not state.get("unicode_check") and sys.platform == "win32":
         try:
             if hasattr(sys.stdout, "reconfigure"):
@@ -333,9 +329,6 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
                 "Level 0 (Pre-Flight Sanity Guard)", str(e), severity="ERROR", error_type="UnicodeError"
             )
 
-    # Fix 2: Non-ASCII Python files - REPORT ONLY (per encoding-validation-policy.md)
-    # Policy: "Cannot auto-fix. Non-ASCII content requires human judgment."
-    # Action: Report non-ASCII files and flag for manual review.
     if not state.get("encoding_check"):
         try:
             nonascii_files = state.get("encoding_nonascii_files") or []
@@ -362,29 +355,17 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
         except Exception as e:
             fix_errors.append("Could not check encoding: %s" % e)
 
-    # Fix 3: Windows path handling (convert backslashes to forward slashes)
     if not state.get("windows_path_check") and sys.platform == "win32":
         try:
             import re as _re_fix
 
-            from sdlc_engine.security.path_scan import has_drive_path as _has_drive_path
-            from sdlc_engine.security.preflight_nodes import _iter_project_py_files
-
-            # A file is only rewritten when the AST-based scan confirms a real drive
-            # path in a string VALUE.
-            _DRIVE_PATH_RE = _re_fix.compile(
-                r"(?<![A-Za-z0-9_\\?])([A-Za-z]):(\\\\|\\)((?:[A-Za-z0-9_\-\.\\/()+@#$~{}[\]]| (?![ \-\/]|[A-Za-z]:[\\/]))*)",
-                _re_fix.IGNORECASE,
+            from sdlc_engine.security.path_scan import (
+                DRIVE_PATH_RE as _DRIVE_PATH_RE,
+                get_docstring_spans as _get_docstring_spans,
+                has_drive_path as _has_drive_path,
+                is_drive_path_match as _is_drive_path_match,
             )
-
-            def _fix_drive_path(m):
-                drive = m.group(1)
-                sep = m.group(2)
-                rest = m.group(3).lstrip("\\/")
-                if sep == "\\" and rest and rest[0] in "ntr0bfv" and (len(rest) == 1 or rest[1] in " \t\r\n:=#"):
-                    return m.group(0)
-                cleaned_rest = _re_fix.sub(r"\\+", "/", rest)
-                return f"{drive}:/{cleaned_rest}"
+            from sdlc_engine.security.preflight_nodes import _iter_project_py_files
 
             project_root = Path(state.get("project_root", "."))
             fixed_files = []
@@ -411,7 +392,8 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
                     if not _has_drive_path(content):
                         continue
                     if "\\" in content and ":\\" in content:
-                        # Step 1: Backup file before modification (Fail-Closed)
+                        original_content = content
+
                         if backup:
                             backup_ok = backup.backup_file(
                                 str(py_file), "Level 0 (Pre-Flight Sanity Guard)", "Before path fix"
@@ -421,52 +403,82 @@ def fix_preflight_guard_issues(state: FlowState) -> dict:
                                 fix_errors.append(f"Backup failed for {py_file.name}, auto-fix aborted")
                                 continue
 
-                        # Original content to compare
-                        original_content = content
+                        docstring_spans = _get_docstring_spans(content)
 
-                        # Replace only matched Windows drive paths (e.g. C:/foo/bar -> C:/foo/bar).
-                        # Backslashes outside a drive-path match are left untouched.
+                        def _fix_drive_path(m):
+                            if docstring_spans and any(s <= m.start() < e for s, e in docstring_spans):
+                                return m.group(0)
+                            if not _is_drive_path_match(m):
+                                return m.group(0)
+                            drive = m.group(1)
+                            rest = m.group(3).lstrip("\\/")
+                            cleaned_rest = _re_fix.sub(r"\\+", "/", rest)
+                            return f"{drive}:/{cleaned_rest}"
+
                         content = _DRIVE_PATH_RE.sub(_fix_drive_path, content)
 
-                        # Only write back if content changed
                         if content != original_content:
                             _atomic_write_text(py_file, content, encoding="utf-8")
 
-                            # Step 2: Validate file integrity after modification
-                            if backup and backup.validate_file_integrity(
-                                str(py_file), "Level 0 (Pre-Flight Sanity Guard)"
-                            ):
-                                fixed_files.append(_safe_rel_path(py_file, project_root))
-                                logger and logger.log_validation_result(
-                                    "Level 0 (Pre-Flight Sanity Guard)", f"Path fix: {py_file.name}", True
-                                )
+                            if backup:
+                                if backup.validate_file_integrity(
+                                    str(py_file), "Level 0 (Pre-Flight Sanity Guard)"
+                                ):
+                                    fixed_files.append(_safe_rel_path(py_file, project_root))
+                                    logger and logger.log_validation_result(
+                                        "Level 0 (Pre-Flight Sanity Guard)", f"Path fix: {py_file.name}", True
+                                    )
 
-                                # Step 3: Generate diff for audit trail
-                                diff_path = backup.generate_diff(
-                                    str(py_file), "Level 0 (Pre-Flight Sanity Guard)", "path_fix"
-                                )
-                                logger and logger.log_decision(
-                                    "Level 0 (Pre-Flight Sanity Guard)",
-                                    "File modified and validated",
-                                    f"Path fix applied to {py_file.name}",
-                                    chosen_option=f"Diff saved: {diff_path}",
-                                )
+                                    diff_path = backup.generate_diff(
+                                        str(py_file), "Level 0 (Pre-Flight Sanity Guard)", "path_fix"
+                                    )
+                                    logger and logger.log_decision(
+                                        "Level 0 (Pre-Flight Sanity Guard)",
+                                        "File modified and validated",
+                                        f"Path fix applied to {py_file.name}",
+                                        chosen_option=f"Diff saved: {diff_path}",
+                                    )
+                                else:
+                                    backup.restore_file(str(py_file), "Level 0 (Pre-Flight Sanity Guard)")
+                                    fix_errors.append(f"Validation failed for {py_file.name}, file restored")
+                                    logger and logger.log_error(
+                                        "Level 0 (Pre-Flight Sanity Guard)",
+                                        f"Validation failed for {py_file.name}",
+                                        severity="ERROR",
+                                        recovery_action="File restored from backup",
+                                    )
                             else:
-                                # Restore file if validation failed
-                                backup and backup.restore_file(str(py_file), "Level 0 (Pre-Flight Sanity Guard)")
-                                fix_errors.append(f"Validation failed for {py_file.name}, file restored")
-                                logger and logger.log_error(
-                                    "Level 0 (Pre-Flight Sanity Guard)",
-                                    f"Validation failed for {py_file.name}",
-                                    severity="ERROR",
-                                    recovery_action="File restored from backup",
-                                )
+                                is_valid = False
+                                try:
+                                    compile(content, str(py_file), "exec")
+                                    is_valid = True
+                                except SyntaxError as se:
+                                    _logger.error("Syntax error detected in %s: %s", py_file, se)
+
+                                if is_valid:
+                                    fixed_files.append(_safe_rel_path(py_file, project_root))
+                                    logger and logger.log_validation_result(
+                                        "Level 0 (Pre-Flight Sanity Guard)", f"Path fix: {py_file.name}", True
+                                    )
+                                else:
+                                    _atomic_write_text(py_file, original_content, encoding="utf-8")
+                                    fix_errors.append(f"Validation failed for {py_file.name}, file restored")
+                                    logger and logger.log_error(
+                                        "Level 0 (Pre-Flight Sanity Guard)",
+                                        f"Validation failed for {py_file.name}",
+                                        severity="ERROR",
+                                        recovery_action="File restored from original content",
+                                    )
                         else:
-                            # File had backslashes but they were all escape sequences
                             issues.append(_safe_rel_path(py_file, project_root))
                 except Exception as e:
-                    # Restore file on any error
-                    backup and backup.restore_file(str(py_file), "Level 0 (Pre-Flight Sanity Guard)")
+                    if backup:
+                        backup.restore_file(str(py_file), "Level 0 (Pre-Flight Sanity Guard)")
+                    elif "original_content" in locals():
+                        try:
+                            _atomic_write_text(py_file, original_content, encoding="utf-8")
+                        except Exception:
+                            pass
                     error_msg = f"Could not fix {py_file.name}: {e}"
                     fix_errors.append(error_msg)
                     logger and logger.log_error(

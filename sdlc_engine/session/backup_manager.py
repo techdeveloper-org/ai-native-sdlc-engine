@@ -418,9 +418,17 @@ class BackupManager:
             diff_filename = f"{step}_{diff_label}_{timestamp_str}.diff"
             diff_file = self.diff_dir / diff_filename
 
-            tmp_diff = diff_file.with_name(f".{diff_file.name}.tmp.{os.getpid()}")
-            tmp_diff.write_text(diff_content, encoding="utf-8")
-            os.replace(tmp_diff, diff_file)
+            tmp_token = f"{os.getpid()}_{threading.get_ident()}_{uuid.uuid4().hex[:8]}"
+            tmp_diff = diff_file.with_name(f".{diff_file.name}.tmp.{tmp_token}")
+            try:
+                tmp_diff.write_text(diff_content, encoding="utf-8")
+                os.replace(tmp_diff, diff_file)
+            finally:
+                if tmp_diff.exists():
+                    try:
+                        tmp_diff.unlink()
+                    except OSError:
+                        pass
 
             logger.info(
                 "Diff generated successfully: %s",

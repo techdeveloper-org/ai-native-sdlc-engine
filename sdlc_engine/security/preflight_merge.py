@@ -59,13 +59,12 @@ def preflight_guard_merge_node(state: FlowState) -> dict:
 
     updates = {}
 
-    # All checks must pass for Level 0 (Pre-Flight Sanity Guard) to be OK
     if unicode_ok and encoding_ok and windows_path_ok:
         updates["preflight_status"] = "OK"
         updates["auto_fix_complete"] = True
+        updates["preflight_guard_errors"] = []
         logger and logger.log_validation_result("Level 0 (Pre-Flight Sanity Guard)", "All checks passed", True)
     else:
-        # Any check failed - need recovery
         updates["preflight_status"] = "FAILED"
         updates["auto_fix_complete"] = False
 
@@ -76,7 +75,6 @@ def preflight_guard_merge_node(state: FlowState) -> dict:
         # on each retry cycle.  Always return only the freshly generated entries.
         new_errors = []
 
-        # Log individual failures
         if not unicode_ok:
             error_msg = state.get("unicode_check_error", "Unknown error")
             new_errors.append(f"Unicode check failed: {error_msg}")

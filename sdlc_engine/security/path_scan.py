@@ -51,15 +51,88 @@ never a false negative on a real path.
 """
 
 import ast
+import io
 import re
-from typing import List, Optional, Set
+import tokenize
+from typing import List, Optional, Set, Tuple
 
 DRIVE_PATH_RE = re.compile(
-    r"(?<![A-Za-z0-9_\\?])([A-Za-z]):(?:\\\\|\\)(?:[A-Za-z0-9_\-\.\\/()+@#$~{}[\]]| (?![ \-\/]|[A-Za-z]:[\\/]))*",
+    r"(?<![A-Za-z0-9_\\?])([A-Za-z]):(\\\\|\\)((?:[A-Za-z0-9_\-\.\\/()+@#$~{}[\]]| (?![ \-\/]|[A-Za-z]:[\\/]))*)",
     re.IGNORECASE,
 )
 
 _DOCSTRING_OWNERS = (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+
+
+def is_drive_path_match(match: re.Match) -> bool:
+    """Evaluate whether a regular expression match is a genuine Windows drive path.
+
+    Differentiates authentic Windows drive paths from Python escape sequences
+    (such as \\n, \\t, \\r) that follow a single drive-letter identifier and colon.
+
+    Args:
+        match: Regular expression match object with capturing groups (drive, sep, rest).
+
+    Returns:
+        bool: True if the match represents a genuine drive path, False if it is an escape sequence.
+    """
+    sep = match.group(2)
+    rest = match.group(3).lstrip("\\/")
+    if sep == "\\" and rest and rest[0] in "ntr0bfv" and (len(rest) == 1 or rest[1] in " \t\r\n:=#"):
+        return False
+    return True
+
+
+def get_docstring_spans(source: str) -> List[Tuple[int, int]]:
+    """Compute character start and end index spans for all docstrings in Python source.
+
+    Parses the source into an AST and identifies expression statements that serve as
+    module, class, or function docstrings, translating line and column coordinates
+    into character offset spans.
+
+    Args:
+        source: Python source code string.
+
+    Returns:
+        List[Tuple[int, int]]: List of (start_char, end_char) coordinate pairs.
+    """
+    try:
+        tree = ast.parse(source)
+    except (SyntaxError, ValueError):
+        return []
+
+    lines = source.splitlines(keepends=True)
+    line_starts = [0]
+    for line in lines:
+        line_starts.append(line_starts[-1] + len(line))
+
+    spans: List[Tuple[int, int]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, _DOCSTRING_OWNERS):
+            continue
+        body = getattr(node, "body", None)
+        if not body:
+            continue
+        first = body[0]
+        if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant):
+            if isinstance(first.value.value, str):
+                val = first.value
+                start_line = getattr(val, "lineno", None)
+                start_col = getattr(val, "col_offset", None)
+                end_line = getattr(val, "end_lineno", None)
+                end_col = getattr(val, "end_col_offset", None)
+                if (
+                    start_line is not None
+                    and start_col is not None
+                    and end_line is not None
+                    and end_col is not None
+                    and start_line <= len(line_starts)
+                    and end_line <= len(line_starts)
+                ):
+                    start_char = line_starts[start_line - 1] + start_col
+                    end_char = line_starts[end_line - 1] + end_col
+                    spans.append((start_char, end_char))
+    return spans
 
 
 def _docstring_nodes(tree: ast.AST) -> Set[int]:
@@ -124,14 +197,15 @@ def has_drive_path(source: str) -> bool:
     """Report whether a Python source text hardcodes a Windows drive path.
 
     Inspects string literal values directly via a single-pass AST visitor with
-    early-exit semantics. The moment a drive path is matched, the walk halts
-    immediately.
+    early-exit semantics, filters out docstring examples, examines standalone
+    and inline comments using lexical tokenization, and rejects false-positive
+    Python escape sequences.
 
     Args:
         source: Python source text.
 
     Returns:
-        bool: True when at least one drive path is present.
+        bool: True when at least one genuine Windows drive path is present.
     """
     try:
         tree = ast.parse(source)
@@ -143,14 +217,30 @@ def has_drive_path(source: str) -> bool:
                     if isinstance(body[0].value.value, str):
                         docstrings.add(id(body[0].value))
             elif isinstance(node, ast.Constant) and isinstance(node.value, str):
-                if id(node) not in docstrings and DRIVE_PATH_RE.search(node.value):
-                    return True
+                if id(node) not in docstrings:
+                    for match in DRIVE_PATH_RE.finditer(node.value):
+                        if is_drive_path_match(match):
+                            return True
     except (SyntaxError, ValueError):
-        if DRIVE_PATH_RE.search(source):
-            return True
+        for match in DRIVE_PATH_RE.finditer(source):
+            if is_drive_path_match(match):
+                return True
 
-    for line in source.splitlines():
-        stripped = line.lstrip()
-        if stripped.startswith("#") and DRIVE_PATH_RE.search(stripped):
-            return True
+    try:
+        source_bytes = source.encode("utf-8")
+        tokens = tokenize.tokenize(io.BytesIO(source_bytes).readline)
+        for tok in tokens:
+            if tok.type == tokenize.COMMENT:
+                for match in DRIVE_PATH_RE.finditer(tok.string):
+                    if is_drive_path_match(match):
+                        return True
+    except (tokenize.TokenError, IndentationError, SyntaxError):
+        for line in source.splitlines():
+            stripped = line.lstrip()
+            if "#" in stripped:
+                comment_part = stripped[stripped.index("#"):]
+                for match in DRIVE_PATH_RE.finditer(comment_part):
+                    if is_drive_path_match(match):
+                        return True
+
     return False

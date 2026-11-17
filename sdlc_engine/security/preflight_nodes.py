@@ -9,6 +9,7 @@ Contains:
 - node_windows_path_check: Forward slashes, no drive letters in paths
 """
 
+import io
 import logging
 import os
 import sys
@@ -35,6 +36,12 @@ _VENDOR_DIR_NAMES = {
     ".mypy_cache",
     ".pytest_cache",
     ".eggs",
+    "sessions",
+    ".sdlc",
+    ".claude",
+    ".gemini",
+    ".ruff_cache",
+    ".hypothesis",
 }
 
 
@@ -85,11 +92,9 @@ def node_unicode_fix(state: FlowState) -> dict:
     Returns:
         Updated state with unicode_check result
     """
-    # NOTE: session_id is immutable (Annotated with _keep_first_value reducer)
-    # Nodes should NOT return it - let LangGraph manage it
     _step_start = time.time()
     session_id = state.get("session_id")
-    log_base_dir = state.get("log_dir")
+    log_base_dir = state.get("log_base_dir") or state.get("backup_base_dir") or state.get("log_dir")
     logger = ErrorLogger(session_id, log_base_dir=log_base_dir) if session_id else None
 
     _logger.debug("[L0 UNICODE FIX] state['project_root'] at entry: '%s'", state.get("project_root", "MISSING"))
@@ -105,16 +110,13 @@ def node_unicode_fix(state: FlowState) -> dict:
             return updates
 
         if sys.platform != "win32":
-            # Non-Windows - skip check
             updates["unicode_check"] = True
+            updates["unicode_check_error"] = None
             logger and logger.log_validation_result(
                 "Level 0 (Pre-Flight Sanity Guard)", "Unicode UTF-8 Fix", True, "Not Windows platform"
             )
             write_level_log(state, "level-minus1", "unicode-fix", "SKIP", time.time() - _step_start, updates)
             return updates
-
-        # Windows - apply UTF-8 reconfiguration
-        import io
 
         applied = False
 
@@ -133,6 +135,7 @@ def node_unicode_fix(state: FlowState) -> dict:
             applied = True
 
         updates["unicode_check"] = True
+        updates["unicode_check_error"] = None
         if applied:
             existing = state.get("auto_fix_applied") or []
             updates["auto_fix_applied"] = list(existing) + ["Unicode UTF-8 encoding"]
@@ -177,13 +180,14 @@ def node_encoding_validation(state: FlowState) -> dict:
     """
     _step_start = time.time()
     session_id = state.get("session_id")
-    log_base_dir = state.get("log_dir")
+    log_base_dir = state.get("log_base_dir") or state.get("backup_base_dir") or state.get("log_dir")
     logger = ErrorLogger(session_id, log_base_dir=log_base_dir) if session_id else None
     updates = {}
     try:
         if sys.platform != "win32":
-            # Non-Windows - skip check
             updates["encoding_check"] = True
+            updates["encoding_check_error"] = None
+            updates["encoding_nonascii_files"] = []
             logger and logger.log_validation_result(
                 "Level 0 (Pre-Flight Sanity Guard)", "ASCII-only Python files", True, "Not Windows platform"
             )
@@ -195,6 +199,7 @@ def node_encoding_validation(state: FlowState) -> dict:
             _logger.warning("project_root '%s' does not exist, skipping encoding check", project_root)
             updates["encoding_check"] = True
             updates["encoding_check_error"] = None
+            updates["encoding_nonascii_files"] = []
             write_level_log(state, "level-minus1", "encoding-validation", "SKIP", time.time() - _step_start, updates)
             return updates
 
@@ -202,19 +207,20 @@ def node_encoding_validation(state: FlowState) -> dict:
 
         non_ascii_files = []
 
-        for py_file in py_files:  # Scan all Python files (capped at 500)
+        for py_file in py_files:
             try:
                 content = py_file.read_bytes()
-                # Check if content is pure ASCII
                 content.decode("ascii")
             except (UnicodeDecodeError, Exception):
                 try:
                     rel = py_file.resolve().relative_to(project_root.resolve()).as_posix()
                 except (ValueError, RuntimeError):
-                    rel = py_file.name
+                    try:
+                        rel = py_file.relative_to(project_root).as_posix()
+                    except (ValueError, RuntimeError):
+                        rel = py_file.as_posix()
                 non_ascii_files.append(rel)
 
-        # Store full file list in state for downstream visibility
         updates["encoding_nonascii_files"] = non_ascii_files
 
         if non_ascii_files:
@@ -229,6 +235,8 @@ def node_encoding_validation(state: FlowState) -> dict:
             )
         else:
             updates["encoding_check"] = True
+            updates["encoding_check_error"] = None
+            updates["encoding_nonascii_files"] = []
             logger and logger.log_validation_result(
                 "Level 0 (Pre-Flight Sanity Guard)", "ASCII-only Python files", True, "All files ASCII-safe"
             )
@@ -271,13 +279,14 @@ def node_windows_path_check(state: FlowState) -> dict:
     """
     _step_start = time.time()
     session_id = state.get("session_id")
-    log_base_dir = state.get("log_dir")
+    log_base_dir = state.get("log_base_dir") or state.get("backup_base_dir") or state.get("log_dir")
     logger = ErrorLogger(session_id, log_base_dir=log_base_dir) if session_id else None
     updates = {}
     try:
         if sys.platform != "win32":
-            # Non-Windows - skip check
             updates["windows_path_check"] = True
+            updates["windows_path_check_error"] = None
+            updates["windows_path_violating_files"] = []
             logger and logger.log_validation_result(
                 "Level 0 (Pre-Flight Sanity Guard)", "Windows path handling", True, "Not Windows platform"
             )
@@ -289,11 +298,10 @@ def node_windows_path_check(state: FlowState) -> dict:
             _logger.warning("project_root '%s' does not exist, skipping path check", project_root)
             updates["windows_path_check"] = True
             updates["windows_path_check_error"] = None
+            updates["windows_path_violating_files"] = []
             write_level_log(state, "level-minus1", "windows-path-check", "SKIP", time.time() - _step_start, updates)
             return updates
 
-        # Detection reads string literal VALUES, so a Python escape sequence can
-        # never be mistaken for a path separator.
         from sdlc_engine.security.path_scan import has_drive_path
 
         _path_files = list(_iter_project_py_files(project_root))
@@ -305,7 +313,10 @@ def node_windows_path_check(state: FlowState) -> dict:
                     try:
                         rel = py_file.resolve().relative_to(project_root.resolve()).as_posix()
                     except (ValueError, RuntimeError):
-                        rel = py_file.name
+                        try:
+                            rel = py_file.relative_to(project_root).as_posix()
+                        except (ValueError, RuntimeError):
+                            rel = py_file.as_posix()
                     issues.append(rel)
             except OSError as exc:
                 _logger.debug("level-1: drive-detect read skipped: %s", exc)
@@ -319,6 +330,8 @@ def node_windows_path_check(state: FlowState) -> dict:
             )
         else:
             updates["windows_path_check"] = True
+            updates["windows_path_check_error"] = None
+            updates["windows_path_violating_files"] = []
             logger and logger.log_validation_result(
                 "Level 0 (Pre-Flight Sanity Guard)", "Windows path handling", True, "No backslash paths found"
             )
